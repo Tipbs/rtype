@@ -1,21 +1,7 @@
 ﻿#include "registry.hpp"
 //#include <raylib.h>
 
-struct Position {
-	float x, y;
-};
 
-struct Velocity {
-	float vx, vy;
-};
-
-struct Drawable {
-	int color;
-};
-
-struct Controllable {
-	bool key_pressed[256];
-};
 
 void logging_system(Registry& r,
 	sparse_array<Position> const& positions,
@@ -66,6 +52,6 @@ int main()
 	reg.add_component<Controllable>(ent, std::move(controllable));
 	auto ent2 = reg.spawn_entity();
 	test_system(reg);
-	reg.add_system<Position, Velocity>(logging_system);
+	reg.add_system<Velocity, Position>(logging_system);
 	return 0;
 }
