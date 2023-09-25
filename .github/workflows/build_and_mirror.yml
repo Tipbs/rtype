@@ -10,6 +10,9 @@ jobs:
     name: "build with cmake"
     runs-on: ubuntu-latest
     steps:
+      - name: Install low-level dependency libxrandr
+        run: sudo apt-install libxrandr
+
       - name: Checkout the repository
         uses: actions/checkout@v3.5.3
 

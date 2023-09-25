@@ -17,25 +17,6 @@ aux_source_directory(source/ SRC_DIR)
 aux_source_directory(include/ INCLUDE_DIR)
 
 # Dependencies
-set(LIBXRANDR_VERSION 1.5.0)
-find_package(libxrandr ${LIBXRANDR_VERSION} QUIET) # QUIET or REQUIRED
-if (NOT libxrandr_FOUND) # If there's none, fetch and build libxrandr
-  include(FetchContent)
-  FetchContent_Declare(
-    libxrandr
-    DOWNLOAD_EXTRACT_TIMESTAMP OFF
-    URL https://github.com/xtforever/libXrandr/archive/refs/tags/libXrandr-1.5.0.tar.gz
-  )
-  FetchContent_GetProperties(libxrandr)
-  if (NOT libxrandr_POPULATED) # Have we downloaded libxrandr yet?
-    set(FETCHCONTENT_QUIET NO)
-    FetchContent_Populate(libxrandr)
-    set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
-    FetchContent_MakeAvailable(libxrandr)
-    # add_subdirectory(${libxrandr_SOURCE_DIR} ${libxrandr_BINARY_DIR})
-  endif()
-endif()
-
 set(RAYLIB_VERSION 4.5.0)
 find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
 if (NOT raylib_FOUND) # If there's none, fetch and build raylib
@@ -62,7 +43,6 @@ add_executable(R-Type
 
 target_link_libraries(R-Type
     PRIVATE
-    libxrandr
     raylib
 )
 target_compile_definitions(${PROJECT_NAME} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/ressources/") # Set the asset path macro to the absolute path on the dev machine
