@@ -49,7 +49,8 @@ if (NOT libxrandr_FOUND) # If there's none, fetch and build libxrandr
     set(FETCHCONTENT_QUIET NO)
     FetchContent_Populate(libxrandr)
     set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
-    #add_subdirectory(${libxrandr_SOURCE_DIR} ${libxrandr_BINARY_DIR})
+    FetchContent_MakeAvailable(libxrandr)
+    # add_subdirectory(${libxrandr_SOURCE_DIR} ${libxrandr_BINARY_DIR})
   endif()
 endif()
 
