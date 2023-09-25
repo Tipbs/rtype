@@ -7,6 +7,21 @@
 #include "sparse_array.hpp"
 #include "entity.hpp"
 
+struct Position {
+	float x, y;
+};
+
+struct Velocity {
+	float vx, vy;
+};
+
+struct Drawable {
+	int color;
+};
+
+struct Controllable {
+	bool key_pressed[256];
+};
 class Registry {
 	template<typename Component>
 	void erase(Entity const &entity);
@@ -71,13 +86,13 @@ inline sparse_array<Component>& Registry::register_component()
 template<class Component>
 inline sparse_array<Component>& Registry::get_components()
 {
-	return std::any_cast<sparse_array<Component> &>(_components_arrays[typeid(Component)]);
+	return std::any_cast<sparse_array<Component> &>(_components_arrays[std::type_index(typeid(Component))]);
 }
 
 template<class Component>
 inline sparse_array<Component> const& Registry::get_components() const
 {
-	return std::any_cast<sparse_array<Component> &>(_components_arrays[typeid(Component)]);
+	return std::any_cast<sparse_array<Component> &>(_components_arrays.at(std::type_index(typeid(Component))));
 }
 
 template<typename Component>
@@ -91,14 +106,14 @@ inline typename sparse_array<Component>::reference_type Registry::add_component(
 template<typename Component, typename ...Params>
 inline typename sparse_array<Component>::reference_type Registry::emplace_component(Entity const& to, Params && ...p)
 {
-	_components_arrays[typeid(Component)].emplace(typeid(Component), p);
+	_components_arrays[typeid(Component)].emplace(typeid(Component), std::forward(p)...);
 	return typename sparse_array<Component>::reference_type();
 }
 
 template<typename Component>
 inline void Registry::remove_component(Entity const& from)
 {
-	_erase_funcs(typeid(Component), (size_t)from);
+	_erase_funcs[std::type_index(typeid(Component))](std::ref(*this), from);
 }
 
 template<class ...Components, typename Function>

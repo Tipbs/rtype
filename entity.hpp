@@ -1,6 +1,7 @@
 #pragma once
 
-#include <stddef.h>
+#include <compare>
+#include <cstddef>
 
 class Entity {
 	size_t _id;
@@ -15,17 +16,17 @@ public:
 	Entity &operator+(size_t id)
 	{
 		this->_id += id;
-		return *this;
+        return *this;
 	}
 	Entity &operator-(size_t id)
 	{
 		this->_id -= id;
-		return *this;
+        return *this;
 	}
 	Entity &operator*(size_t id)
 	{
 		this->_id *= id;
-		return *this;
+        return *this;
 	}
 	auto operator<=>(const size_t id) const 
 	{

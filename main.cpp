@@ -1,21 +1,7 @@
 ﻿#include "registry.hpp"
 //#include <raylib.h>
 
-struct Position {
-	float x, y;
-};
 
-struct Velocity {
-	float vx, vy;
-};
-
-struct Drawable {
-	int color;
-};
-
-struct Controllable {
-	bool key_pressed[256];
-};
 
 void logging_system(Registry& r,
 	sparse_array<Position> const& positions,
