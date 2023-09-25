@@ -34,7 +34,6 @@ public:
 	void remove_component(Entity const& from);
 	template <class ...Components, typename Function>
 	void add_system(Function&& f); // perfect forwarding in lambda capture , anyone ?
-	// or
 	template <class ...Components, typename Function>
 	void add_system(Function const& f); // taking it by reference .
 	void run_systems();
@@ -103,23 +102,19 @@ inline void Registry::remove_component(Entity const& from)
 }
 
 template<class ...Components, typename Function>
-inline void Registry::create_system(Function&& f)
-{
-	//auto components =
-	f(std::forward(Components));
-}
-
-template<class ...Components, typename Function>
 inline void Registry::add_system(Function&& f)
 {
+	auto lambda = [&](Registry& reg) {
+		f(reg, get_components<Components>()...);
+	};
+	_systems.push_back(lambda);
 }
 
 template<class ...Components, typename Function>
 inline void Registry::add_system(Function const& f)
 {
-	auto lambda = [](Registry &reg) {
-		f(reg, std::forward(Components...));
+	auto lambda = [&](Registry& reg) {
+		f(reg, get_components<Components>()...);
 	};
 	_systems.push_back(lambda);
-	std::cout << "oui" << std::endl;
 }

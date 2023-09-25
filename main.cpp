@@ -31,22 +31,6 @@ void logging_system(Registry& r,
 	}
 }
 
-void test_system(Registry &r)
-{
-	auto const& positions = r.get_components<Position>();
-	auto const& velocities = r.get_components<Velocity>();
-	std::cout << positions[0].has_value() << std::endl;
-	for (size_t i = 0; i < positions.size() && i < velocities.size(); ++i) {
-		auto const& pos = positions[i];
-		auto const& vel = velocities[i];
-		if (pos && vel) {
-			std::cerr << i << ": Position = { " << pos.value().x << ", " << pos.value
-			().y << " } , Velocity = { " << vel.value().vx << ", " << vel.value() .
-				vy << " }" << std::endl;
-		}
-	}
-}
-
 int main()
 {
 	Registry reg;
@@ -65,7 +49,7 @@ int main()
 	reg.add_component<Drawable>(ent, std::move(drawable));
 	reg.add_component<Controllable>(ent, std::move(controllable));
 	auto ent2 = reg.spawn_entity();
-	test_system(reg);
 	reg.add_system<Position, Velocity>(logging_system);
+	reg.run_systems();
 	return 0;
 }
