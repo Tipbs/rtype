@@ -1,0 +1,61 @@
+AlignAfterOpenBracket: AlwaysBreak
+AlignConsecutiveMacros: Consecutive
+AllowShortBlocksOnASingleLine: Empty
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: Yes
+ColumnLimit: 80
+BreakBeforeBraces: Custom
+BreakBeforeTernaryOperators: true
+BreakInheritanceList: AfterComma
+BraceWrapping:
+  AfterEnum: false
+  AfterCaseLabel: false
+  AfterFunction: true
+  AfterNamespace: false
+  AfterStruct: false
+  BeforeCatch: false
+  BeforeElse: false
+  BeforeWhile: false
+  SplitEmptyFunction: false
+EmptyLineBeforeAccessModifier: Always
+IncludeCategories:
+  # Headers in <> without extension.
+  - Regex:           '<([A-Za-z0-9\Q/-_\E])+>'
+    Priority:        1
+  # Headers in <> from specific external libraries.
+  - Regex:           '<(catch2|boost)\/'
+    Priority:        2
+  # Headers in <> with extension.
+  - Regex:           '<([A-Za-z0-9.\Q/-_\E])+>'
+    Priority:        3
+  # Headers in "" with extension.
+  - Regex:           '"([A-Za-z0-9.\Q/-_\E])+"'
+    Priority:        4
+IncludeBlocks: Merge
+IndentCaseLabels: true
+IndentWidth: 4
+Language: Cpp
+MaxEmptyLinesToKeep: 1
+PointerAlignment: Right
+ReferenceAlignment: Right
+RemoveBracesLLVM: true
+SeparateDefinitionBlocks: Always
+SortIncludes: CaseInsensitive
+SortUsingDeclarations: true
+SpaceAfterCStyleCast: true
+SpaceAfterTemplateKeyword: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCaseColon: false
+SpaceBeforeCpp11BracedList: true
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceBeforeSquareBrackets: false
+SpaceInEmptyBlock: false
+SpaceInEmptyParentheses: false
+SpacesInCStyleCastParentheses: false
+SpacesInConditionalStatement: false
+Standard: Cpp11
+UseTab: Never
