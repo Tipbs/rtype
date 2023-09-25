@@ -1,12 +1,9 @@
-name: CI-build
+name: CI build
   
-on: [push, pull_request, ]
-
-env:
-  MIRROR_URL: "git@github.com:Remi-Mergen/chocolatine-mirror.git"
+on: [push, pull_request]
 
 jobs:
-  build-project:
+  build:
     name: "build with cmake"
     runs-on: ubuntu-latest
     steps:

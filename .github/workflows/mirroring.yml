@@ -5,6 +5,12 @@ on: [push, pull_request]
 env:
   MIRROR_URL: "git@github.com:EpitechPromo2026/B-CPP-500-TLS-5-1-rtype-tristan.masselot.git"
 
+on:
+  workflow_run:
+    workflows: ["CI build"]
+    types:
+      - completed
+
 jobs:
   mirroring_to_github:
     name: "Push the current commit to github"
