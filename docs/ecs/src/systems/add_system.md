@@ -1,20 +1,24 @@
-﻿#include "registry.hpp"
-//#include <raylib.h>
+# Add system
 
+# Description:
+Add a system to the registry, it will be executed on each iteration of run_systems()
+
+# Signature:
+```c++
+template <class ...Components, typename Function>
+void add_system(Function&& f);
+template <class ...Components, typename Function>
+void add_system(Function const& f);
+```
+
+# Usage:
+```c++
 struct Position {
 	float x, y;
 };
 
 struct Velocity {
 	float vx, vy;
-};
-
-struct Drawable {
-	int color;
-};
-
-struct Controllable {
-	bool key_pressed[256];
 };
 
 void logging_system(Registry& r,
@@ -34,21 +38,8 @@ void logging_system(Registry& r,
 int main()
 {
 	Registry reg;
-	auto ent = reg.spawn_entity();
-	Position pos = { 10.0, 15.0 };
-	Velocity vel = { 1.0, 1.0 }; 
-	Drawable drawable = { 255 };
-	Controllable controllable = { { 0 } };
 
 	reg.register_component<Position>();
 	reg.register_component<Velocity>();
-	reg.register_component<Drawable>();
-	reg.register_component<Controllable>();
-	reg.add_component<Position>(ent, std::move(pos));
-	reg.add_component<Velocity>(ent, std::move(vel));
-	reg.add_component<Drawable>(ent, std::move(drawable));
-	reg.add_component<Controllable>(ent, std::move(controllable));
-	auto ent2 = reg.spawn_entity();
 	reg.add_system<Position, Velocity>(logging_system);
-	reg.run_systems();
 }

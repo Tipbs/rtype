@@ -7,28 +7,11 @@
 #include "sparse_array.hpp"
 #include "entity.hpp"
 
-struct Position {
-	float x, y;
-};
-
-struct Velocity {
-	float vx, vy;
-};
-
-struct Drawable {
-	int color;
-};
-
-struct Controllable {
-	bool key_pressed[256];
-};
 class Registry {
 	template<typename Component>
 	void erase(Entity const &entity);
 	template<typename Component>
 	void insert(size_t entity);
-	template<class ...Components, typename Function>
-	void create_system(Function&& f);
 public:
 	template <class Component>
 	sparse_array<Component>& register_component();
