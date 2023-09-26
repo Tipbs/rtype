@@ -22,21 +22,23 @@ jobs:
       - name: Build the project
         run: cmake --build build
 
-      - name: Format code using clang-format
-        run: |
-          `./tests/format-code.sh`
-          STATUS=$?
-          
-          if [ $STATUS -gt 0 ]; then
-            echo "Error! Code isn't formatted"
-            exit 1
-          fi
-          echo "Success! Code is correctly formatted"
-          exti 0
+
+  code_format
+    name: Check code formatting
+      run: |
+        `./tests/format-code.sh`
+        STATUS=$?
+        
+        if [ $STATUS -gt 0 ]; then
+          echo "Error! Code isn't formatted"
+          exit 1
+        fi
+        echo "Success! Code is correctly formatted"
+        exit 0
 
 
   mirroring_to_github:
-    needs: build
+    needs: code_format
     name: Push the current commit to github
     runs-on: ubuntu-latest
     steps:                                              # <-- must use actions/checkout before mirroring!
