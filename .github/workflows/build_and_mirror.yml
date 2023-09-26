@@ -31,7 +31,7 @@ jobs:
       - name: Run check format script
         shell: bash
         run: |
-          ./tests/format-code.sh
+          ${PWD}/tests/format-code.sh
           STATUS=$?
           
           if [ $STATUS -gt 0 ]; then
