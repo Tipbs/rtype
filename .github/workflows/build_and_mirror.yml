@@ -25,10 +25,12 @@ jobs:
 
   code_format:
     name: Check code formatting
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Run check format script
         run: |
+          echo `pwd`
           `./tests/format-code.sh`
           STATUS=$?
           
@@ -41,8 +43,8 @@ jobs:
 
 
   mirroring_to_github:
-    needs: code_format
     name: Push the current commit to github
+    needs: code_format
     runs-on: ubuntu-latest
     steps:                                              # <-- must use actions/checkout before mirroring!
       - uses: actions/checkout@v3
