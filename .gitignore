@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+R-Type
+
+# CMake
+build/
+
+# clangd
+compile_commands.json
+.cache/
