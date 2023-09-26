@@ -1,7 +1,8 @@
 #include <iostream>
+#include "Background.hpp"
 
 int main()
 {
-    std::cout << "Hello world :,D!" << std::endl;
+    backgroundMaker();
     return 0;
 }
