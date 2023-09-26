@@ -29,8 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run check format script
+        shell: bash
         run: |
-          chmod +x ./tests/format-code.sh
           ./tests/format-code.sh
           STATUS=$?
           
