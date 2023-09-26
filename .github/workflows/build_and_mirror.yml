@@ -28,12 +28,13 @@ jobs:
     # needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3.5.3
+
       - name: Run check format script
         shell: bash
         run: |
-          ls ..
-          exit 1
-          ${PWD}/tests/format-code.sh
+          ./tests/format-code.sh
           STATUS=$?
           
           if [ $STATUS -gt 0 ]; then
