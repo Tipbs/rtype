@@ -1,4 +1,5 @@
 ﻿#include "registry.hpp"
+#include "zipper_iterator.hpp"
 //#include <raylib.h>
 
 struct Position {
