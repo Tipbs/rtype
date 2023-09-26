@@ -23,7 +23,7 @@ jobs:
         run: cmake --build build
 
 
-  code_format
+  code_format:
     name: Check code formatting
       run: |
         `./tests/format-code.sh`
