@@ -30,9 +30,8 @@ jobs:
     steps:
       - name: Run check format script
         run: |
-          echo `pwd`
-          echo `ls`
-          `./format-code.sh`
+          chmod +x ./tests/format-code.sh
+          ./tests/format-code.sh
           STATUS=$?
           
           if [ $STATUS -gt 0 ]; then
