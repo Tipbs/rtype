@@ -31,7 +31,7 @@ jobs:
       - name: Run check format script
         shell: bash
         run: |
-          ls -a ${PWD}
+          ls ..
           exit 1
           ${PWD}/tests/format-code.sh
           STATUS=$?
