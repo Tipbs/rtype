@@ -25,13 +25,13 @@ jobs:
 
   code_format:
     name: Check code formatting
-    needs: build
+    # needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Run check format script
         run: |
           echo `pwd`
-          `./tests/format-code.sh`
+          `./format-code.sh`
           STATUS=$?
           
           if [ $STATUS -gt 0 ]; then
