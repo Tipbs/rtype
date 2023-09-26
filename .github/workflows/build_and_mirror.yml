@@ -31,7 +31,7 @@ jobs:
       - name: Run check format script
         run: |
           echo `pwd`
-          `./tests/format-code.sh`
+          `../../tests/format-code.sh`
           STATUS=$?
           
           if [ $STATUS -gt 0 ]; then
