@@ -25,16 +25,16 @@ jobs:
 
   code_format:
     name: Check code formatting
-      run: |
-        `./tests/format-code.sh`
-        STATUS=$?
-        
-        if [ $STATUS -gt 0 ]; then
-          echo "Error! Code isn't formatted"
-          exit 1
-        fi
-        echo "Success! Code is correctly formatted"
-        exit 0
+    run: |
+      `./tests/format-code.sh`
+      STATUS=$?
+      
+      if [ $STATUS -gt 0 ]; then
+        echo "Error! Code isn't formatted"
+        exit 1
+      fi
+      echo "Success! Code is correctly formatted"
+      exit 0
 
 
   mirroring_to_github:
