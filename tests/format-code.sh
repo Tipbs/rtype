@@ -21,7 +21,13 @@ if [ $# -eq 1 ]; then
     exit 1
 fi
 
-echo "-----server/-----"
+echo "----- SERVER/ -----"
 $CLANGFORMAT -i -n --Werror --style=${STYLE} ${SERVER_FILES}
-echo "-----gui/-----"
+if [ $? -ne 0 ]; then
+    exit 1
+fi
+echo "----- GUI -----"
 $CLANGFORMAT -i -n --Werror --style=${STYLE} ${GUI_FILES}
+if [ $? -ne 0 ]; then
+    exit 1
+fi
