@@ -4,6 +4,7 @@ on: [push, pull_request]
 
 env:
   MIRROR_URL: "git@github.com:EpitechPromo2026/B-CPP-500-TLS-5-1-rtype-tristan.masselot.git"
+  GUI_PATH: "gui"
 
 jobs:
   build:
@@ -22,7 +23,7 @@ jobs:
           source-dir: gui
 
       - name: Build the project
-        run: cmake --build build
+        run: cmake --build ${{ env.GUI_PATH }}/build
 
 
   code_format:
