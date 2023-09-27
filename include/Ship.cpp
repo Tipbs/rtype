@@ -12,7 +12,7 @@ Ship::Ship(int width, int height, int ShipNb)
     shipRec.width = (float)ship.width / 5;
     shipRec.height = (float)ship.height / 5;
     shipRec.x = 2 * (float)ship.width / 5;
-    shipRec.y = ShipNb * (float)ship.height / 5;
+    shipRec.y = (ShipNb % 5) * (float)ship.height / 5;
 
     Vector2 ShipPos = {(float)width/2 - (float)shipRec.width/2, (float)height/2 - (float)shipRec.height/2};
 
@@ -34,14 +34,14 @@ void Ship::UpdateShip(int width, int height, int Keyup, int Keydown, int Keyleft
     //Movement handling and clamping
     Vector2 Moves = {0., 0.};
 
-    if (IsKeyDown(KeyRight)) Moves.x = (this->ShipPos.x + this->ShipRec.width > width) ? 0 : Speed;
-    if (IsKeyDown(Keyleft)) Moves.x = this->ShipPos.x < 0 ? 0 : -1 * Speed;
+    if (IsKeyDown(KeyRight)) Moves.x += (this->ShipPos.x + this->ShipRec.width > width) ? 0 : Speed;
+    if (IsKeyDown(Keyleft)) Moves.x += this->ShipPos.x < 0 ? 0 : -1 * Speed;
     if (IsKeyDown(Keyup)) {
-        Moves.y = this->ShipPos.y < 0 ? 0 : -1 * Speed;
+        Moves.y += this->ShipPos.y < 0 ? 0 : -1 * Speed;
         this->ShipRec.x = ShipBigUp;
     }
     if (IsKeyDown(Keydown)) {
-        Moves.y = this->ShipPos.y + this->ShipRec.height > height ? 0 : Speed;
+        Moves.y += this->ShipPos.y + this->ShipRec.height > height ? 0 : Speed;
         this->ShipRec.x = ShipBigDown;
     }
     if (IsKeyDown(Keydown) == IsKeyDown(Keyup)) this->ShipRec.x = ShipMid;

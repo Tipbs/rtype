@@ -18,7 +18,7 @@ int backgroundMaker()
     Ship play1(ScreenWidth, ScreenHeight, 1);
     Ship play2(ScreenWidth, ScreenHeight, 2);
     Ship play3(ScreenWidth, ScreenHeight, 3);
-    Ship play4(ScreenWidth, ScreenHeight, 4);
+    Ship play4(ScreenWidth, ScreenHeight, 9);
 
     UnloadImage(bg);
 
@@ -26,8 +26,8 @@ int backgroundMaker()
 
         play0.UpdateShip(ScreenWidth, ScreenHeight, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT);
         play1.UpdateShip(ScreenWidth, ScreenHeight, KEY_W, KEY_S, KEY_A, KEY_D);
-        play2.UpdateShip(ScreenWidth, ScreenHeight, KEY_DOWN, KEY_UP, KEY_RIGHT, KEY_LEFT);
-        play3.UpdateShip(ScreenWidth, ScreenHeight, KEY_S, KEY_W, KEY_D, KEY_A);
+        play2.UpdateShip(ScreenWidth, ScreenHeight, KEY_T, KEY_G, KEY_F, KEY_H);
+        play3.UpdateShip(ScreenWidth, ScreenHeight, KEY_SEMICOLON, KEY_X, KEY_Z, KEY_C);
         play4.UpdateShip(ScreenWidth, ScreenHeight, KEY_I, KEY_K, KEY_J, KEY_L);
 
         ClearBackground(BLACK);
