@@ -9,7 +9,7 @@ endif()
 project ("Bootstrap RType")
 
 # Ajoutez une source à l'exécutable de ce projet.
-add_executable (CMakeTarget "main.cpp" "sparse_array.hpp" "registry.cpp" "registry.hpp" "entity.hpp" "zipper_iterator.hpp" )
+add_executable (CMakeTarget "main.cpp" "sparse_array.hpp" "registry.cpp" "registry.hpp" "entity.hpp" "zipper_iterator.hpp" "zipper.hpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET CMakeTarget PROPERTY CXX_STANDARD 20)

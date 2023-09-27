@@ -7,7 +7,7 @@
 template <class ...Containers>
 class zipper_iterator {
 	template <class Container>
-	using iterator_t = decltype(sparse_array<Container>.begin()); // type of Container::begin() return value
+	using iterator_t = Container::iterator; // type of Container::begin() return value
 
 	template <class Container>
 	using it_reference_t = typename iterator_t<Container>::reference;
@@ -32,7 +32,7 @@ public:
 	friend bool operator!=(zipper_iterator const& lhs, zipper_iterator const
 		& rhs);
 private:
-	// Increment every iterator at the same time . It also skips to the next
+	// Increment every iterator at the same time. It also skips to the next
 	template <size_t ...Is>
 	void incr_all(std::index_sequence<Is...>);
 	// check if every std::optional are set.
@@ -60,13 +60,12 @@ template<class ...Containers>
 inline zipper_iterator<Containers...> zipper_iterator<Containers...>::operator++()
 {
 	_idx += 1;
-	++_current;
 	while (_idx != _max) {
 		([&] {
-			(void)Containers;
-			if (_current[_seq] == std::nullopt) {
+			typeid(Containers);
+			if (*_current[_seq] == std::nullopt) {
 				_idx += 1;
-				++_current;
+				++(_current[_seq]);
 				continue;
 			}
 		}(), ...);
@@ -81,7 +80,7 @@ inline zipper_iterator<Containers...>& zipper_iterator<Containers...>::operator+
 	++_current;
 	while (_idx != _max) {
 		([&] {
-			(void)Containers;
+			typeid(Containers);
 			if (_current[_seq] == std::nullopt) {
 				++_current;
 				_idx += 1;
@@ -95,13 +94,13 @@ inline zipper_iterator<Containers...>& zipper_iterator<Containers...>::operator+
 template<class ...Containers>
 inline zipper_iterator<Containers...>::value_type zipper_iterator<Containers...>::operator*()
 {
-	return std::make_tuple(*_current[_seq]...);
+	return std::make_tuple<typename Containers::value_type...>(_current[_seq]...);
 }
 
 template<class ...Containers>
 inline zipper_iterator<Containers...>::value_type zipper_iterator<Containers...>::operator->()
 {
-	return std::make_tuple(*_current[_seq]...);
+	return std::make_tuple<typename Containers::value_type...>(**_current[_seq]...);
 }
 
 template<class ...Containers>
@@ -136,7 +135,15 @@ template<class ...Containers>
 template<size_t ...Is>
 inline bool zipper_iterator<Containers...>::all_set(std::index_sequence<Is...>)
 {
-	return false;
+	while (_idx != _max) {
+		([&] {
+			(void)Containers;
+			if (_current[_seq] == std::nullopt) {
+				_idx += 1;
+				continue;
+			}
+		}(), ...);
+	}
 }
 
 template<class ...Containers>
