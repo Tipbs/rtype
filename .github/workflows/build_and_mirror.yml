@@ -4,13 +4,14 @@ on: [push, pull_request]
 
 env:
   MIRROR_URL: "git@github.com:EpitechPromo2026/B-CPP-500-TLS-5-1-rtype-tristan.masselot.git"
+  GUI_PATH: "gui"
 
 jobs:
   build:
-    name: Build project with cmake
+    name: Build gui project with cmake
     runs-on: ubuntu-latest
     steps:
-      - name: Install low-level dependency libxrandr
+      - name: Install low-level dependency xorg-dev
         run: sudo apt-get install xorg-dev
 
       - name: Checkout the repository
@@ -18,9 +19,11 @@ jobs:
 
       - name: Configure the project
         uses: threeal/cmake-action@v1.3.0
+        with:
+          source-dir: gui
 
       - name: Build the project
-        run: cmake --build build
+        run: cmake --build ${{ env.GUI_PATH }}/build
 
 
   code_format:

@@ -2,7 +2,8 @@
 
 CLANGFORMAT=`which clang-format`
 STYLE="file"
-FILES="source/*.cpp"
+SERVER_FILES="server/source/*.cpp"
+GUI_FILES="gui/source/*.cpp"
 
 if [ $# -eq 1 ]; then
     if [[ $1 == "-h" || $1 == "--help" ]]; then
@@ -14,10 +15,22 @@ if [ $# -eq 1 ]; then
         exit 0
     fi
     if [[ $1 == "-f" || $1 == "--fix" ]]; then
-        $CLANGFORMAT -i --style=${STYLE} ${FILES}
+        $CLANGFORMAT -i --style=${STYLE} ${GUI_FILES} ${SERVER_FILES}
         exit 0
     fi
     exit 1
 fi
 
-$CLANGFORMAT -i -n --Werror --style=${STYLE} ${FILES}
+echo "----- SERVER/ -----"
+$CLANGFORMAT -n --Werror --style=${STYLE} ${SERVER_FILES}
+if [ $? -ne 0 ]; then
+    exit 1
+fi
+echo "Nothing to format"
+
+echo "----- GUI -----"
+$CLANGFORMAT -n --Werror --style=${STYLE} ${GUI_FILES}
+if [ $? -ne 0 ]; then
+    exit 1
+fi
+echo "Nothing to format"
