@@ -7,7 +7,7 @@ env:
 
 jobs:
   build:
-    name: "build with cmake"
+    name: Build project with cmake
     runs-on: ubuntu-latest
     steps:
       - name: Install low-level dependency libxrandr
@@ -22,11 +22,32 @@ jobs:
       - name: Build the project
         run: cmake --build build
 
-      # - name: List files
-      #   run: ls
-  mirroring_to_github:
+
+  code_format:
+    name: Check code formatting
     needs: build
-    name: "Push the current commit to github"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3.5.3
+
+      - name: Run check format script
+        shell: bash
+        run: |
+          ./tests/format-code.sh
+          STATUS=$?
+          
+          if [ $STATUS -gt 0 ]; then
+            echo "Error! Code isn't formatted"
+            exit 1
+          fi
+          echo "Success! Code is correctly formatted"
+          exit 0
+
+
+  mirroring_to_github:
+    name: Push the current commit to github
+    needs: code_format
     runs-on: ubuntu-latest
     steps:                                              # <-- must use actions/checkout before mirroring!
       - uses: actions/checkout@v3
