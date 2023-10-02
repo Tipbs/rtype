@@ -4,7 +4,6 @@
 int main()
 {
     InitWindow(800, 450, "raylib [core] example - basic window");
-
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
@@ -13,7 +12,6 @@ int main()
             LIGHTGRAY);
         EndDrawing();
     }
-
     CloseWindow();
     return 0;
 }

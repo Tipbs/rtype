@@ -40,3 +40,4 @@ compile_commands.json
 .cache/
 /.vs
 /CMakeUserPresets.json
+/CMakeFiles
