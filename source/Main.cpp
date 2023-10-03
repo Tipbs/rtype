@@ -1,8 +1,8 @@
 #include <iostream>
-#include "Background.hpp"
+#include "Routine.hpp"
 
 int main()
 {
-    backgroundMaker();
+    routineMaker();
     return 0;
 }

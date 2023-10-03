@@ -1,53 +1,54 @@
-#include <cmath>
-#include <iostream>
-#include "Background.hpp"
-#include "raylib.h"
-#include "Ship.hpp"
+// #include <iostream>
+// #include "Background.hpp"
 
-int backgroundMaker()
-{
-    const int ScreenWidth = 1280;
-    const int ScreenHeight = 720;
-    InitWindow(ScreenWidth, ScreenHeight, "R-Type");
-    SetTargetFPS(144);
-    Image bg = LoadImage("ressources/Backgrounds/Back.png");
-    ImageResize(&bg, ScreenWidth, ScreenHeight);
-    Texture2D bgText = LoadTextureFromImage(bg);
 
-    Ship play0(ScreenWidth, ScreenHeight, 0);
-    Ship play1(ScreenWidth, ScreenHeight, 1);
-    Ship play2(ScreenWidth, ScreenHeight, 2);
-    Ship play3(ScreenWidth, ScreenHeight, 3);
-    Ship play4(ScreenWidth, ScreenHeight, 9);
+// void Background::GetElementsRandom() {
+//     std::size_t elementSize = 0;
+//     for (std::size_t i = 0; i < 250; ++i) {
+//         elementSize = std::rand() % 15 + 5;
+//         _elementsVector.push_back({ elementSize, std::size_t(std::rand() % screenWidth),
+//             std::size_t(std::rand() % screenHeight), BLUE, std::size_t(std::rand() % 3 + 0), true });
+//     }
+// }
 
-    UnloadImage(bg);
+// void Background::UpdateStarGlowing(Element &star) { //Element ?
+//     if (star.isIncrement)
+//         ++star.glow;
+//     else
+//         --star.glow;
+//     if (star.glow == 4)
+//         star.isIncrement = false;
+//     if (star.glow == 0)
+//         star.isIncrement = true;
+// }
 
-    while (!WindowShouldClose()) {
+// void Background::UpdateStarsPosition(int screenWidth) {
+//     for (auto &star : _elementsVector) {
+//         if (star.posX <= 0) {
+//             star.posX = screenWidth;
+//             star.posY = std::rand() % 720;
+//         } else {
+//             star.posX -= 1;
+//         }
+//         if (std::rand() % 50 == 1)
+//             UpdateStarGlowing(star);
+//     }
+// }
 
-        play0.UpdateShip(ScreenWidth, ScreenHeight, KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT);
-        play1.UpdateShip(ScreenWidth, ScreenHeight, KEY_W, KEY_S, KEY_A, KEY_D);
-        play2.UpdateShip(ScreenWidth, ScreenHeight, KEY_T, KEY_G, KEY_F, KEY_H);
-        play3.UpdateShip(ScreenWidth, ScreenHeight, KEY_SEMICOLON, KEY_X, KEY_Z, KEY_C);
-        play4.UpdateShip(ScreenWidth, ScreenHeight, KEY_I, KEY_K, KEY_J, KEY_L);
+// void Background::Draw() {
+//     for (auto i : _elementsVector) {
+//         _bgElement.SetWidth(i.size);
+//         _bgElement.SetHeight(i.size);
+//         _bgElement.Draw(i.posX, i.posY, {
+//             i.color.r, i.color.g, i.color.b, static_cast<unsigned char>(i.glow * 50) });
+//     }
+// }
 
-        ClearBackground(BLACK);
-        BeginDrawing();
-            DrawTexture(bgText, 0, 0, WHITE);
-            DrawTextureRec(play0.GetShip(), play0.GetRect(), play0.GetPos(), WHITE);
-            DrawTextureRec(play1.GetShip(), play1.GetRect(), play1.GetPos(), WHITE);
-            DrawTextureRec(play2.GetShip(), play2.GetRect(), play2.GetPos(), WHITE);
-            DrawTextureRec(play3.GetShip(), play3.GetRect(), play3.GetPos(), WHITE);
-            DrawTextureRec(play4.GetShip(), play4.GetRect(), play4.GetPos(), WHITE);
-        EndDrawing();
-    }
-    UnloadTexture(bgText);
-    play0.~Ship();
-    play1.~Ship();
-    play2.~Ship();
-    play3.~Ship();
-    play4.~Ship();
+// Background::Background(std::string bgElementTexturePath) {
+//     GetElementsRandom();
+//     _bgElement = raylib::Texture(bgElementTexturePath);
+// };
 
-    CloseWindow();
-    
-    return 0;
-}
+// Background::~Background() {
+//     _bgElement.Unload();
+// };
