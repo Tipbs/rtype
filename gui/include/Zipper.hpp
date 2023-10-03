@@ -27,29 +27,29 @@ private:
 template<class ...Containers>
 inline Zipper<Containers...>::Zipper(Containers & ...cs)
 {
-    iterator(cs...);
+    // iterator(cs...);
 }
 
 template<class ...Containers>
 inline Zipper<Containers...>::iterator Zipper<Containers...>::begin()
 {
-	return iterator();
+	// return iterator();
 }
 
 template<class ...Containers>
 inline Zipper<Containers...>::iterator Zipper<Containers...>::end()
 {
-	return iterator();
+	// return iterator();
 }
 
 template<class ...Containers>
 inline size_t Zipper<Containers...>::_compute_size(Containers & ...containers)
 {
-	return size_t();
+	// return size_t();
 }
 
 template<class ...Containers>
 inline Zipper<Containers...>::iterator_tuple Zipper<Containers...>::_compute_end(Containers & ...containers)
 {
-	return iterator_tuple();
+	// return iterator_tuple();
 }

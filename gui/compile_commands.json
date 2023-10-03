@@ -1,1 +1,22 @@
-[]
+[
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-DASSETS_PATH=\"/home/degodenne/Bureau/Epitech/rtype/gui/ressources/\"",
+      "-DGRAPHICS_API_OPENGL_33",
+      "-DPLATFORM_DESKTOP",
+      "-I/home/degodenne/Bureau/Epitech/rtype/gui/./include",
+      "-I/home/degodenne/Bureau/Epitech/rtype/gui/build/_deps/raylib-src/src",
+      "-I/home/degodenne/Bureau/Epitech/rtype/gui/build/_deps/raylib-src/src/external/glfw/include",
+      "-Wall",
+      "-std=gnu++20",
+      "-c",
+      "-o",
+      "CMakeFiles/R-Type.dir/source/main.cpp.o",
+      "/home/degodenne/Bureau/Epitech/rtype/gui/source/main.cpp"
+    ],
+    "directory": "/home/degodenne/Bureau/Epitech/rtype/gui/build",
+    "file": "/home/degodenne/Bureau/Epitech/rtype/gui/source/main.cpp",
+    "output": "/home/degodenne/Bureau/Epitech/rtype/gui/build/CMakeFiles/R-Type.dir/source/main.cpp.o"
+  }
+]
