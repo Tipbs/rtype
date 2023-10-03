@@ -17,16 +17,14 @@ include_directories(
 aux_source_directory(source/ SRC_DIR)
 aux_source_directory(include/ INCLUDE_DIR)
 
-#find_package(raylib 4.0.0 REQUIRED)
+find_package(raylib 4.0.0 REQUIRED)
 
 add_executable(R-Type
   ${INCLUDE_DIR}
   ${SRC_DIR}
 )
 
-target_link_libraries(R-Type
-#raylib
-)
+target_link_libraries(R-Type raylib)
 target_compile_definitions(${PROJECT_NAME} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/ressources/") # Set the asset path macro to the absolute path on the dev machine
 install(TARGETS R-Type)
 include(CPACK)

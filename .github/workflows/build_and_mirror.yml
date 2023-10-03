@@ -13,6 +13,13 @@ jobs:
       - name: Install low-level dependency libxrandr
         run: sudo apt-get install xorg-dev
 
+      - name: Install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
+
+      - name: Install dependencies
+        run: conan install . --output-folder=build --build=missing
+
       - name: Checkout the repository
         uses: actions/checkout@v3.5.3
 
