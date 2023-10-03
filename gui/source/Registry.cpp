@@ -1,4 +1,4 @@
-#include "registry.hpp"
+#include "Registry.hpp"
 
 Entity Registry::spawn_entity()
 {

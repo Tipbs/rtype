@@ -1,9 +1,10 @@
 #pragma once
 
-#include "zipper_iterator.hpp"
+#include "Zipper_iterator.hpp"
 #include <vector>
+#include <tuple>
 
-template <class ... Containers >
+template <class... Containers >
 class Zipper {
 public:
 	using iterator = zipper_iterator<Containers...>;
@@ -26,16 +27,7 @@ private:
 template<class ...Containers>
 inline Zipper<Containers...>::Zipper(Containers & ...cs)
 {
-	//using iterator = zipper_iterator<Containers...>;
-	//using iterator_tuple = typename iterator::iterator_tuple;
-	//zipper_iterator(iterator_tuple const& it_tuple, size_t max);
-	//using iterator_tuple = std::tuple<iterator_t<Containers>...>;
-	//using iterator_t = decltype(sparse_array<Container>.begin()); // type of Container::begin() return value
-	std::vector vec = { 0, 1, 2 };
-	++vec.begin();
-	//auto tuple = std::tuple<
-	//auto ite = zipper_iterator<...Containers>();
-	//_begin = 
+    iterator(cs...);
 }
 
 template<class ...Containers>

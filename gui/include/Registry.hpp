@@ -4,8 +4,8 @@
 #include <unordered_map>
 #include <typeindex>
 #include <functional>
-#include "sparse_array.hpp"
-#include "entity.hpp"
+#include "Sparse_array.hpp"
+#include "Entity.hpp"
 
 class Registry {
 	template<typename Component>
@@ -44,12 +44,24 @@ private:
 	size_t _maxId = 0;
 };
 
+/**
+* @brief Erase one entity from one component.
+*
+* @tparam  Component   The component from the entity will be erase.
+* @param   entity      The entity to erase.
+*/
 template<typename Component>
 inline void Registry::erase(const Entity &entity)
 {
 	std::any_cast<sparse_array<Component>>(_components_arrays[typeid(Component)])[(size_t)entity] = std::nullopt;
 }
 
+/**
+* @brief Insert one entity to one component.
+*
+* @tparam  Component   The component from the entity will be insert.
+* @param   entity      The entity to insert.
+*/
 template<typename Component>
 inline void Registry::insert(size_t entity)
 {
@@ -57,6 +69,12 @@ inline void Registry::insert(size_t entity)
 	comp.add_entity(entity);
 }
 
+/**
+* @brief Add a new component with its erase and insert function.
+*
+* @tparam  Component   The Component to insert.
+* @return  The sparse_array of Component newly created.
+*/
 template<class Component>
 inline sparse_array<Component>& Registry::register_component()
 {
@@ -66,18 +84,38 @@ inline sparse_array<Component>& Registry::register_component()
 	return std::any_cast<sparse_array<Component> &>(_components_arrays.at(typeid(Component)));
 }
 
+/**
+* @brief Get component in component array
+*
+* @tparam  Component   The Component to get
+* @return  The sparse array of the component.
+*/
 template<class Component>
 inline sparse_array<Component>& Registry::get_components()
 {
 	return std::any_cast<sparse_array<Component> &>(_components_arrays[std::type_index(typeid(Component))]);
 }
 
+/**
+* @brief Get component in component array.
+*
+* @tparam  Component   The Component to get.
+* @return  The sparse array of the component.
+*/
 template<class Component>
 inline sparse_array<Component> const& Registry::get_components() const
 {
 	return std::any_cast<sparse_array<Component> &>(_components_arrays.at(std::type_index(typeid(Component))));
 }
 
+/**
+* @brief Add a component to an entity in a sparse array
+*
+* @tparam  Component   The Component from sparse_array
+* @param   to          The index in sparse array
+* @param   c           The new component to add
+* @return  The new component created
+*/
 template<typename Component>
 inline typename sparse_array<Component>::reference_type Registry::add_component(Entity const& to, Component&& c)
 {
@@ -86,19 +124,41 @@ inline typename sparse_array<Component>::reference_type Registry::add_component(
 	return comp_array[(size_t)to];
 }
 
+/**
+* @brief Create and insert a component
+*
+* @tparam  Component   The Component to create
+* @tparam  ...Params   The param's type to forward to constructor
+* @param   to          The index in sparse array
+* @param   c           The new component to add
+* @return  The new component created
+*/
 template<typename Component, typename ...Params>
 inline typename sparse_array<Component>::reference_type Registry::emplace_component(Entity const& to, Params && ...p)
 {
-	_components_arrays[typeid(Component)].emplace(typeid(Component), std::forward(p)...);
+	_components_arrays[typeid(Component)].emplace(typeid(Component), std::forward<Params>(p)...);
 	return typename sparse_array<Component>::reference_type();
 }
 
+/**
+* @brief Remove a compoenent in a sparse array
+*
+* @tparam  Component   The Component who point sparse array.
+* @param   from        The entity (index in sparse array)
+*/
 template<typename Component>
 inline void Registry::remove_component(Entity const& from)
 {
 	_erase_funcs[std::type_index(typeid(Component))](std::ref(*this), from);
 }
 
+/**
+* @brief Add a system to one or more Component
+*
+* @tparam  ...Component The Component who will be assign to the system.
+* @tparam  ...Component The type of the system.
+* @param   t            The system who will be assign.
+*/
 template<class ...Components, typename Function>
 inline void Registry::add_system(Function&& f)
 {
@@ -108,6 +168,13 @@ inline void Registry::add_system(Function&& f)
 	_systems.push_back(lambda);
 }
 
+/**
+* @brief Add a system to one or more Component
+*
+* @tparam  ...Component The Component who will be assign to the system.
+* @tparam  ...Component The type of the system.
+* @param   t            The system who will be assign.
+*/
 template<class ...Components, typename Function>
 inline void Registry::add_system(Function const& f)
 {

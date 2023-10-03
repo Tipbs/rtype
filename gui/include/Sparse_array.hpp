@@ -99,16 +99,13 @@ inline typename sparse_array<Component>::size_type sparse_array<Component>::size
 	return _data.size();
 }
 
-//template<typename Component>
-//inline typename sparse_array<Component>::reference_type sparse_array<Component>::insert_at(size_type pos, Component const& comp)
-//{
-//	if (pos > this->size())
-//		pos = this->size();
-//	if (pos < this->size())
-//		_data.erase(begin() + pos);
-//	return *(_data.insert(begin() + pos, comp));
-//}
-
+/**
+* @brief Add a new Component to one entity
+*
+* @tparam  Component   The type of component.
+* @param   pos         the position in sparse array.
+* @return  The new component.
+*/
 template<typename Component>
 inline sparse_array<Component>::reference_type sparse_array<Component>::add_entity(size_type pos)
 {
@@ -119,6 +116,14 @@ inline sparse_array<Component>::reference_type sparse_array<Component>::add_enti
 	return *(_data.insert(begin() + pos, std::nullopt));
 }
 
+/**
+* @brief Add a new Component to one entity
+*
+* @tparam  Component   The type of component.
+* @param   pos         the position in sparse array.
+* @param   pos         the component to insert.
+* @return  The component.
+*/
 template<typename Component>
 inline typename sparse_array<Component>::reference_type sparse_array<Component>::insert_at(size_type pos, Component&& comp)
 {
@@ -129,12 +134,24 @@ inline typename sparse_array<Component>::reference_type sparse_array<Component>:
 	return *(_data.insert(begin() + pos, comp));
 }
 
+/**
+* @brief Erase a component at a position
+*
+* @tparam  Component   The type of component.
+* @param   pos         the position in sparse array.
+*/
 template<typename Component>
 inline void sparse_array<Component>::erase(size_type pos)
 {
 	_data.erase(begin() + pos);
 }
 
+/**
+* @brief Get the index of a component
+*
+* @tparam  Component   The type of component.
+* @param   pos         The component..
+*/
 template<typename Component>
 inline typename sparse_array<Component>::size_type sparse_array<Component>::get_index(value_type const& comp) const
 {
@@ -148,6 +165,15 @@ inline typename sparse_array<Component>::size_type sparse_array<Component>::get_
 	return _data.end() - _data.begin();
 }
 
+/**
+* @brief Create and insert a component
+*
+* @tparam  Component   The Component to create
+* @tparam  ...Params   The param's type to forward to constructor
+* @param   pos         The index in sparse array
+* @param   c           The new component to add
+* @return  The new component created
+*/
 template<typename Component>
 template<class ...Params>
 inline typename sparse_array<Component>::reference_type sparse_array<Component>::emplace_at(size_type pos, Params &&...params)

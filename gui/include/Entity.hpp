@@ -28,9 +28,9 @@ public:
 		this->_id *= id;
         return *this;
 	}
-	auto operator<=>(const size_t id) const 
+	auto operator<= >(const size_t id) const 
 	{
-		return _id <=> id;
+		return _id <= > id;
 	}
 	explicit operator size_t() const
 	{

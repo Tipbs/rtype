@@ -1,0 +1,23 @@
+name: CI-build
+  
+on: [push, pull_request, ]
+
+env:
+  MIRROR_URL: "git@github.com:Remi-Mergen/chocolatine-mirror.git"
+
+jobs:
+  build-project:
+    name: "build with cmake"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3.5.3
+
+      - name: Configure the project
+        uses: threeal/cmake-action@v1.3.0
+
+      - name: Build the project
+        run: cmake --build build
+
+      # - name: List files
+      #   run: ls

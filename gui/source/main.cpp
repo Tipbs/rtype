@@ -1,7 +1,6 @@
-﻿#include "registry.hpp"
-#include "zipper_iterator.hpp"
-#include "zipper.hpp"
-#include <Windows.h>
+﻿#include "Registry.hpp"
+#include "Zipper_iterator.hpp"
+#include "Zipper.hpp"
 //#include <raylib.h>
 
 struct Position {
