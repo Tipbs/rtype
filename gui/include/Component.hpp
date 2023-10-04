@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 //#include "raylib.h"
-=======
-#include "raylib.h"
->>>>>>> 3e03e104c16f473978c6e1efc69a974be2970634
 
 #ifndef COMPONENT_HPP
     #define COMPONENT_HPP
