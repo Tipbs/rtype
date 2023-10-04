@@ -1,11 +1,11 @@
-#include <map>
-#include <thread>
+#include <boost/archive/binary_iarchive.hpp>
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/array.hpp>
 #include <chrono>
+#include <map>
 #include "../../shared/UserCmd.hpp"
 
 namespace boost {
@@ -36,7 +36,8 @@ class udp_server {
         void broadcast();
         void handle_broadcast(const boost::system::error_code &, std::size_t);
         void multiple_broadcast(std::vector<boost::asio::ip::udp::endpoint>, std::map<std::size_t ,std::vector<UserCmd>>);
-        void add_buff_to_cmd();
+        void deserialize(const std::size_t);
+        void handle_tick(const boost::system::error_code &);
     private:
         void start_receive();
 
@@ -44,6 +45,7 @@ class udp_server {
         std::size_t id = 0;
         boost::asio::io_context _svc;
         boost::asio::ip::udp::socket _socket;
+        boost::asio::deadline_timer timer;
         boost::asio::ip::udp::endpoint _remote_point;
         std::vector<boost::asio::ip::udp::endpoint> clients;
         std::map<std::size_t, std::vector<UserCmd>> cmd;

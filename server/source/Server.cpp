@@ -4,20 +4,16 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/streambuf.hpp>
+#include <boost/archive/binary_iarchive.hpp>
 #include <boost/bind.hpp>
-#include <cstddef>
 #include <cstring>
-#include <deque>
 #include <exception>
 #include <iostream>
 #include <map>
-#include <string>
 #include <thread>
 #include "../include/Server.hpp"
 
 using boost::asio::ip::udp;
-
-typedef std::deque<boost::asio::const_buffer> ConstBuffers;
 
 void udp_server::handle_send(const boost::system::error_code &error, std::size_t bytes_transferred) //Callback to the send function 
 {
@@ -53,13 +49,23 @@ void udp_server::broadcast() // Broadcast a message to all connected clients tha
     broadcasting.detach();
 }
 
-void udp_server::add_buff_to_cmd()
+void udp_server::handle_tick(const boost::system::error_code &error) //tick every seconds
+{
+    broadcast();
+    timer.expires_from_now(boost::posix_time::seconds(1));
+    timer.async_wait(boost::bind(&udp_server::handle_tick, this, boost::asio::placeholders::error));
+}
+
+void udp_server::deserialize(const std::size_t bytes_transferred)
 {
     std::size_t i = 0;
     for (const auto &client_endpoint : clients)
         i++;
+    std::string seralizedData(_recv_buffer.data(), bytes_transferred);
+    std::istringstream iss(seralizedData);
+    boost::archive::binary_iarchive archive(iss);
     UserCmd tmp;
-    std::memcpy(&tmp, &_recv_buffer, sizeof(UserCmd));
+    archive >> tmp;
     cmd[i - 1].push_back(tmp);
 }
 
@@ -67,11 +73,9 @@ void udp_server::handle_receive(const boost::system::error_code &error, std::siz
 {
     if (!error || error == boost::asio::error::message_size) {
         std::cout << "Received " << bytes_transferred << "bytes" << std::endl;
-        if (std::find(clients.begin(), clients.end(), _remote_point) == clients.end() && clients.size() <= 4) {
+        if (std::find(clients.begin(), clients.end(), _remote_point) == clients.end() && clients.size() <= 4)
             clients.push_back(_remote_point);
-        }
-        add_buff_to_cmd();
-        broadcast();
+        //deserialize(bytes_transferred);
         start_receive();
     }
 }
@@ -85,10 +89,14 @@ void udp_server::start_receive() // Receive function
         boost::asio::placeholders::bytes_transferred));
 }
 
-udp_server::udp_server(std::size_t port) : _svc(), _socket(_svc, udp::endpoint(udp::v4(), port))
+udp_server::udp_server(std::size_t port) : _svc(), _socket(_svc, udp::endpoint(udp::v4(), port)), timer(_svc)
 {
     _port = port;
     _socket.non_blocking(true);
+
+    timer.expires_from_now(boost::posix_time::seconds(1));
+    timer.async_wait(boost::bind(&udp_server::handle_tick, this, boost::asio::placeholders::error));
+
     start_receive(); 
     _svc.run();
 }
