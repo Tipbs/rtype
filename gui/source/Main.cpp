@@ -1,7 +1,8 @@
 #include <iostream>
+#include "../include/Routine.hpp"
 
 int main()
 {
-    std::cout << "Hello world :,D!" << std::endl;
+    routineMaker();
     return 0;
 }
