@@ -8,6 +8,20 @@
 #include <chrono>
 #include "../../shared/UserCmd.hpp"
 
+namespace boost {
+#ifdef BOOST_NO_EXCEPTIONS
+void throw_exception(std::exception const &e)
+{
+    throw e; // or whatever
+};
+void throw_exception(std::exception const &e, boost::source_location const &)
+{
+    throw e; // or whatever
+};
+#endif
+} // namespace boost
+
+
 struct Message {
     int type;
 };
