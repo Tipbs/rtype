@@ -1,6 +1,6 @@
 #include <cmath>
 #include <iostream>
-#include "Ship.hpp"
+#include "../include/Ship.hpp"
 #include "raylib.h"
 
 Ship::Ship(int width, int height, int ShipNb)

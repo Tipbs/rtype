@@ -1,8 +1,8 @@
 #include <cmath>
 #include <iostream>
-#include "Routine.hpp"
+#include "../include/Routine.hpp"
 #include "raylib.h"
-#include "Ship.hpp"
+#include "../include/Ship.hpp"
 
 int routineMaker()
 {
