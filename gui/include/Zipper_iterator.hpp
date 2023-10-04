@@ -27,10 +27,10 @@ public:
 	zipper_iterator& operator++(int);
 	value_type operator*();
 	value_type operator->();
-	friend bool operator==(zipper_iterator const& lhs, zipper_iterator const
-		& rhs);
-	friend bool operator!=(zipper_iterator const& lhs, zipper_iterator const
-		& rhs);
+	// friend bool operator==(zipper_iterator const& lhs, zipper_iterator const
+	// 	&rhs);
+	// friend bool operator!=(zipper_iterator const& lhs, zipper_iterator const
+	// 	&rhs);
 private:
 	// Increment every iterator at the same time. It also skips to the next
 	template <size_t ...Is>
@@ -112,7 +112,7 @@ template<class ...Containers>
 template <size_t... Is>
 inline bool zipper_iterator<Containers...>::all_set(std::index_sequence<Is ...> seq)
 {
-    // return (... && (*_current[Is] == std::nullopt));
+    return (... && (*_current[Is] == std::nullopt));
 }
 
 template<class ...Containers>

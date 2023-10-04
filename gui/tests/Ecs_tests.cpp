@@ -1,16 +1,9 @@
-/*
-** EPITECH PROJECT, 2023
-** Raytracer
-** File description:
-** main.cpp
-*/
-
 #include <criterion/criterion.h>
 #include <criterion/redirect.h>
 #include <iostream>
-#include "registry.hpp"
-#include "zipper.hpp"
-#include "sparse_array.hpp"
+#include "Registry.hpp"
+#include "Zipper.hpp"
+#include "Sparse_array.hpp"
 
 struct Position {
 	float x, y;
@@ -40,11 +33,15 @@ void print_position(Registry &r, sparse_array<Position> positions)
         std::cout << "Position = { " << pos->x << ", " << pos->y << " }" << std::endl;
 }
 
-void test_zipper()
+Test(Ecs, create_comomponent)
 {
     sparse_array<Position> positions(0);
     Zipper zipper(positions);
     Registry reg;
+    Entity const entity = reg.spawn_entity();
 
-    reg.register_component<Position>(); 
+    reg.register_component<Position>();
+    reg.emplace_component<Position>(entity);
+    reg.add_system<Position>(&print_position);
+    reg.run_systems();
 }

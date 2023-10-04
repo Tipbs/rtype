@@ -9,14 +9,17 @@
       "-I/home/degodenne/Bureau/Epitech/rtype/gui/build/_deps/raylib-src/src",
       "-I/home/degodenne/Bureau/Epitech/rtype/gui/build/_deps/raylib-src/src/external/glfw/include",
       "-Wall",
+      "-g",
+      "-g3",
+      "-ggdb",
       "-std=gnu++20",
       "-c",
       "-o",
-      "CMakeFiles/R-Type.dir/source/main.cpp.o",
-      "/home/degodenne/Bureau/Epitech/rtype/gui/source/main.cpp"
+      "CMakeFiles/R-Type.dir/source/Main.cpp.o",
+      "/home/degodenne/Bureau/Epitech/rtype/gui/source/Main.cpp"
     ],
     "directory": "/home/degodenne/Bureau/Epitech/rtype/gui/build",
-    "file": "/home/degodenne/Bureau/Epitech/rtype/gui/source/main.cpp",
-    "output": "/home/degodenne/Bureau/Epitech/rtype/gui/build/CMakeFiles/R-Type.dir/source/main.cpp.o"
+    "file": "/home/degodenne/Bureau/Epitech/rtype/gui/source/Main.cpp",
+    "output": "/home/degodenne/Bureau/Epitech/rtype/gui/build/CMakeFiles/R-Type.dir/source/Main.cpp.o"
   }
 ]

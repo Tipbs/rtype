@@ -182,5 +182,5 @@ inline typename sparse_array<Component>::reference_type sparse_array<Component>:
 		pos = this->size();
 	if (pos < this->size())
 		_data.erase(begin() + pos);
-	return *(_data.emplace(begin() + pos, params ...));
+	return *(_data.emplace(begin() + pos, params...));
 }

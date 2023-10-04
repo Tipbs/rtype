@@ -45,7 +45,7 @@ inline Zipper<Containers...>::iterator Zipper<Containers...>::end()
 template<class ...Containers>
 inline size_t Zipper<Containers...>::_compute_size(Containers & ...containers)
 {
-	// return size_t();
+	return size_t();
 }
 
 template<class ...Containers>
