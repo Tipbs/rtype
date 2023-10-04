@@ -6,6 +6,9 @@
 #include <boost/array.hpp>
 #include <chrono>
 #include <map>
+#include <mutex>
+#include <semaphore>
+#include <thread>
 #include "../../shared/UserCmd.hpp"
 
 namespace boost {
@@ -37,7 +40,7 @@ class udp_server {
         void handle_broadcast(const boost::system::error_code &, std::size_t);
         void multiple_broadcast(std::vector<boost::asio::ip::udp::endpoint>, std::map<std::size_t ,std::vector<UserCmd>>);
         void deserialize(const std::size_t);
-        void handle_tick(const boost::system::error_code &);
+        void handle_tick();
     private:
         void start_receive();
 
@@ -50,4 +53,8 @@ class udp_server {
         std::vector<boost::asio::ip::udp::endpoint> clients;
         std::map<std::size_t, std::vector<UserCmd>> cmd;
         boost::array<char, 512> _recv_buffer;
+
+        std::thread tick;
+        std::thread broadcasting;
+        std::mutex cmd_mutex;
 };
