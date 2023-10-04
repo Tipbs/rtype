@@ -6,7 +6,7 @@ sparse_array<Position> positions,
 sparse_array<Speed> speed, 
 sparse_array<Direction> dir)
 {
-    for (auto ind : positions.size()) {
-        std::cout << "pos : " << positions[ind] << "\nspeed : " << speed[ind] << "\ndir : " << dir[ind] << std::endl;
+    for (int ind = 0; ind < positions.size(); ind++) {
+        std::cout << "pos : " << positions[ind]->pos_X << ", " << positions[ind]->pos_Y << "\nspeed : " << speed[ind]->speed << "\ndir : " << dir[ind]->dir_X << ", " << dir[ind]->dir_Y << std::endl;
     }
 }

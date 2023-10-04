@@ -1,4 +1,4 @@
-#include "raylib.h"
+//#include "raylib.h"
 
 #ifndef COMPONENT_HPP
     #define COMPONENT_HPP
@@ -29,10 +29,10 @@
         float creation_time = 0;
     };
     struct Sprite {
-        Texutre2D sprite;
+        // Texutre2D sprite;
     };
     struct Animation {
-        Rectangle rect; //contains size as well
+        // Rectangle rect; //contains size as well
         Sprite sprite;
         Position* frames; // contains a list of position for each frames of an animated picture.
     };

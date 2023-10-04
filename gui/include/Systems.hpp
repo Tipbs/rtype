@@ -1,5 +1,6 @@
-#include "raylib.h"
+//#include "raylib.h"
 #include "Component.hpp"
+#include "Registry.hpp"
 
 #ifndef SYSTEMS_HPP
     #define SYSTEMS_HPP
