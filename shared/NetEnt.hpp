@@ -1,6 +1,6 @@
 #pragma once
-#include "Utils.hpp"
 #include <cstdint>
+#include "Utils.hpp"
 
 class NetEnt {
     int id;
