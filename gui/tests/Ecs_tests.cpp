@@ -1,9 +1,9 @@
 #include <criterion/criterion.h>
 #include <criterion/redirect.h>
 #include <iostream>
-#include "Registry.hpp"
-#include "Zipper.hpp"
-#include "Sparse_array.hpp"
+#include "../include/Registry.hpp"
+#include "../include/Zipper.hpp"
+#include "../include/Sparse_array.hpp"
 
 struct Position {
 	float x, y;
@@ -36,7 +36,7 @@ void print_position(Registry &r, sparse_array<Position> positions)
 Test(Ecs, create_comomponent)
 {
     sparse_array<Position> positions(0);
-    Zipper zipper(positions);
+    //Zipper zipper(positions);
     Registry reg;
     Entity const entity = reg.spawn_entity();
 
