@@ -1,18 +1,7 @@
-// #include <iostream>
-
-// int main()
-// {
-//     std::cout << "Hello world :,D!" << std::endl;
-//     return 0;
-// }
 #include <iostream>
 #include "Registry.hpp"
 #include "Sparse_array.hpp"
 #include "Zipper.hpp"
-
-struct Position {
-    float x, y;
-};
 
 struct Velocity {
     float vx, vy;
@@ -44,9 +33,11 @@ int main()
     Registry reg;
     Entity const entity = reg.spawn_entity();
     Position pos(1, 2);
+    float x = 2.0, y = 1.0;
+    std::cout << x << y << std::endl;
 
     reg.register_component<Position>();
-    reg.emplace_component<Position>(entity, 1, 2);
+    std::optional<Position> &temp = reg.emplace_component<Position>(entity, x, y);
     reg.add_system<Position>(&print_position);
     reg.run_systems();
 }

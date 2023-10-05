@@ -5,9 +5,9 @@
 #include "Zipper.hpp"
 #include "Sparse_array.hpp"
 
-struct Position {
-	float x, y;
-};
+// struct Position {
+// 	float x, y;
+// };
 
 struct Velocity {
 	float vx, vy;
