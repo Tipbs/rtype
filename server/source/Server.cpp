@@ -1,3 +1,4 @@
+#include <boost/archive/archive_exception.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/deadline_timer.hpp>
@@ -8,6 +9,8 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/bind.hpp>
+#include <boost/date_time/posix_time/posix_time_duration.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <cstring>
 #include <exception>
 #include <fstream>
@@ -25,7 +28,6 @@ std::binary_semaphore ThreadToMain{0};
 void udp_server::handle_send(const boost::system::error_code &error, std::size_t bytes_transferred) //Callback to the send function 
 {
     if (!error) {
-        std::cout << "bytes_transferred = " << bytes_transferred << std::endl;
         start_receive();
     }
 }
@@ -33,19 +35,40 @@ void udp_server::handle_send(const boost::system::error_code &error, std::size_t
 void udp_server::handle_broadcast(const boost::system::error_code &error, std::size_t bytes_transferred) //Callback to broadcast
 {
     if (!error) {
-        std::cout << "bytes_transferred = " << bytes_transferred << std::endl;
     }
 }
 
-void udp_server::multiple_broadcast(std::vector<udp::endpoint> tmp, std::map<std::size_t, std::vector<UserCmd>> commands)
+void udp_server::handle_check(const boost::system::error_code &error)
 {
-    for (const auto &c : commands) {
-        std::cout << c.first << std::endl;
+    if (!error) {
+        std::cout << "check" << std::endl;
+        auto now = boost::posix_time::microsec_clock::universal_time();
+        for (auto it = clients.begin(); it != clients.end(); ) {
+            if ((now - it->second).total_seconds() > 5) {
+                std::cout << "Client " << it->first << " disconnected\n";
+                it = clients.erase(it);
+            } else {
+                ++it;
+            }
+        }
+        start_check();
     }
+}
+
+void udp_server::start_check()
+{
+    check_timer.expires_from_now(boost::posix_time::seconds(1));
+    check_timer.async_wait(boost::bind(&udp_server::handle_check, this,
+        boost::asio::placeholders::error));
+}
+
+void udp_server::multiple_broadcast(std::map<udp::endpoint, boost::posix_time::ptime> tmp, std::map<std::size_t, std::vector<UserCmd>> commands)
+{
     Message test;
     test.type = 1;
+
     for (const auto& client_endpoint : tmp) {
-        _socket.async_send_to(boost::asio::buffer(&test, sizeof(test)), client_endpoint,
+        _socket.async_send_to(boost::asio::buffer(&test, sizeof(test)), client_endpoint.first,
             boost::bind(&udp_server::handle_broadcast, this,
             boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred));
@@ -61,7 +84,7 @@ void udp_server::broadcast() // Broadcast a message to all connected clients tha
 {
     while (1) {
         MainToThread.acquire();
-        std::vector<udp::endpoint> tmp = clients;
+        std::map<udp::endpoint, boost::posix_time::ptime> tmp = clients;
         run_system();
         ThreadToMain.release();
         cmd_mutex.lock();
@@ -74,22 +97,26 @@ void udp_server::handle_tick() //tick every seconds
 {
     MainToThread.release();
     ThreadToMain.acquire();
-    timer.expires_from_now(boost::posix_time::seconds(1));
-    timer.async_wait(boost::bind(&udp_server::handle_tick, this));
+    tick_timer.expires_from_now(boost::posix_time::millisec(50));
+    tick_timer.async_wait(boost::bind(&udp_server::handle_tick, this));
 }
 
 void udp_server::deserialize(const std::size_t bytes_transferred)
 {
     std::size_t i = 1;
-    for (const auto &client_endpoint : clients)
+    for (const auto &client_endpoint : clients) {
+        if (client_endpoint.first == _remote_point)
+            break;
         i++;
+    }
     std::string seralizedData(_recv_buffer.data(), bytes_transferred);
     std::istringstream iss(seralizedData);
     boost::archive::binary_iarchive archive(iss);
     UserCmd tmp;
-    //archive >> tmp;
+    archive >> tmp;
+    std::cout << "usercmd:\n" << tmp.attackState << "\n moved.x = " << tmp.moved.x << "\n moved.y = "<< tmp.moved.y << std::endl;
     cmd_mutex.lock();
-    cmd[i - 1].push_back(tmp);
+    cmd[i].push_back(tmp);
     cmd_mutex.unlock();
 }
 
@@ -97,9 +124,10 @@ void udp_server::handle_receive(const boost::system::error_code &error, std::siz
 {
     if (!error || error == boost::asio::error::message_size) {
         std::cout << "Received " << bytes_transferred << "bytes" << std::endl;
-        if (std::find(clients.begin(), clients.end(), _remote_point) == clients.end() && clients.size() <= 4)
-            clients.push_back(_remote_point);
-        //deserialize(bytes_transferred);
+        if (clients.count(_remote_point) > 0 || clients.size() <= 4) {
+            clients[_remote_point] = boost::posix_time::microsec_clock::universal_time();
+            deserialize(bytes_transferred);
+        }
         start_receive();
     }
 }
@@ -113,17 +141,17 @@ void udp_server::start_receive() // Receive function
         boost::asio::placeholders::bytes_transferred));
 }
 
-udp_server::udp_server(std::size_t port) : _svc(), _socket(_svc, udp::endpoint(udp::v4(), port)), timer(_svc)
+udp_server::udp_server(std::size_t port) : _svc(), _socket(_svc, udp::endpoint(udp::v4(), port)), tick_timer(_svc), check_timer(_svc)
 {
     _port = port;
-    _socket.non_blocking(true);
-    tick = std::thread(&udp_server::handle_tick, this);// tmp, std::move(cmd));
-    broadcasting = std::thread(&udp_server::broadcast, this);// tmp, std::move(cmd));
+    tick = std::thread(&udp_server::handle_tick, this); //Timer thread
+    broadcasting = std::thread(&udp_server::broadcast, this); // Snapshot thread
     tick.detach();
     broadcasting.detach();
 
 
     start_receive(); 
+    start_check();
     _svc.run();
 }
 
