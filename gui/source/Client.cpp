@@ -1,5 +1,3 @@
-#include <cstddef>
-#include <cstring>
 #include <exception>
 #include <iostream>
 #include <sstream>
@@ -7,7 +5,6 @@
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/udp.hpp>
-#include <boost/asio/registered_buffer.hpp>
 #include <boost/bind.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 #include "../include/Client.hpp"
