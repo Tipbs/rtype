@@ -1,9 +1,13 @@
 #pragma once
 
 #include <any>
+#include <cstddef>
 #include <unordered_map>
 #include <typeindex>
 #include <functional>
+#include <utility>
+#include <sys/types.h>
+#include "Component.hpp"
 #include "Sparse_array.hpp"
 #include "Entity.hpp"
 
@@ -34,7 +38,7 @@ public:
 	void add_system(Function&& f); // perfect forwarding in lambda capture , anyone ?
 	template <class ...Components, typename Function>
 	void add_system(Function const& f); // taking it by reference .
-	void run_systems();
+	void 	run_systems();
 
 private:
 	std::unordered_map<std::type_index, std::any> _components_arrays;
@@ -136,8 +140,10 @@ inline typename sparse_array<Component>::reference_type Registry::add_component(
 template<typename Component, typename ...Params>
 inline typename sparse_array<Component>::reference_type Registry::emplace_component(Entity const& to, Params && ...p)
 {
-    ((std::cout << p << std::endl), ...);
-    return std::any_cast<sparse_array<Component>>(_components_arrays.at(typeid(Component))).emplace_at((size_t)to, p...);
+	// ((std::cout << p << std::endl), ...);
+	// Position pos = Position(1, 2);
+	// Component comp(std::forward<Params>(p)...);
+    // return std::any_cast<sparse_array<Component>>(_components_arrays.at(typeid(Component))).insert_at((size_t)to, std::move(pos));
 }
 
 /**

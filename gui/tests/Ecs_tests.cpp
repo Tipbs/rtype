@@ -5,10 +5,6 @@
 #include "../include/Zipper.hpp"
 #include "../include/Sparse_array.hpp"
 
-struct Position {
-	float x, y;
-};
-
 struct Velocity {
 	float vx, vy;
 };
@@ -30,7 +26,7 @@ struct Controllable {
 void print_position(Registry &r, sparse_array<Position> positions)
 {
     for (auto pos : positions)
-        std::cout << "Position = { " << pos->x << ", " << pos->y << " }" << std::endl;
+        std::cout << "Position = { " << pos->pos_X << ", " << pos->pos_Y << " }" << std::endl;
 }
 
 Test(Ecs, create_comomponent)
