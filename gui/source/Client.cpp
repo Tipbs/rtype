@@ -2,13 +2,13 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <semaphore>
+#include <thread>
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/bind.hpp>
 #include <boost/archive/binary_oarchive.hpp>
-#include "Client.hpp"
+#include "../include/Client.hpp"
 
 using boost::asio::ip::udp;
 std::binary_semaphore MainToThread{0};
@@ -80,8 +80,6 @@ udp_client::udp_client(boost::asio::io_context &_svc,const std::string &ip, cons
     tick.detach();
     sending.detach();
     cmd.reset();
-    cmd.moved.x = 5;
-    cmd.moved.y = 2;
     send();
     start_receive();
 }
@@ -89,13 +87,21 @@ udp_client::udp_client(boost::asio::io_context &_svc,const std::string &ip, cons
 udp_client::~udp_client()
 {
     _socket.close();
+    tick.std::thread::~thread();
+    sending.std::thread::~thread();
 }
 
 int main(int ac, char **av)
 {
     try {
         boost::asio::io_context _svc;
-        udp_client client(_svc, av[1], av[2]);
+        std::string port = "5000";
+        std::string ip = "127.0.0.1";
+        if (ac == 3 && std::stoi(av[2])) {
+            ip = av[1];
+            port = av[2];
+        }
+        udp_client client(_svc, ip, port);
         _svc.run();
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
