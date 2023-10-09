@@ -1,0 +1,9 @@
+{
+    "version": 4,
+    "vendor": {
+        "conan": {}
+    },
+    "include": [
+        "/home/eoiys/Tek3/Mirror_Rtype/build/Release/generators/CMakePresets.json"
+    ]
+}
