@@ -1,13 +1,7 @@
-// #include <iostream>
-
-// int main()
-// {
-//     std::cout << "Hello world :,D!" << std::endl;
-//     return 0;
-// }
 #include <cstdio>
 #include <iostream>
 #include <utility>
+#include <semaphore>
 #include "../include/Registry.hpp"
 #include "../include/Component.hpp"
 #include "../include/Systems.hpp"

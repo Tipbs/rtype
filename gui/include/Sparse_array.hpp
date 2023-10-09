@@ -5,6 +5,10 @@
 #include <optional>
 #include <iterator>
 
+struct Position {
+    float x, y;
+};
+
 template <typename Component> // You can also mirror the definition of std::vector, that takes an additional allocator.
 class sparse_array {
 public:
@@ -178,9 +182,9 @@ template<typename Component>
 template<class ...Params>
 inline typename sparse_array<Component>::reference_type sparse_array<Component>::emplace_at(size_type pos, Params &&...params)
 {
-	if (pos > this->size())
-		pos = this->size();
-	if (pos < this->size())
-		_data.erase(begin() + pos);
-	return *(_data.emplace(begin() + pos, params...));
+    int x = 1.0, y = 2.0;
+    std::optional<Position> comp = std::make_optional<Component>(x, y);
+    std::optional<Position> &temp = *(_data.emplace(begin() + pos, comp));
+    std::cout << sizeof(temp) << std::endl;
+	return temp;
 }
