@@ -2,12 +2,13 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <semaphore>
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/bind.hpp>
 #include <boost/archive/binary_oarchive.hpp>
-#include "../include/Client.hpp"
+#include "Client.hpp"
 
 using boost::asio::ip::udp;
 std::binary_semaphore MainToThread{0};

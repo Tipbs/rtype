@@ -10,7 +10,7 @@
 #include <map>
 #include <thread>
 #include <semaphore>
-#include "../include/Server.hpp"
+#include "Server.hpp"
 
 using boost::asio::ip::udp;
 std::binary_semaphore MainToThread{0};

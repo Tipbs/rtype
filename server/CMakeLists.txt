@@ -8,7 +8,7 @@ project(server)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ..)
 
 include_directories(
-    ./include
+    ./server/include
 )
 
 aux_source_directory(./server/source/ SRC_DIR)
