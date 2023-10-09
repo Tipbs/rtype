@@ -53,10 +53,20 @@ void udp_server::start_check()
         boost::asio::placeholders::error));
 }
 
+void start_snapshot(UserCmd state, std::size_t id)
+{
+
+}
+
 void udp_server::multiple_broadcast(std::map<udp::endpoint, boost::posix_time::ptime> tmp, std::map<std::size_t, std::vector<UserCmd>> commands)
 {
     Message test;
     test.type = 1;
+    for (const auto &client : commands) {
+        for (const auto &client_command : client.second) {
+            start_snapshot(client_command, client.first);
+        }
+    }
 
     for (const auto& client_endpoint : tmp) {
         _socket.async_send_to(boost::asio::buffer(&test, sizeof(test)), client_endpoint.first,
@@ -105,7 +115,6 @@ void udp_server::deserialize(const std::size_t bytes_transferred)
     boost::archive::binary_iarchive archive(iss);
     UserCmd tmp;
     archive >> tmp;
-    std::cout << "usercmd:\n" << tmp.attackState << "\n moved.x = " << tmp.moved.x << "\n moved.y = "<< tmp.moved.y << std::endl;
     cmd_mutex.lock();
     cmd[i].push_back(tmp);
     cmd_mutex.unlock();
@@ -128,8 +137,8 @@ void udp_server::start_receive() // Receive function
     _socket.async_receive_from(
         boost::asio::buffer(_recv_buffer), _remote_point,
         boost::bind(&udp_server::handle_receive, this,
-        boost::asio::placeholders::error,
-        boost::asio::placeholders::bytes_transferred));
+            boost::asio::placeholders::error,
+            boost::asio::placeholders::bytes_transferred));
 }
 
 udp_server::udp_server(std::size_t port) : _svc(), _socket(_svc, udp::endpoint(udp::v4(), port)), tick_timer(_svc), check_timer(_svc)
@@ -149,6 +158,8 @@ udp_server::udp_server(std::size_t port) : _svc(), _socket(_svc, udp::endpoint(u
 udp_server::~udp_server()
 {
     _socket.close();
+    tick.std::thread::~thread();
+    broadcasting.std::thread::~thread();
 }
 
 int main(int ac, char **av)

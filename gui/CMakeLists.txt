@@ -11,12 +11,12 @@ include_directories(
     ./gui/include
 )
 
-aux_source_directory(./gui/source/ SRC_DIR)
-aux_source_directory(./gui/include/ INCLUDE_DIR)
+aux_source_directory(./gui/source/ GUI_SRC_DIR)
+aux_source_directory(./gui/include/ GUI_INCLUDE_DIR)
 
 add_executable(gui
-  ${INCLUDE_DIR}
-  ${SRC_DIR}
+  ${GUI_INCLUDE_DIR}
+  ${GUI_SRC_DIR}
 )
 
 target_link_libraries(gui

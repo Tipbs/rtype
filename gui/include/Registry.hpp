@@ -136,8 +136,9 @@ inline typename sparse_array<Component>::reference_type Registry::add_component(
 template<typename Component, typename ...Params>
 inline typename sparse_array<Component>::reference_type Registry::emplace_component(Entity const& to, Params && ...p)
 {
-    std::optional<Position> &temp = std::any_cast<sparse_array<Component>>(_components_arrays.at(typeid(Component))).emplace_at((size_t)to, p...);
-    return temp;
+	auto &sparse_arr = std::any_cast<sparse_array<Component> &>(_components_arrays[typeid(Component)]);
+	sparse_arr[(size_t)to] = std::make_optional<Component>(p...);
+	return sparse_arr[(size_t) to];
 }
 
 /**

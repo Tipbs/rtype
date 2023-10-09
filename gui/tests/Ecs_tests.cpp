@@ -1,9 +1,9 @@
 #include <criterion/criterion.h>
 #include <criterion/redirect.h>
 #include <iostream>
-#include "../include/Registry.hpp"
-#include "../include/Zipper.hpp"
-#include "../include/Sparse_array.hpp"
+#include "Registry.hpp"
+#include "Zipper.hpp"
+#include "Sparse_array.hpp"
 
 struct Velocity {
 	float vx, vy;

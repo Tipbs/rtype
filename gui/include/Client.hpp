@@ -6,6 +6,19 @@
 #include <boost/asio/io_context.hpp>
 #include "../../shared/UserCmd.hpp"
 
+namespace boost {
+#ifdef BOOST_NO_EXCEPTIONS
+void throw_exception(std::exception const &e)
+{
+    throw e; // or whatever
+};
+void throw_exception(std::exception const &e, boost::source_location const &)
+{
+    throw e; // or whatever
+};
+#endif
+} // namespace boost
+
 class udp_client {
     public:
         udp_client(boost::asio::io_context &, const std::string &ip, const std::string &port);

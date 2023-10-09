@@ -1,13 +1,13 @@
 #include <cstdio>
 #include <iostream>
-#include <filesystem>
 #include <utility>
 #include <semaphore>
-#include "../include/Registry.hpp"
-#include "../include/Component.hpp"
-#include "../include/Systems.hpp"
-#include "../include/Sparse_array.hpp"
-#include "../include/Zipper.hpp"
+#include <format>
+#include "Registry.hpp"
+#include "Component.hpp"
+#include "Systems.hpp"
+#include "Sparse_array.hpp"
+#include "Zipper.hpp"
 #include "raylib.h"
 
 struct Velocity {
@@ -28,7 +28,8 @@ struct Controllable {
 //     cr_redirect_stderr();
 // }
 
-void print_position(Registry &r, sparse_array<Position> positions)
+void logging_system(
+    Registry &r, sparse_array<Position> const &positions)
 {
     for (auto pos : positions)
         std::cout << "Position = { " << pos->pos_X << ", " << pos->pos_Y << " }"
