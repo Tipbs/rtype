@@ -178,6 +178,6 @@ template<typename Component>
 template<class ...Params>
 inline typename sparse_array<Component>::reference_type sparse_array<Component>::emplace_at(size_type pos, Params &&...params)
 {
-    std::optional<Component> &temp = *(_data.emplace(begin() + pos, std::make_optional<Component>(params...)));
-	return temp;
+	_data[pos] = std::make_optional<Component>(params...);
+	return _data[pos];
 }

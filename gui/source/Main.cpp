@@ -27,11 +27,18 @@ struct Controllable {
 //     cr_redirect_stderr();
 // }
 
-void print_position(Registry &r, sparse_array<Position> positions)
+void logging_system(
+    Registry &r, sparse_array<Position> const &positions)
 {
-    for (auto &pos : positions)
-        std::cout << "Position = { " << pos->x << ", " << pos->y << " }"
-                  << std::endl;
+    std::cout << "size: " << positions.size() << "\n";
+    std::cout << positions[0].has_value() << std::endl;
+    for (size_t i = 0; i < positions.size(); ++i) {
+        auto const &pos = positions[i];
+        if (pos) {
+            std::cerr << i << ": Position = { " << pos.value().x << ", "
+                      << pos.value().y << " }" << std::endl;
+        }
+    }
 }
 
 int main()
@@ -43,7 +50,10 @@ int main()
     std::cout << x << y << std::endl;
     std::cout << std::format("Hello {} !\n", "world") << std::endl;
     reg.register_component<Position>();
+    //std::optional<Position> &temp = reg.emplace_component<Position>(entity, x, y);
     std::optional<Position> &temp = reg.emplace_component<Position>(entity, x, y);
-    reg.add_system<Position>(&print_position);
+    std::cout << "temp: " << temp.value().x << " " << temp.value().y
+              << std::endl;
+    reg.add_system<Position>(logging_system);
     reg.run_systems();
 }
