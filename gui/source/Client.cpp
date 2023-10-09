@@ -91,13 +91,13 @@ udp_client::~udp_client()
     _socket.close();
 }
 
-int main(int ac, char **av)
-{
-    try {
-        boost::asio::io_context _svc;
-        udp_client client(_svc, av[1], av[2]);
-        _svc.run();
-    } catch (std::exception &e) {
-        std::cerr << e.what() << std::endl;
-    }
-}
+// int main(int ac, char **av)
+// {
+//     try {
+//         boost::asio::io_context _svc;
+//         udp_client client(_svc, av[1], av[2]);
+//         _svc.run();
+//     } catch (std::exception &e) {
+//         std::cerr << e.what() << std::endl;
+//     }
+// }

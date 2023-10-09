@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <iostream>
+#include <filesystem>
 #include <utility>
 #include <semaphore>
 #include "../include/Registry.hpp"
@@ -41,36 +42,24 @@ int main()
     InitWindow(ScreenWidth, ScreenHeight, "R-Type");
     SetTargetFPS(144);
 
-    Image bg = LoadImage("ressources/Backgrounds/Back.png");
-    ImageResize(&bg, ScreenWidth, ScreenHeight);
-    Texture2D bgText = LoadTextureFromImage(bg);
-
     Registry reg;
-
-    Entity const entity = reg.spawn_entity();
-    Position pos(1, 5);
-    Speed spe(5);
-    Direction dir(6, 6);
 
     Entity const background = reg.spawn_entity();
     Position bgPos(0, 0);
     Size bgSize(ScreenWidth, ScreenHeight);
-    Sprite bgsprite("../ressources/Backgrounds/Back.png")
-
-    reg.register_component<Position>();
-    reg.register_component<Speed>();
-    reg.register_component<Direction>();
-    reg.add_component(entity, std::move(pos));
-    reg.add_component(entity, std::move(spe));
-    reg.add_component(entity, std::move(dir));
+    std::string bgpath = "./gui/ressources/Backgrounds/Back.png";
+    std::cout << "PATH : " << std::filesystem::current_path() << std::endl;
+    Sprite bgsprite(bgpath.c_str(), ScreenWidth, ScreenHeight);
 
     reg.register_component<Size>();
+    reg.register_component<Position>();
     reg.register_component<Sprite>();
     reg.add_component(background, std::move(bgPos));
     reg.add_component(background, std::move(bgSize));
     reg.add_component(background, std::move(bgsprite));
-    // reg.emplace_component<Position>(entity, 1, 2);
-    reg.add_system<Position, Speed, Direction>(&move);
     reg.add_system<Position, Size, Sprite>(&display);
-    reg.run_systems();
+    while (!WindowShouldClose()) {
+        reg.run_systems();
+    }
+    
 }

@@ -38,8 +38,22 @@
         SpawnGrace(float x, float y): timer(x), creation_time(y) {};
     };
     struct Sprite {
-        Texutre2D sprite;
-        Sprite(std::string path): sprite(LoadTextureFromImage(LoadImage(path))) {};
+        Texture2D sprite;
+
+        Sprite(char *path, int w, int h) {
+            Image sprit = LoadImage(path);
+            ImageResize(&sprit, w, h);
+            sprite = LoadTextureFromImage(sprit);
+            };
+
+        Sprite(const char *path, int w, int h) {
+            Image sprit = LoadImage(path);
+            ImageResize(&sprit, w, h);
+            sprite = LoadTextureFromImage(sprit);
+            };
+
+        Sprite(const char *path): sprite(LoadTextureFromImage(LoadImage(path))) {};
+        Sprite(char *path): sprite(LoadTextureFromImage(LoadImage(path))) {};
     };
     struct Animation {
         // Rectangle rect; //contains size as well
