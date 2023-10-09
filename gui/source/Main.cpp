@@ -2,7 +2,6 @@
 #include <iostream>
 #include <utility>
 #include <semaphore>
-#include <format>
 #include "Registry.hpp"
 #include "Component.hpp"
 #include "Systems.hpp"
@@ -49,7 +48,6 @@ int main()
     Position bgPos(0, 0);
     Size bgSize(ScreenWidth, ScreenHeight);
     std::string bgpath = "./gui/ressources/Backgrounds/Back.png";
-    std::cout << "PATH : " << std::filesystem::current_path() << std::endl;
     Sprite bgsprite(bgpath.c_str(), ScreenWidth, ScreenHeight);
 
     reg.register_component<Size>();
