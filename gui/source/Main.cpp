@@ -22,7 +22,7 @@ int main()
     const int ScreenWidth = 1280;
     const int ScreenHeight = 720;
     InitWindow(ScreenWidth, ScreenHeight, "R-Type");
-    SetTargetFPS(60);
+    SetTargetFPS(144);
 
     Registry reg;
 
@@ -36,7 +36,7 @@ int main()
     Position nePos(0, 0);
     Size neSize(30, 30);
     std::string nepath = "./gui/ressources/Backgrounds/Star.png";
-    Speed speedo(0.3);
+    Speed speedo(150);
     Direction diro(50, 0);
     SpawnGrace gra(5);
     Sprite nesprite(nepath.c_str(), 30, 30);
@@ -61,8 +61,8 @@ int main()
     reg.add_component(new_entity, std::move(gra));
 
 
-    reg.add_system<Position, Speed, Direction>(&move);
     reg.add_system<Position, Size, SpawnGrace>(&colision);
+    reg.add_system<Position, Speed, Direction>(&move);
     reg.add_system<Position, Size, Sprite>(&display);
     while (!WindowShouldClose()) {
         reg.run_systems();

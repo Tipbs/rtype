@@ -20,8 +20,8 @@ sparse_array<Direction> &dir)
         double magnitude = std::sqrt((dir[ind].value().dir_X * dir[ind].value().dir_X) + (dir[ind].value().dir_Y * dir[ind].value().dir_Y));
         std::cout << "magnitude " << magnitude << std::endl;
         if (magnitude > 0.1) { //Added a magnitude threshold to avoid going straight to INT_MIN and INT_MAX when having a really low direction move
-            positions[ind].value().pos_X += (speed[ind].value().speed * (dir[ind].value().dir_X / magnitude));
-            positions[ind].value().pos_Y += (speed[ind].value().speed * (dir[ind].value().dir_Y / magnitude));
+            positions[ind].value().pos_X += (speed[ind].value().speed * (dir[ind].value().dir_X / magnitude)) * GetFrameTime();
+            positions[ind].value().pos_Y += (speed[ind].value().speed * (dir[ind].value().dir_Y / magnitude)) * GetFrameTime();
         }
         std::cout << "AFTER : pos : " << positions[ind].value().pos_X << ", " << positions[ind].value().pos_Y << "\nspeed : " << speed[ind].value().speed << "\ndir : " << dir[ind].value().dir_X << ", " << dir[ind].value().dir_Y << std::endl << std::endl;
     }
