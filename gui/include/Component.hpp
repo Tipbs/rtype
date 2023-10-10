@@ -5,10 +5,16 @@
 #ifndef COMPONENT_HPP
     #define COMPONENT_HPP
 
+    struct Player {
+        int id = 0;
+        Player(): id(0) {};
+        Player(int x): id(x) {};
+    };
+
     struct Position {
-        int pos_X = 0;
-        int pos_Y = 0;
-        Position(int x, int y): pos_X(x), pos_Y(y) {};
+        double pos_X = 0;
+        double pos_Y = 0;
+        Position(double x, double y): pos_X(x), pos_Y(y) {};
     };
     struct Damages {
         int damages = 0;
@@ -24,18 +30,21 @@
         Health(int x): health(x) {};
     };
     struct Speed {
-        float speed = 0.0f;
-        Speed(float x): speed(x) {};
+        double speed = 0;
+        Speed(double x): speed(x) {};
     };
     struct Direction {
-        float dir_X = 0.0f;
-        float dir_Y = 0.0f;
-        Direction(float x, float y): dir_X(x), dir_Y(y) {};
+        double dir_X = 0;
+        double dir_Y = 0;
+        Direction(double x, double y): dir_X(x), dir_Y(y) {};
     };
     struct SpawnGrace {
-        float timer = 0;
-        float creation_time = 0;
-        SpawnGrace(float x, float y): timer(x), creation_time(y) {};
+        double timer = 0;
+        double creation_time = 0;
+        SpawnGrace(double x, double y): timer(x), creation_time(y) {};
+        SpawnGrace(double timer): timer(timer) {
+            creation_time = GetTime();
+        };
     };
     struct Sprite {
         Texture2D sprite;
@@ -71,7 +80,7 @@
     struct Weapon {
         int type;
         Size size;
-        float attack_speed;
+        double attack_speed;
         Animation sprite;
         Ammo ammo;
     };
