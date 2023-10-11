@@ -15,6 +15,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ..)
 find_package(Boost 1.82.0 COMPONENTS system filesystem regex asio REQUIRED)
 find_package(raylib REQUIRED)
 
-# include(./server/CMakeLists.txt)
+include(./server/CMakeLists.txt)
 include(./gui/CMakeLists.txt)
 include(CPack)
