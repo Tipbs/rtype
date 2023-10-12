@@ -20,6 +20,8 @@ add_executable(server
   ${SHARED_SRC_DIR}
 )
 
+target_compile_definitions(server PRIVATE SERVER=1)
+
 target_link_libraries(server
 	#${Boost_FILESYSTEM_LIBRARY}
 	#${Boost_SYSTEM_LIBRARY}

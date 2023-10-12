@@ -11,7 +11,6 @@
 #include <semaphore>
 #include <thread>
 #include "../../shared/UserCmd.hpp"
-#define SERVER
 
 namespace boost {
 #ifdef BOOST_NO_EXCEPTIONS
