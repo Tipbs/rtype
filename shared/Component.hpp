@@ -1,6 +1,19 @@
-#include <raylib.h>
 #include <string>
 #include <utility>
+
+#ifdef SERVER
+	float GetFrameTime()
+	{
+		return 1.0;
+	}
+
+    void ResetFrameTime()
+	{
+
+	}
+#else
+	#include <raylib.h>
+#endif // !SERVER
 
 #ifndef COMPONENT_HPP
     #define COMPONENT_HPP
@@ -46,42 +59,19 @@
             creation_time = GetTime();
         };
     };
-    struct Sprite {
-        Texture2D sprite;
-
-        Sprite(char *path, int w, int h) {
-            Image sprit = LoadImage(path);
-            ImageResize(&sprit, w, h);
-            sprite = LoadTextureFromImage(sprit);
-            };
-
-        Sprite(const char *path, int w, int h) {
-            Image sprit = LoadImage(path);
-            ImageResize(&sprit, w, h);
-            sprite = LoadTextureFromImage(sprit);
-            };
-
-        Sprite(const char *path): sprite(LoadTextureFromImage(LoadImage(path))) {};
-        Sprite(char *path): sprite(LoadTextureFromImage(LoadImage(path))) {};
-    };
-    struct Animation {
-        // Rectangle rect; //contains size as well
-        Sprite sprite;
-        Position* frames; // contains a list of position for each frames of an animated picture.
-    };
-    struct Ammo {
-        Animation sprite;
-        Speed speed;
-        Damages damages;
-        Size size;
-        Health health;
-        Direction dir;
-    };
-    struct Weapon {
-        int type;
-        Size size;
-        double attack_speed;
-        Animation sprite;
-        Ammo ammo;
-    };
+    //struct Ammo {
+    //    Animation sprite;
+    //    Speed speed;
+    //    Damages damages;
+    //    Size size;
+    //    Health health;
+    //    Direction dir;
+    //};
+    //struct Weapon {
+    //    int type;
+    //    Size size;
+    //    double attack_speed;
+    //    Animation sprite;
+    //    Ammo ammo;
+    //};
 #endif

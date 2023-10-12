@@ -17,6 +17,7 @@ aux_source_directory(./server/include/ SERVER_INCLUDE_DIR)
 add_executable(server
   ${SERVER_INCLUDE_DIR}
   ${SERVER_SRC_DIR}
+  ${SHARED_SRC_DIR}
 )
 
 target_link_libraries(server

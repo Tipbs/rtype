@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <ostream>
-#include "../include/Systems.hpp"
+#include "Systems.hpp"
 
 void move(Registry &r, 
 sparse_array<Position> &positions, 
@@ -11,9 +11,9 @@ sparse_array<Speed> &speed,
 sparse_array<Direction> &dir)
 {
     for (size_t ind = 0; ind < positions.size(); ind++) {
-        auto & pos = positions[ind];
-        auto & spe = speed[ind];
-        auto & diro = dir[ind];
+        auto &pos = positions[ind];
+        auto &spe = speed[ind];
+        auto &diro = dir[ind];
         if (!(pos && spe && diro))
             continue;
         std::cout << "BEFORE : pos : " << positions[ind].value().pos_X << ", " << positions[ind].value().pos_Y << "\nspeed : " << speed[ind].value().speed << "\ndir : " << dir[ind].value().dir_X << ", " << dir[ind].value().dir_Y << std::endl << std::endl;
@@ -25,24 +25,6 @@ sparse_array<Direction> &dir)
         }
         std::cout << "AFTER : pos : " << positions[ind].value().pos_X << ", " << positions[ind].value().pos_Y << "\nspeed : " << speed[ind].value().speed << "\ndir : " << dir[ind].value().dir_X << ", " << dir[ind].value().dir_Y << std::endl << std::endl;
     }
-}
-
-void display(Registry &r,
-sparse_array<Position> &positions, 
-sparse_array<Size> &size, 
-sparse_array<Sprite> &sprite)
-{
-    
-    BeginDrawing();
-    for (size_t ind = 0; ind < sprite.size(); ind++) {
-        auto & pos = positions[ind];
-        auto & siz = size[ind];
-        auto & spri = sprite[ind];
-        if (!(pos && siz && spri))
-            continue;
-        DrawTexture(sprite[ind].value().sprite, positions[ind].value().pos_X, positions[ind].value().pos_Y, WHITE);
-    }
-    EndDrawing();
 }
 
 void colision(Registry &r,

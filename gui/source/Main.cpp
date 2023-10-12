@@ -3,8 +3,8 @@
 #include <utility>
 #include <semaphore>
 #include "../include/Registry.hpp"
-#include "Component.hpp"
-#include "Systems.hpp"
+#include "GraphicComponents.hpp"
+#include "GraphicSystems.hpp"
 #include "Sparse_array.hpp"
 #include "Zipper.hpp"
 #include "raylib.h"
@@ -31,7 +31,6 @@ int main()
     Size bgSize(ScreenWidth, ScreenHeight);
     std::string bgpath = "./gui/ressources/Backgrounds/Back.png";
     Sprite bgsprite(bgpath.c_str(), ScreenWidth, ScreenHeight);
-
     Entity const new_entity = reg.spawn_entity();
     Position nePos(0, 0);
     Size neSize(30, 30);
@@ -52,7 +51,6 @@ int main()
     reg.add_component(background, std::move(bgSize));
     reg.add_component(background, std::move(bgsprite));
 
-
     reg.add_component(new_entity, std::move(nePos));
     reg.add_component(new_entity, std::move(neSize));
     reg.add_component(new_entity, std::move(nesprite));
@@ -62,10 +60,9 @@ int main()
 
 
     reg.add_system<Position, Size, SpawnGrace>(&colision);
-    reg.add_system<Position, Speed, Direction>(&move);
-    reg.add_system<Position, Size, Sprite>(&display);
+    reg.add_system<Position, Speed, Direction>(move);
+    reg.add_system<Position, Size, Sprite>(display);
     while (!WindowShouldClose()) {
         reg.run_systems();
     }
-    
 }

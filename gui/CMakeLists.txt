@@ -17,7 +17,8 @@ aux_source_directory(./gui/include/ GUI_INCLUDE_DIR)
 add_executable(gui
   ${GUI_INCLUDE_DIR}
   ${GUI_SRC_DIR}
-)
+  ${SHARED_SRC_DIR}
+ )
 
 target_link_libraries(gui
 	#${Boost_SYSTEM_LIBRARY}
