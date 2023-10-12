@@ -5,6 +5,29 @@
 #include <ostream>
 #include "Systems.hpp"
 
+#ifdef SERVER
+    #include <chrono>
+
+	static auto time_since_last_tick = std::chrono::high_resolution_clock::now(); // voir si raylib utilise même chose
+	float GetFrameTime()
+	{
+		const auto now = std::chrono::high_resolution_clock::now();
+		return std::chrono::duration<double>(time_since_last_tick - now).count();
+	}
+
+    double GetTime()
+    {
+        return 1.0;
+    }
+
+    void ResetFrameTime()
+	{
+		time_since_last_tick = std::chrono::high_resolution_clock::now();
+	}
+#else
+	#include <raylib.h>
+#endif // !SERVER
+
 void move(Registry &r, 
 sparse_array<Position> &positions, 
 sparse_array<Speed> &speed, 

@@ -11,6 +11,7 @@
 #include <thread>
 #include <semaphore>
 #include "Server.hpp"
+#include "../../shared/Systems.hpp"
 
 using boost::asio::ip::udp;
 std::binary_semaphore MainToThread{0};

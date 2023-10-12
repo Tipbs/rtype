@@ -1,3 +1,5 @@
+#pragma once
+
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/io_context.hpp>
