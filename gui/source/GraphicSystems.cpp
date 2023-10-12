@@ -17,6 +17,7 @@ sparse_array<Player> &anim)
         if (!(pos && siz && spri))
             continue;
         if (anim[ind]) {
+            sprite[ind]->sprite.y = anim[ind]->id * sprite[ind]->height_padding;
             if (anim[ind]->count >= 1.85) {
                 sprite[ind]->sprite.x = 4 * sprite[ind]->width_padding;
             } else if (anim[ind]->count <= 0.15) {
@@ -61,7 +62,11 @@ sparse_array<Sprite> &sprite)
         Moves.y += 1;
         heigh = (heigh <= 0) ? 0 : heigh - (5 * AnimationPad);
     }
-    
+
+    if (IsKeyPressed(KEY_C)) {
+        anim[1]->id = anim[1]->id == 4 ? 0 : anim[1]->id + 1;
+    }
+
 
     if (dir[1]) { //1 is the entity num representing the player seen here
         dir[1].value().dir_X = Moves.x;
@@ -71,4 +76,18 @@ sparse_array<Sprite> &sprite)
     if (anim[1]) {
         anim[1]->count = heigh;
     }
+}
+
+void handle_shoot_inputs(Registry &r, 
+sparse_array<Player> &anim)
+{
+    if (IsKeyDown(KEY_SPACE)) {
+        anim[1]->IsShooting = true;
+    }
+    if (IsKeyReleased(KEY_SPACE)) {
+        anim[1]->IsShooting = false;
+    }
+
+    if (anim[1]->IsShooting)
+        std::cout << "Player id " << anim[1]->id << " just shoot\n";
 }

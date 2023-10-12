@@ -6,6 +6,7 @@
 #include "../include/GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
 #include "raylib.h"
+#include "../../shared/Bundle.hpp"
 
 void logging_system(
     Registry &r, sparse_array<Position> const &positions)
@@ -30,16 +31,6 @@ int main()
     std::string bgpath = "./gui/ressources/Backgrounds/Back.png";
     Sprite bgsprite(bgpath.c_str(), ScreenWidth, ScreenHeight);
 
-    Entity const new_entity = reg.spawn_entity();
-    Player player(0);
-    Position nePos(0, 0);
-    Size neSize(83, 43);
-    std::string nepath = "./gui/ressources/Sprites/r-typesheet42.gif";
-    Speed speedo(300);
-    Direction diro(50, 0);
-    SpawnGrace gra(5);
-    Sprite nesprite(nepath.c_str(), 83, 43, 5, 5);
-
     reg.register_component<Size>();
     reg.register_component<Position>();
     reg.register_component<Sprite>();
@@ -52,19 +43,13 @@ int main()
     reg.add_component(background, std::move(bgSize));
     reg.add_component(background, std::move(bgsprite));
 
-    reg.add_component(new_entity, std::move(nePos));
-    reg.add_component(new_entity, std::move(neSize));
-    reg.add_component(new_entity, std::move(nesprite));
-    reg.add_component(new_entity, std::move(speedo));
-    reg.add_component(new_entity, std::move(diro));
-    reg.add_component(new_entity, std::move(gra));
-    reg.add_component(new_entity, std::move(player));
-
+    create_player(reg, 0);
 
     reg.add_system<Position, Size, SpawnGrace>(colision);
     reg.add_system<Position, Speed, Direction>(move);
     reg.add_system<Position, Size, Sprite, Player>(display);
     reg.add_system<Direction, Player, Sprite>(handle_dir_inputs);
+    reg.add_system<Player>(handle_shoot_inputs);
     while (!WindowShouldClose()) {
         reg.run_systems();
     }
