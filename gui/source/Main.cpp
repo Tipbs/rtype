@@ -2,8 +2,6 @@
 #include <iostream>
 #include <utility>
 #include <semaphore>
-#include "../include/Registry.hpp"
-#include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
 #include "Sparse_array.hpp"
 #include "Zipper.hpp"
@@ -58,8 +56,7 @@ int main()
     reg.add_component(new_entity, std::move(diro));
     reg.add_component(new_entity, std::move(gra));
 
-
-    reg.add_system<Position, Size, SpawnGrace>(&colision);
+    reg.add_system<Position, Size, SpawnGrace>(colision);
     reg.add_system<Position, Speed, Direction>(move);
     reg.add_system<Position, Size, Sprite>(display);
     while (!WindowShouldClose()) {

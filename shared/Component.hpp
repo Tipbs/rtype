@@ -7,6 +7,11 @@
 		return 1.0;
 	}
 
+    float GetTime()
+    {
+        return 1.0;
+    }
+
     void ResetFrameTime()
 	{
 

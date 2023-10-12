@@ -1,5 +1,5 @@
 #include "GraphicComponents.hpp"
-#include "Registry.hpp"
+#include "../../shared/Registry.hpp"
 
 void display(Registry &r,
 sparse_array<Position> &positions, 
