@@ -59,6 +59,7 @@
             creation_time = GetTime();
         };
     };
+    
     //struct Ammo {
     //    Animation sprite;
     //    Speed speed;
