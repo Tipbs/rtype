@@ -23,7 +23,7 @@
 	#include <raylib.h>
 #endif // !SERVER
 
-std::chrono::steady_clock::time_point GetTime()
+std::chrono::steady_clock::time_point GetTimePoint()
 {
 	return std::chrono::high_resolution_clock::now();
 }
@@ -55,20 +55,20 @@ sparse_array<Position> &positions,
 sparse_array<Size> &size, 
 sparse_array<SpawnGrace> &grace)
 {
-    std::chrono::steady_clock::time_point time = GetTime();
+    std::chrono::steady_clock::time_point time = GetTimePoint();
     for (size_t ind = 0; ind < positions.size(); ind++) {
         auto &pos = positions[ind];
         auto &siz = size[ind];
         if (!(pos && siz))
             continue;
         std::cout << "temps d'origine : "
-            << grace[ind].value().creation_time.time_since_epoch()
+            << grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time.time_since_epoch()
                   << std::endl;
         std::cout << "temps de grace : "
-                  << grace[ind].value().timer
+            << grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).timer
                   << std::endl;
         std::cout << "temps actuel : " << time.time_since_epoch() << std::endl;
-        if (grace[ind].value().creation_time + grace[ind].value().timer >=
+        if (grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time + grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).timer >=
             time)
             continue;
         for (size_t ind2 = ind + 1; ind2 < positions.size(); ind2++) {

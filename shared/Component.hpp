@@ -10,7 +10,7 @@
 #else
 	#include <raylib.h>
 #endif // !SERVER
-std::chrono::steady_clock::time_point GetTime();
+std::chrono::steady_clock::time_point GetTimePoint();
 
 struct Player {
 	int id = 0;
@@ -56,6 +56,6 @@ struct SpawnGrace {
 	std::chrono::steady_clock::time_point creation_time;
 	SpawnGrace(std::chrono::duration<float> x, std::chrono::steady_clock::time_point y): timer(x), creation_time(y) {};
 	SpawnGrace(std::chrono::duration<float> timer): timer(timer) {
-		creation_time = GetTime();
+		creation_time = GetTimePoint();
 	};
 };

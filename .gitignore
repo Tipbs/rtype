@@ -43,3 +43,4 @@ compile_commands.json
 /.vs
 CMakePresets.json
 CMakeUserPresets.json
+/Debug
