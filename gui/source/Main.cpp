@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <iostream>
+#include <iterator>
 #include <utility>
 #include <semaphore>
 #include "../include/Registry.hpp"
@@ -61,8 +62,10 @@ int main()
     reg.add_component(new_entity, std::move(gra));
 
 
-    reg.add_system<Position, Size, SpawnGrace>(&colision);
+    reg.add_system<Position>(&logging_system);
+    // reg.add_system<Position, Size, SpawnGrace>(&colision);
     reg.add_system<Position, Speed, Direction>(&move);
+    reg.add_system<Direction>(&handle_inputs);
     reg.add_system<Position, Size, Sprite>(&display);
     while (!WindowShouldClose()) {
         reg.run_systems();

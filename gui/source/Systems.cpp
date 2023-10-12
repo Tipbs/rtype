@@ -56,12 +56,17 @@ sparse_array<SpawnGrace> &grace)
         auto & siz = size[ind];
         if (!(pos && siz))
             continue;
+        std::cout << "\npos : " << positions[ind].value().pos_X << ", " << positions[ind].value().pos_Y << std::endl << std::endl;
         std::cout << "temps d'origine : " << grace[ind].value_or(SpawnGrace(0, 0)).creation_time << std::endl;
         std::cout << "temps de grace : " << grace[ind].value_or(SpawnGrace(0, 0)).timer << std::endl;
         std::cout << "temps actuel : " << time << std::endl;
         if (grace[ind].value_or(SpawnGrace(0, 0)).creation_time + grace[ind].value_or(SpawnGrace(0, 0)).timer >= time)
-                continue;
+            continue;
         for (size_t ind2 = ind + 1; ind2 < positions.size(); ind2++) {
+            auto & poso = positions[ind2];
+            auto & sizo = size[ind2];
+            if (!(poso && sizo))
+                continue;
             if (grace[ind2].value_or(SpawnGrace(0, 0)).creation_time + grace[ind2].value_or(SpawnGrace(0, 0)).timer >= time)
                 continue;
             if (positions[ind].value().pos_X > positions[ind2].value().pos_X + size[ind2].value().size_X)
@@ -75,5 +80,21 @@ sparse_array<SpawnGrace> &grace)
             else
                 std::cout << "y'a collision\n";
         }
+    }
+}
+
+void handle_inputs(Registry &r, 
+sparse_array<Direction> &dir)
+{
+    Vector2 Moves = {0, 0};
+
+    if (IsKeyDown(KEY_RIGHT)) Moves.x += 1;
+    if (IsKeyDown(KEY_LEFT)) Moves.x -= 1;
+    if (IsKeyDown(KEY_UP)) Moves.y -= 1;
+    if (IsKeyDown(KEY_DOWN)) Moves.y += 1;
+
+    if (dir[1]) {
+        dir[1].value().dir_X = Moves.x;
+        dir[1].value().dir_Y = Moves.y;
     }
 }

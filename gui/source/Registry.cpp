@@ -18,6 +18,7 @@ void Registry::kill_entity(Entity const &e)
 
 void Registry::run_systems()
 {
-    for (auto &system : _systems)
+    for (auto &system : _systems) {
         system(std::ref(*this));
+        }
 }
