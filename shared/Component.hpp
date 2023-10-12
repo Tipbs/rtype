@@ -13,8 +13,11 @@
 
 struct Player {
 	int id = 0;
-	Player(): id(0) {};
-	Player(int x): id(x) {};
+    double count = 1;
+	Player(double x): count(x) {};
+	Player(int x): id(x) {count = 1;};
+	Player(double x, int i): id(i), count(x) {};
+	Player(int i, double x): id(i), count(x) {};
 };
 
     struct Position {

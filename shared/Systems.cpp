@@ -8,7 +8,7 @@
 #ifdef SERVER
     #include <chrono>
 
-	static auto time_since_last_tick = std::chrono::high_resolution_clock::now(); // voir si raylib utilise même chose
+	static auto time_since_last_tick = std::chrono::high_resolution_clock::now(); // voir si raylib utilise mï¿½me chose
 	float GetFrameTime()
 	{
 		const auto now = std::chrono::high_resolution_clock::now();
@@ -39,14 +39,11 @@ sparse_array<Direction> &dir)
         auto &diro = dir[ind];
         if (!(pos && spe && diro))
             continue;
-        std::cout << "BEFORE : pos : " << positions[ind].value().pos_X << ", " << positions[ind].value().pos_Y << "\nspeed : " << speed[ind].value().speed << "\ndir : " << dir[ind].value().dir_X << ", " << dir[ind].value().dir_Y << std::endl << std::endl;
         double magnitude = std::sqrt((dir[ind].value().dir_X * dir[ind].value().dir_X) + (dir[ind].value().dir_Y * dir[ind].value().dir_Y));
-        std::cout << "magnitude " << magnitude << std::endl;
         if (magnitude > 0.1) { //Added a magnitude threshold to avoid going straight to INT_MIN and INT_MAX when having a really low direction move
             positions[ind].value().pos_X += (speed[ind].value().speed * (dir[ind].value().dir_X / magnitude)) * GetFrameTime();
             positions[ind].value().pos_Y += (speed[ind].value().speed * (dir[ind].value().dir_Y / magnitude)) * GetFrameTime();
         }
-        std::cout << "AFTER : pos : " << positions[ind].value().pos_X << ", " << positions[ind].value().pos_Y << "\nspeed : " << speed[ind].value().speed << "\ndir : " << dir[ind].value().dir_X << ", " << dir[ind].value().dir_Y << std::endl << std::endl;
     }
 }
 
@@ -61,9 +58,6 @@ sparse_array<SpawnGrace> &grace)
         auto & siz = size[ind];
         if (!(pos && siz))
             continue;
-        std::cout << "temps d'origine : " << grace[ind].value_or(SpawnGrace(0, 0)).creation_time << std::endl;
-        std::cout << "temps de grace : " << grace[ind].value_or(SpawnGrace(0, 0)).timer << std::endl;
-        std::cout << "temps actuel : " << time << std::endl;
         if (grace[ind].value_or(SpawnGrace(0, 0)).creation_time + grace[ind].value_or(SpawnGrace(0, 0)).timer >= time)
                 continue;
         for (size_t ind2 = ind + 1; ind2 < positions.size(); ind2++) {

@@ -81,8 +81,3 @@ struct Animation {
 	Sprite sprite;
 	Position* frames; // contains a list of position for each frames of an animated picture.
 };
-
-struct MoveAnimCounter {
-	double count = 1;
-	MoveAnimCounter(double x): count(x) {};
-};

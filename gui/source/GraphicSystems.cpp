@@ -7,7 +7,7 @@ void display(Registry &r,
 sparse_array<Position> &positions, 
 sparse_array<Size> &size, 
 sparse_array<Sprite> &sprite,
-sparse_array<MoveAnimCounter> &anim)
+sparse_array<Player> &anim)
 {
     BeginDrawing();
     for (size_t ind = 0; ind < sprite.size(); ind++) {
@@ -39,7 +39,7 @@ sparse_array<MoveAnimCounter> &anim)
 
 void handle_dir_inputs(Registry &r, 
 sparse_array<Direction> &dir,
-sparse_array<MoveAnimCounter> &anim, 
+sparse_array<Player> &anim, 
 sparse_array<Sprite> &sprite)
 {
     const double AnimationPad = 0.02;
@@ -61,13 +61,12 @@ sparse_array<Sprite> &sprite)
         Moves.y += 1;
         heigh = (heigh <= 0) ? 0 : heigh - (5 * AnimationPad);
     }
+    
 
     if (dir[1]) { //1 is the entity num representing the player seen here
         dir[1].value().dir_X = Moves.x;
         dir[1].value().dir_Y = Moves.y;
     }
-
-
 
     if (anim[1]) {
         anim[1]->count = heigh;
