@@ -3,8 +3,6 @@
 #include <utility>
 #include <semaphore>
 #include "GraphicSystems.hpp"
-#include "Sparse_array.hpp"
-#include "Zipper.hpp"
 #include "raylib.h"
 
 void logging_system(
