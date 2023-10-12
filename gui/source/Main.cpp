@@ -2,7 +2,7 @@
 #include <iostream>
 #include <utility>
 #include <semaphore>
-#include "../include/Registry.hpp"
+#include "../../shared/Registry.hpp"
 #include "../include/GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
 #include "raylib.h"

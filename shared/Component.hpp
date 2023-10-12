@@ -68,4 +68,3 @@ struct Player {
     //    Animation sprite;
     //    Ammo ammo;
     //};
-#endif

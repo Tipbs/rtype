@@ -1,7 +1,7 @@
 #include <raylib.h>
 #include "GraphicComponents.hpp"
 #include "../../shared/Registry.hpp"
-#include "Sparse_array.hpp"
+#include "../../shared/Sparse_array.hpp"
 
 void display(Registry &r,
 sparse_array<Position> &positions, 
