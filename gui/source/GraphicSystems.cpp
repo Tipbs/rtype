@@ -1,6 +1,6 @@
 #include <raylib.h>
 #include "GraphicComponents.hpp"
-#include "Registry.hpp"
+#include "../../shared/Registry.hpp"
 #include "Sparse_array.hpp"
 
 void display(Registry &r,

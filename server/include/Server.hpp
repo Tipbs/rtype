@@ -1,3 +1,5 @@
+#pragma once
+
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/io_context.hpp>
@@ -11,7 +13,6 @@
 #include <semaphore>
 #include <thread>
 #include "../../shared/UserCmd.hpp"
-#define SERVER
 
 namespace boost {
 #ifdef BOOST_NO_EXCEPTIONS

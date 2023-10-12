@@ -1,28 +1,21 @@
+#pragma once
+
 #include <string>
 #include <utility>
 
 #ifdef SERVER
-	float GetFrameTime()
-	{
-		return 1.0;
-	}
-
-    void ResetFrameTime()
-	{
-
-	}
+	float GetFrameTime();
+	double GetTime();
+	void ResetFrameTime();
 #else
 	#include <raylib.h>
 #endif // !SERVER
 
-#ifndef COMPONENT_HPP
-    #define COMPONENT_HPP
-
-    struct Player {
-        int id = 0;
-        Player(): id(0) {};
-        Player(int x): id(x) {};
-    };
+struct Player {
+	int id = 0;
+	Player(): id(0) {};
+	Player(int x): id(x) {};
+};
 
     struct Position {
         double pos_X = 0;
