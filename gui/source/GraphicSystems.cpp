@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include "GraphicComponents.hpp"
+#include "GraphicSystems.hpp"
 #include "../../shared/Registry.hpp"
 #include "../../shared/Sparse_array.hpp"
 
@@ -51,14 +52,15 @@ sparse_array<Sprite> &sprite)
 
     if (IsKeyDown(KEY_RIGHT)) Moves.x += 1;
     if (IsKeyDown(KEY_LEFT)) Moves.x -= 1;
+
     if (IsKeyDown(KEY_DOWN) == IsKeyDown(KEY_UP)) {
         heigh = (heigh < 1) ? heigh + AnimationPad : (heigh == 1) ? 1 : heigh - AnimationPad;
     }
-    if (IsKeyDown(KEY_UP)) {
+    else if (IsKeyDown(KEY_UP)) {
         Moves.y -= 1;
         heigh = (heigh >= 2) ? 2 : heigh + (5 * AnimationPad);
     }
-    if (IsKeyDown(KEY_DOWN)) {
+    else if (IsKeyDown(KEY_DOWN)) {
         Moves.y += 1;
         heigh = (heigh <= 0) ? 0 : heigh - (5 * AnimationPad);
     }
@@ -79,7 +81,8 @@ sparse_array<Sprite> &sprite)
 }
 
 void handle_shoot_inputs(Registry &r, 
-sparse_array<Player> &anim)
+sparse_array<Player> &anim,
+sparse_array<Position> &pos)
 {
     if (IsKeyDown(KEY_SPACE)) {
         anim[1]->IsShooting = true;
@@ -88,6 +91,10 @@ sparse_array<Player> &anim)
         anim[1]->IsShooting = false;
     }
 
-    if (anim[1]->IsShooting)
-        std::cout << "Player id " << anim[1]->id << " just shoot\n";
+    if (anim[1]->IsShooting) {
+        std::cout << "Player id " << anim[1]->id << " just shoot with a " << anim[1]->weapon.type << " typed weapon, with an attack speed of " << anim[1]->weapon.attack_speed << std::endl;
+
+        create_ammo(r, Position(pos[1]->pos_X, pos[1]->pos_Y), anim[1]->weapon);
+    }
+        
 }

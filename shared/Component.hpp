@@ -11,17 +11,6 @@
 	#include <raylib.h>
 #endif // !SERVER
 
-struct Player {
-	int id = 0;
-    double count = 1;
-    bool IsShooting = false;
-
-	Player(double x): count(x) {IsShooting = false;};
-	Player(int x): id(x) {count = 1;IsShooting = false;};
-	Player(double x, int i): id(i), count(x) {IsShooting = false;};
-	Player(int i, double x): id(i), count(x) {IsShooting = false;};
-};
-
     struct Position {
         double pos_X = 0;
         double pos_Y = 0;
@@ -57,19 +46,3 @@ struct Player {
             creation_time = GetTime();
         };
     };
-    
-    //struct Ammo {
-    //    Animation sprite;
-    //    Speed speed;
-    //    Damages damages;
-    //    Size size;
-    //    Health health;
-    //    Direction dir;
-    //};
-    //struct Weapon {
-    //    int type;
-    //    Size size;
-    //    double attack_speed;
-    //    Animation sprite;
-    //    Ammo ammo;
-    //};
