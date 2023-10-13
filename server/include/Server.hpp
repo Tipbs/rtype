@@ -13,6 +13,9 @@
 #include <semaphore>
 #include <thread>
 #include "../../shared/UserCmd.hpp"
+#include "../../shared/NetEnt.hpp"
+#include "../../shared/Systems.hpp"
+#include "../../shared/Registry.hpp"
 
 namespace boost {
 #ifdef BOOST_NO_EXCEPTIONS
@@ -32,6 +35,11 @@ struct Message {
     int type;
 };
 
+struct Clients {
+    std::size_t _id;
+    boost::posix_time::ptime _timer;
+};
+
 
 class udp_server {
     public:
@@ -46,12 +54,14 @@ class udp_server {
 
         void broadcast();
         void handle_broadcast(const boost::system::error_code &, std::size_t);
-        void multiple_broadcast(std::map<boost::asio::ip::udp::endpoint, boost::posix_time::ptime>, std::map<std::size_t ,std::vector<UserCmd>>);
-        void deserialize(const std::size_t);
+        void multiple_broadcast(std::map<boost::asio::ip::udp::endpoint, struct Clients>, std::vector<NetEnt>);
+        void deserialize(const std::size_t, bool);
 
         void start_check();
         void start_receive();
+        void run_system();
     private:
+        Registry reg;
 
         std::size_t _port;
 
@@ -62,7 +72,7 @@ class udp_server {
         boost::asio::ip::udp::endpoint _remote_point;
         boost::array<char, 512> _recv_buffer;
 
-        std::map<boost::asio::ip::udp::endpoint, boost::posix_time::ptime> clients;
+        std::map<boost::asio::ip::udp::endpoint, struct Clients> clients;
         std::map<std::size_t, std::vector<UserCmd>> cmd;
 
         std::thread tick;
