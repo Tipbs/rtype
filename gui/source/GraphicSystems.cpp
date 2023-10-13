@@ -2,6 +2,7 @@
 #include "GraphicComponents.hpp"
 #include "../../shared/Registry.hpp"
 #include "../../shared/Sparse_array.hpp"
+#include "GraphicSystems.hpp"
 
 void display(Registry &r,
 sparse_array<Position> &positions, 
@@ -67,9 +68,28 @@ sparse_array<Sprite> &sprite)
         dir[1].value().dir_Y = Moves.y;
     }
 
-
-
     if (anim[1]) {
         anim[1]->count = heigh;
     }
+}
+
+void updateWithSnapshots(Registry &r, sparse_array<Position> &positions, sparse_array<Player> players)
+{
+    auto &net_ents = r.netEnts.ents;
+
+    r.netEnts.mutex.lock();
+    for (auto i = 0; i < positions.size(); ++i) {
+        auto &pos = positions[i];
+        auto const &player = players[i];
+        if (pos && player) {
+            auto finded = std::find_if(net_ents.begin(), net_ents.end(), [&] (NetEnt &ent) {
+                return ent.id == player.value().id;
+			});
+            if (finded == net_ents.end())
+                continue;
+            pos.value().pos_X = finded->pos.x;
+            pos.value().pos_Y = finded->pos.y;
+        } // pour le moment il n'y a pas l'ajout de nouvelles entités
+    }
+    r.netEnts.mutex.unlock();
 }

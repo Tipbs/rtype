@@ -3,8 +3,9 @@
 #include <utility>
 #include <semaphore>
 #include "../../shared/Registry.hpp"
-#include "../include/GraphicComponents.hpp"
+#include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
+#include "Client.hpp"
 #include "raylib.h"
 
 void logging_system(
@@ -19,10 +20,13 @@ int main()
 {
     const int ScreenWidth = 1280;
     const int ScreenHeight = 720;
+    boost::asio::io_context context;
+    Registry reg;
+    udp_client net_client(context, "127.0.0.1", "5000", reg);
+    context.run();
     InitWindow(ScreenWidth, ScreenHeight, "R-Type");
     SetTargetFPS(144);
 
-    Registry reg;
 
     Entity const background = reg.spawn_entity();
     Position bgPos(0, 0);
@@ -47,6 +51,7 @@ int main()
     reg.register_component<Direction>();
     reg.register_component<SpawnGrace>();
     reg.register_component<MoveAnimCounter>();
+    reg.register_component<Player>();
 
     reg.add_component(background, std::move(bgPos));
     reg.add_component(background, std::move(bgSize));
@@ -65,6 +70,7 @@ int main()
     reg.add_system<Position, Speed, Direction>(move);
     reg.add_system<Position, Size, Sprite, MoveAnimCounter>(display);
     reg.add_system<Direction, MoveAnimCounter, Sprite>(handle_dir_inputs);
+    reg.add_system<Position, Player>(updateWithSnapshots);
     while (!WindowShouldClose()) {
         reg.run_systems();
     }
