@@ -65,7 +65,6 @@ int main()
     reg.add_component(new_entity, std::move(gra));
     reg.add_component(new_entity, std::move(play0count));
 
-
     reg.add_system<Position, Size, SpawnGrace>(colision);
     reg.add_system<Position, Speed, Direction>(move);
     reg.add_system<Position, Size, Sprite, MoveAnimCounter>(display);

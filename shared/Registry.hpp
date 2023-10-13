@@ -7,6 +7,9 @@
 #include "Sparse_array.hpp"
 #include "Entity.hpp"
 #include "NetEnt.hpp"
+#ifndef SERVER
+	#include "UserCmd.hpp"
+#endif
 
 class Registry {
 	template<typename Component>
@@ -38,6 +41,7 @@ public:
 	void run_systems();
 	#ifndef SERVER
 		ThreadNetEnt netEnts;
+        ThreadUserCmd currentCmd;
 	#endif
 
 private:
