@@ -28,8 +28,10 @@ int main()
     Entity const background = reg.spawn_entity();
     Position bgPos(0, 0);
     Size bgSize(ScreenWidth, ScreenHeight);
-    std::string bgpath = "./gui/ressources/Backgrounds/Back.png";
-    Sprite bgsprite(bgpath.c_str(), ScreenWidth, ScreenHeight);
+    std::string bgpath = "./gui/ressources/Backgrounds/Back1bis.png"; // 2 > 3 > 1
+    Speed bgspe(200);
+    Direction bgdir(-4, -1);
+    Sprite bgsprite(bgpath.c_str(), 2 * ScreenWidth, 2 * ScreenHeight);
 
     reg.register_component<Size>();
     reg.register_component<Position>();
@@ -42,6 +44,8 @@ int main()
     reg.add_component(background, std::move(bgPos));
     reg.add_component(background, std::move(bgSize));
     reg.add_component(background, std::move(bgsprite));
+    reg.add_component(background, std::move(bgspe));
+    reg.add_component(background, std::move(bgdir));
 
     create_player(reg, 0);
 
@@ -50,6 +54,7 @@ int main()
     reg.add_system<Position, Size, Sprite, Player>(display);
     reg.add_system<Direction, Player, Sprite>(handle_dir_inputs);
     reg.add_system<Player, Position, Size>(handle_shoot_inputs);
+    reg.add_system<Position, Size>(make_infinite_background);
     while (!WindowShouldClose()) {
         reg.run_systems();
     }

@@ -97,7 +97,24 @@ sparse_array<Size> &siz)
     if (anim[1]->IsShooting) {
         std::cout << "Player id " << anim[1]->id << " just shoot with a " << anim[1]->weapon.type << " typed weapon, with an attack speed of " << anim[1]->weapon.attack_speed << std::endl;
 
-        create_ammo(r, Position(pos[1]->pos_X + (siz[1]->size_X / 2.), pos[1]->pos_Y + (siz[1]->size_Y / 2.)), anim[1]->weapon);
+        create_ammo(r, Position(pos[1]->pos_X + siz[1]->size_X, pos[1]->pos_Y + (siz[1]->size_Y / 2.) - 15), anim[1]->weapon);
     }
         
 }
+
+void make_infinite_background(Registry &r,
+sparse_array<Position> &pos,
+sparse_array<Size> &siz)
+{
+    if (pos[0] && siz[0]) {
+        if (pos[0]->pos_X < -siz[0]->size_X)
+            pos[0]->pos_X += siz[0]->size_X;
+        if (pos[0]->pos_Y < -siz[0]->size_Y)
+            pos[0]->pos_Y += siz[0]->size_Y;
+
+        if (pos[0]->pos_X > 0)
+            pos[0]->pos_X -= siz[0]->size_X;
+        if (pos[0]->pos_Y > 0)
+            pos[0]->pos_Y -= siz[0]->size_Y;
+    }
+} 
