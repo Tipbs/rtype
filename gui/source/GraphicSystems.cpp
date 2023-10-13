@@ -66,6 +66,10 @@ sparse_array<Sprite> &sprite)
     if (dir[1]) { //1 is the entity num representing the player seen here
         dir[1].value().dir_X = Moves.x;
         dir[1].value().dir_Y = Moves.y;
+        r.currentCmd.mutex.lock();
+			r.currentCmd.cmd.moved.x += Moves.x;
+			r.currentCmd.cmd.moved.y += Moves.y;
+        r.currentCmd.mutex.unlock();
     }
 
     if (anim[1]) {
@@ -73,7 +77,7 @@ sparse_array<Sprite> &sprite)
     }
 }
 
-void updateWithSnapshots(Registry &r, sparse_array<Position> &positions, sparse_array<Player> players)
+void updateWithSnapshots(Registry &r, sparse_array<Position> &positions, sparse_array<Player> &players)
 {
     auto &net_ents = r.netEnts.ents;
 

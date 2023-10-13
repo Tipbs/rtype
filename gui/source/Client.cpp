@@ -41,7 +41,11 @@ void udp_client::send()
 {
     std::ostringstream oss;
     boost::archive::binary_oarchive archive(oss);
-    archive << cmd;
+    _reg.currentCmd.mutex.lock();
+		auto copyCmd = _reg.currentCmd.cmd;
+		_reg.currentCmd.cmd.reset();
+    _reg.currentCmd.mutex.unlock();
+    archive << copyCmd;
     std::string serializedData = oss.str();
     std::cout << "Sending " << serializedData.size() << "bytes from " << serializedData.data() << std::endl;
     _socket.async_send_to(boost::asio::buffer(serializedData.c_str(), serializedData.size()), _remote_point,

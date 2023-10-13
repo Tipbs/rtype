@@ -7,4 +7,4 @@ void display(Registry &r, sparse_array<Position> &positions, sparse_array<Size> 
 void handle_dir_inputs(Registry &r, sparse_array<Direction> &dir, sparse_array<MoveAnimCounter> &anim, sparse_array<Sprite> &sprite);
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
-    sparse_array<Player> players);
+    sparse_array<Player> &players);
