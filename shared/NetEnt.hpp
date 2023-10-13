@@ -15,6 +15,8 @@ public:
     Utils::Vec2 pos;
     uint8_t states;
 
+    NetEnt &operator=(const NetEnt &) = default;
+
     template<class Archive>
     void serialize(Archive &ar, const unsigned int version) {
         ar &id;

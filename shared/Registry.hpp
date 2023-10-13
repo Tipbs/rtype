@@ -6,6 +6,7 @@
 #include <functional>
 #include "Sparse_array.hpp"
 #include "Entity.hpp"
+#include "NetEnt.hpp"
 
 class Registry {
 	template<typename Component>
@@ -35,6 +36,9 @@ public:
 	template <class ...Components, typename Function>
 	void add_system(Function const& f); // taking it by reference .
 	void run_systems();
+	#ifndef SERVER
+		ThreadNetEnt netEnts;
+	#endif
 
 private:
 	std::unordered_map<std::type_index, std::any> _components_arrays;

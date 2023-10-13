@@ -9,7 +9,22 @@
 #include <boost/asio/ip/udp.hpp>
 #include <boost/bind.hpp>
 #include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
 #include "Client.hpp"
+#include "../../shared/NetEnt.hpp"
+
+namespace boost {
+#ifdef BOOST_NO_EXCEPTIONS
+void throw_exception(std::exception const &e)
+{
+    throw e; // or whatever
+};
+void throw_exception(std::exception const &e, boost::source_location const &)
+{
+    throw e; // or whatever
+};
+#endif
+} // namespace boost
 
 using boost::asio::ip::udp;
 std::binary_semaphore MainToThread{0};
@@ -39,6 +54,14 @@ void udp_client::handle_receive(const boost::system::error_code &error, std::siz
 {
     if (!error) {
         std::cout << "Received " << bytes_transferred << " bytes" << std::endl;
+		std::string seralizedData(_recv_buffer.data(), bytes_transferred);
+		std::istringstream iss(seralizedData);
+		boost::archive::binary_iarchive archive(iss);
+		std::vector<NetEnt> tmp;
+		archive >> tmp;
+		_reg.netEnts.mutex.lock();
+		_reg.netEnts.ents.insert(_reg.netEnts.ents.begin(), tmp.begin(), tmp.end());
+		_reg.netEnts.mutex.unlock();
         start_receive();
     }
 }
@@ -70,7 +93,8 @@ void udp_client::send_user()
     }
 }
 
-udp_client::udp_client(boost::asio::io_context &_svc,const std::string &ip, const std::string &port) : _socket(_svc, udp::v4()), timer(_svc)
+udp_client::udp_client(boost::asio::io_context &_svc,const std::string &ip, const std::string &port, Registry &reg)
+    : _socket(_svc, udp::v4()), timer(_svc), _reg(reg)
 {
     udp::resolver resolver(_svc);
     udp::resolver::query query(udp::v4(), ip, port);
