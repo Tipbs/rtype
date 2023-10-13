@@ -1,27 +1,26 @@
-#include <cstddef>
+#pragma once
+#if defined(_WIN32)
+#define NOGDI  // All GDI defines and routines
+#define NOUSER // All USER defines and routines
+#endif
+
 #include <thread>
+#if defined(_WIN32) // raylib uses these names as function parameters
+#undef near
+#undef far
+#endif
+// mandatory since raylib and windows.h are incompatible, thread include windows.h
+
+#include <cstddef>
 #include <boost/asio.hpp>
-#include <boost/array.hpp>
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/io_context.hpp>
 #include "../../shared/UserCmd.hpp"
-
-namespace boost {
-#ifdef BOOST_NO_EXCEPTIONS
-void throw_exception(std::exception const &e)
-{
-    throw e; // or whatever
-};
-void throw_exception(std::exception const &e, boost::source_location const &)
-{
-    throw e; // or whatever
-};
-#endif
-} // namespace boost
+#include "../../shared/Registry.hpp"
 
 class udp_client {
     public:
-        udp_client(boost::asio::io_context &, const std::string &ip, const std::string &port);
+        udp_client(boost::asio::io_context &, const std::string &ip, const std::string &port, Registry &reg);
         ~udp_client();
 
         void send();
@@ -31,7 +30,8 @@ class udp_client {
         void handle_tick();
         void send_user();
     private:
-        boost::array<char, 512> _recv_buffer;
+        Registry &_reg;
+        std::vector<char> _recv_buffer = std::vector<char>(512);
         boost::asio::ip::udp::socket _socket;
         boost::asio::ip::udp::endpoint _remote_point;
         boost::asio::io_context _svc;
