@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/serialization/serialization.hpp>
+
 namespace Utils {
     struct Vec2 {
         double x, y;
@@ -11,4 +13,4 @@ namespace Utils {
             ar &y;
         };
     };
-}
+};

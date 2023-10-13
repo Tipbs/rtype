@@ -7,6 +7,10 @@
 #include "Sparse_array.hpp"
 #include "Entity.hpp"
 #include "NetEnt.hpp"
+#ifdef SERVER
+    #include <map>
+    #include "UserCmd.hpp"
+#endif // !SERVER
 
 class Registry {
 	template<typename Component>
@@ -39,6 +43,10 @@ public:
 	#ifndef SERVER
 		ThreadNetEnt netEnts;
 	#endif
+    #ifdef SERVER
+        std::map<std::size_t, std::vector<UserCmd>> user_cmds;
+        std::vector<NetEnt> _netent;
+    #endif // !SERVER
 
 private:
 	std::unordered_map<std::type_index, std::any> _components_arrays;
