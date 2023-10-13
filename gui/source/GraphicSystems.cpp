@@ -77,11 +77,45 @@ sparse_array<Sprite> &sprite)
     }
 }
 
+// temporary bundle
+void create_player(Registry &reg, int id, Position &pos)
+{
+    Entity const new_entity = reg.spawn_entity();
+    Player player(id);
+    Size Size(83, 43);
+    std::string path = "./gui/ressources/Sprites/r-typesheet42.gif";
+    Speed speedo(300);
+    Direction diro(0, 0);
+    SpawnGrace gra(std::chrono::seconds(1));
+    Sprite sprite(path.c_str(), 83, 43, 5, 5);
+
+    reg.add_component(new_entity, std::move(pos));
+    reg.add_component(new_entity, std::move(Size));
+    reg.add_component(new_entity, std::move(sprite));
+    reg.add_component(new_entity, std::move(speedo));
+    reg.add_component(new_entity, std::move(diro));
+    reg.add_component(new_entity, std::move(gra));
+    reg.add_component(new_entity, std::move(player));
+}
+
 void updateWithSnapshots(Registry &r, sparse_array<Position> &positions, sparse_array<Player> &players)
 {
     auto &net_ents = r.netEnts.ents;
 
     r.netEnts.mutex.lock();
+    for (auto it = net_ents.begin(); it != net_ents.end(); ++it) {
+        auto net = *it;
+        auto finded = std::find_if(players.begin(), players.end(), [&](std::optional<Player> &player) {
+			if (player) return player.value().id == net.id;
+        });
+        if (finded != players.end()) {
+            continue;
+        }
+        auto pos = Position(net.pos.x, net.pos.y);
+        create_player(r, net.id, pos);
+        // create entity with info from net ent
+        net_ents.erase(it);
+    }
     for (auto i = 0; i < positions.size(); ++i) {
         auto &pos = positions[i];
         auto const &player = players[i];

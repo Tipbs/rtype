@@ -11,7 +11,7 @@
 void logging_system(
     Registry &r, sparse_array<Position> const &positions)
 {
-    for (auto pos : positions)
+    for (auto &pos : positions)
         std::cout << "Position = { " << pos->pos_X << ", " << pos->pos_Y << " }"
                   << std::endl;
 }
