@@ -25,7 +25,7 @@
 
 std::chrono::steady_clock::time_point GetTimePoint()
 {
-	return std::chrono::high_resolution_clock::now();
+	return std::chrono::steady_clock::now();
 }
 
 void move(Registry &r, 
