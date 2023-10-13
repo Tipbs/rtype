@@ -8,16 +8,12 @@
 #include "GraphicComponents.hpp"
 
 struct Ammo {
-    Sprite sprite = Sprite("./gui/ressources/Sprites/r-typesheet42.gif");
+    Sprite sprite = Sprite("./gui/ressources/Sprites/shoot_charge.png");
     Speed speed = Speed(300);
     Damages damages = Damages(1);
     Size size = Size(1,1);
     Health health = Health(1);
     Direction dir = Direction(1,0);
-
-    Ammo (int x) {
-        dir = Direction(1, x);
-    }
 };
 
 struct Weapon {
@@ -25,7 +21,6 @@ struct Weapon {
     Size size = Size(1,1);
     double attack_speed = 1.;
     Sprite sprite = Sprite("./gui/ressources/Sprites/r-typesheet42.gif");
-    Ammo ammo = Ammo(1);
 
     Weapon(int type, int ammo_per_sec){
         type = type;

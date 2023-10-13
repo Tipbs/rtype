@@ -17,6 +17,9 @@ sparse_array<Player> &anim)
         auto &spri = sprite[ind];
         if (!(pos && siz && spri))
             continue;
+        if (sprite[ind]->width_max == 9 && sprite[ind]->height_max == 1) {
+            sprite[ind]->sprite.x = (sprite[ind]->sprite.x / sprite[ind]->width_padding == sprite[ind]->width_max ? 0 : (sprite[ind]->sprite.x + sprite[ind]->width_padding));
+        }
         if (anim[ind]) {
             sprite[ind]->sprite.y = anim[ind]->id * sprite[ind]->height_padding;
             if (anim[ind]->count >= 1.85) {
@@ -30,7 +33,6 @@ sparse_array<Player> &anim)
             } else {
                 sprite[ind]->sprite.x = 2 * sprite[ind]->width_padding;
             }
-            
         }
 
         Vector2 Rectpos = {(float)(positions[ind].value().pos_X), (float)positions[ind].value().pos_Y};
@@ -82,7 +84,8 @@ sparse_array<Sprite> &sprite)
 
 void handle_shoot_inputs(Registry &r, 
 sparse_array<Player> &anim,
-sparse_array<Position> &pos)
+sparse_array<Position> &pos,
+sparse_array<Size> &siz)
 {
     if (IsKeyDown(KEY_SPACE)) {
         anim[1]->IsShooting = true;
@@ -94,7 +97,7 @@ sparse_array<Position> &pos)
     if (anim[1]->IsShooting) {
         std::cout << "Player id " << anim[1]->id << " just shoot with a " << anim[1]->weapon.type << " typed weapon, with an attack speed of " << anim[1]->weapon.attack_speed << std::endl;
 
-        create_ammo(r, Position(pos[1]->pos_X, pos[1]->pos_Y), anim[1]->weapon);
+        create_ammo(r, Position(pos[1]->pos_X + (siz[1]->size_X / 2.), pos[1]->pos_Y + (siz[1]->size_Y / 2.)), anim[1]->weapon);
     }
         
 }

@@ -49,7 +49,7 @@ int main()
     reg.add_system<Position, Speed, Direction>(move);
     reg.add_system<Position, Size, Sprite, Player>(display);
     reg.add_system<Direction, Player, Sprite>(handle_dir_inputs);
-    reg.add_system<Player, Position>(handle_shoot_inputs);
+    reg.add_system<Player, Position, Size>(handle_shoot_inputs);
     while (!WindowShouldClose()) {
         reg.run_systems();
     }

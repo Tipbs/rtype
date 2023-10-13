@@ -8,6 +8,8 @@ struct Sprite {
 	Rectangle sprite;
 	double height_padding;
 	double width_padding;
+	double height_max;
+	double width_max;
 
 	Sprite(char *path, int width, int height, double width_multiplier, double height_multiplier) {
 		Image sprit = LoadImage(path);
@@ -15,6 +17,8 @@ struct Sprite {
 		spritesheet = LoadTextureFromImage(sprit);
 		width_padding = spritesheet.width / width_multiplier;
 		height_padding = spritesheet.height / height_multiplier;
+		width_max = width_multiplier;
+		height_max = height_multiplier;
 		sprite.height = (spritesheet.height) / height_multiplier;
 		sprite.width = (spritesheet.width) / width_multiplier;
 		sprite.x = 0;
@@ -27,6 +31,8 @@ struct Sprite {
 		spritesheet = LoadTextureFromImage(sprit);
 		width_padding = spritesheet.width / width_multiplier;
 		height_padding = spritesheet.height / height_multiplier;
+		width_max = width_multiplier;
+		height_max = height_multiplier;
 		sprite.height = (spritesheet.height) / height_multiplier;
 		sprite.width = (spritesheet.width) / width_multiplier;
 		sprite.x = 0;
@@ -40,6 +46,8 @@ struct Sprite {
 		spritesheet = LoadTextureFromImage(sprit);
 		width_padding = spritesheet.width;
 		height_padding = spritesheet.height;
+		width_max = width;
+		height_max = height;
 		sprite.height = (spritesheet.height);
 		sprite.width = (spritesheet.width);
 		sprite.x = 0;
@@ -52,6 +60,8 @@ struct Sprite {
 		spritesheet = LoadTextureFromImage(sprit);
 		width_padding = spritesheet.width;
 		height_padding = spritesheet.height;
+		width_max = width;
+		height_max = height;
 		sprite.height = (spritesheet.height);
 		sprite.width = (spritesheet.width);
 		sprite.x = 0;
@@ -61,6 +71,8 @@ struct Sprite {
 	Sprite(const char *path): spritesheet(LoadTextureFromImage(LoadImage(path))) {
 		width_padding = spritesheet.width;
 		height_padding = spritesheet.height;
+		width_max = spritesheet.width;
+		height_max = spritesheet.height;
 		sprite.height = (spritesheet.height);
 		sprite.width = (spritesheet.width);
 		sprite.x = 0;
@@ -69,6 +81,8 @@ struct Sprite {
 	Sprite(char *path): spritesheet(LoadTextureFromImage(LoadImage(path))) {
 		width_padding = spritesheet.width;
 		height_padding = spritesheet.height;
+		width_max = spritesheet.width;
+		height_max = spritesheet.height;
 		sprite.height = (spritesheet.height);
 		sprite.width = (spritesheet.width);
 		sprite.x = 0;
