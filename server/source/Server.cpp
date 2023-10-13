@@ -19,13 +19,6 @@ using boost::asio::ip::udp;
 std::binary_semaphore MainToThread{0};
 std::binary_semaphore ThreadToMain{0};
 
-void udp_server::handle_send(const boost::system::error_code &error, std::size_t bytes_transferred) //Callback to the send function 
-{
-    if (!error) {
-        start_receive();
-    }
-}
-
 void udp_server::handle_broadcast(const boost::system::error_code &error, std::size_t bytes_transferred) //Callback to broadcast
 {
     if (!error) {
@@ -76,7 +69,7 @@ void udp_server::run_system()
     reg.run_systems();
 }
 
-void udp_server::broadcast() // Broadcast a message to all connected clients that already sent a message 
+void udp_server::start_snapshot() // Broadcast a message to all connected clients that already sent a message 
 {
     while (1) {
         MainToThread.acquire();
@@ -186,7 +179,7 @@ udp_server::udp_server(std::size_t port) : _svc(), _socket(_svc, udp::endpoint(u
 
     _port = port;
     tick = std::thread(&udp_server::handle_tick, this); //Timer thread
-    broadcasting = std::thread(&udp_server::broadcast, this); // Snapshot thread
+    broadcasting = std::thread(&udp_server::start_snapshot, this); // Snapshot thread
     tick.detach();
     broadcasting.detach();
 
@@ -202,10 +195,20 @@ udp_server::~udp_server()
     broadcasting.std::thread::~thread();
 }
 
+int helper()
+{
+    std::cout << "USAGE\n";
+    std::cout << "\t./server <port>\n";
+    std::cout << " port\tport number of the server\n";
+    return 0;
+}
+
 int main(int ac, char **av)
 {
     try {
         std::size_t port = 5000;
+        if (ac == 2 && (std::string(av[1]) == "-h" || std::string(av[1]) == "--help"))
+            return helper();
         if (ac == 2 && std::stoi(av[1]))
             port = std::stoi(av[1]);
         udp_server server(port);

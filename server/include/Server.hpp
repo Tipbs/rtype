@@ -48,11 +48,10 @@ class udp_server {
 
         void handle_receive(const boost::system::error_code &, std::size_t);
         void handle_response();
-        void handle_send(const boost::system::error_code &, std::size_t);
         void handle_tick();
         void handle_check(const boost::system::error_code &error);
 
-        void broadcast();
+        void start_snapshot();
         void handle_broadcast(const boost::system::error_code &, std::size_t);
         void multiple_broadcast(std::map<boost::asio::ip::udp::endpoint, struct Clients>, std::vector<NetEnt>);
         void deserialize(const std::size_t, bool);
