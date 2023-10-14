@@ -39,14 +39,14 @@ sparse_array<Direction> &dir)
         auto &diro = dir[ind];
         if (!(pos && spe && diro))
             continue;
-        std::cout << "BEFORE : pos : " << positions[ind].value().pos_X << ", " << positions[ind].value().pos_Y << "\nspeed : " << speed[ind].value().speed << "\ndir : " << dir[ind].value().dir_X << ", " << dir[ind].value().dir_Y << std::endl << std::endl;
+        //std::cout << "BEFORE : pos : " << positions[ind].value().pos_X << ", " << positions[ind].value().pos_Y << "\nspeed : " << speed[ind].value().speed << "\ndir : " << dir[ind].value().dir_X << ", " << dir[ind].value().dir_Y << std::endl << std::endl;
         double magnitude = std::sqrt((dir[ind].value().dir_X * dir[ind].value().dir_X) + (dir[ind].value().dir_Y * dir[ind].value().dir_Y));
-        std::cout << "magnitude " << magnitude << std::endl;
+        //std::cout << "magnitude " << magnitude << std::endl;
         if (magnitude > 0.1) { //Added a magnitude threshold to avoid going straight to INT_MIN and INT_MAX when having a really low direction move
             positions[ind].value().pos_X += (speed[ind].value().speed * (dir[ind].value().dir_X / magnitude)) * GetFrameTime();
             positions[ind].value().pos_Y += (speed[ind].value().speed * (dir[ind].value().dir_Y / magnitude)) * GetFrameTime();
         }
-        std::cout << "AFTER : pos : " << positions[ind].value().pos_X << ", " << positions[ind].value().pos_Y << "\nspeed : " << speed[ind].value().speed << "\ndir : " << dir[ind].value().dir_X << ", " << dir[ind].value().dir_Y << std::endl << std::endl;
+        //std::cout << "AFTER : pos : " << positions[ind].value().pos_X << ", " << positions[ind].value().pos_Y << "\nspeed : " << speed[ind].value().speed << "\ndir : " << dir[ind].value().dir_X << ", " << dir[ind].value().dir_Y << std::endl << std::endl;
     }
 }
 
@@ -61,13 +61,13 @@ sparse_array<SpawnGrace> &grace)
         auto &siz = size[ind];
         if (!(pos && siz))
             continue;
-        std::cout << "temps d'origine : "
-            << grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time.time_since_epoch()
-                  << std::endl;
-        std::cout << "temps de grace : "
-            << grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).timer
-                  << std::endl;
-        std::cout << "temps actuel : " << time.time_since_epoch() << std::endl;
+        //std::cout << "temps d'origine : "
+        //    << grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time.time_since_epoch()
+        //          << std::endl;
+        //std::cout << "temps de grace : "
+        //    << grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).timer
+        //          << std::endl;
+        //std::cout << "temps actuel : " << time.time_since_epoch() << std::endl;
         if (grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time + grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).timer >=
             time)
             continue;

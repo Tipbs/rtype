@@ -56,6 +56,7 @@ void udp_server::multiple_broadcast(std::map<udp::endpoint, struct Clients> tmp,
     archive << netent;
     std::string serializedData = oss.str();
     for (const auto& client_endpoint : tmp) {
+        std::cout << "j'ai bien envoyé ^^ ;) salut\n";
         _socket.async_send_to(boost::asio::buffer(serializedData.c_str(), serializedData.size()), client_endpoint.first,
             boost::bind(&udp_server::handle_broadcast, this,
             boost::asio::placeholders::error,
@@ -83,12 +84,14 @@ void udp_server::start_snapshot() // Broadcast a message to all connected client
     }
 }
 
-void udp_server::handle_tick() //tick every seconds
+void udp_server::handle_tick() // tick every seconds
 {
-    MainToThread.release();
-    ThreadToMain.acquire();
-    tick_timer.expires_from_now(boost::posix_time::millisec(50));
-    tick_timer.async_wait(boost::bind(&udp_server::handle_tick, this));
+    while (true) {
+        MainToThread.release();
+		ThreadToMain.acquire();
+		tick_timer.expires_from_now(boost::posix_time::millisec(50));
+		tick_timer.wait();
+	}
 }
 
 void udp_server::deserialize(const std::size_t bytes_transferred, bool isClientNew)
@@ -100,6 +103,7 @@ void udp_server::deserialize(const std::size_t bytes_transferred, bool isClientN
         reg.add_component(player, std::move(nePlayer));
         reg.add_component(player, std::move(nePos));
         clients[_remote_point]._id = (size_t)player;
+        std::cout << "salut je suis nouveau ici ^^";
     }
     try {
         std::string seralizedData(_recv_buffer.data(), bytes_transferred);
@@ -107,6 +111,7 @@ void udp_server::deserialize(const std::size_t bytes_transferred, bool isClientN
         boost::archive::binary_iarchive archive(iss);
         UserCmd tmp;
         archive >> tmp;
+        std::cout << "je suis le cmd moved x: " << tmp.moved.x << std::endl;
         cmd_mutex.lock();
         cmd[clients[_remote_point]._id].push_back(tmp);
         cmd_mutex.unlock();

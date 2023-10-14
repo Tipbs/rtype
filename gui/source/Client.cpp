@@ -41,13 +41,15 @@ void udp_client::send()
 {
     std::ostringstream oss;
     boost::archive::binary_oarchive archive(oss);
+    //std::cout << "coucou je suis hardstuck\n";
     _reg.currentCmd.mutex.lock();
 		auto copyCmd = _reg.currentCmd.cmd;
 		_reg.currentCmd.cmd.reset();
     _reg.currentCmd.mutex.unlock();
+    //std::cout << "eeqsdqsd\n";
     archive << copyCmd;
     std::string serializedData = oss.str();
-    std::cout << "Sending " << serializedData.size() << "bytes from " << serializedData.data() << std::endl;
+    //std::cout << "Sending " << serializedData.size() << "bytes from " << serializedData.data() << std::endl;
     _socket.async_send_to(boost::asio::buffer(serializedData.c_str(), serializedData.size()), _remote_point,
         boost::bind(&udp_client::handle_send, this,
         boost::asio::placeholders::error,
@@ -56,6 +58,7 @@ void udp_client::send()
 
 void udp_client::handle_receive(const boost::system::error_code &error, std::size_t bytes_transferred)
 {
+    std::cout << "Received mais erreur\n";
     if (!error) {
         std::cout << "Received " << bytes_transferred << " bytes" << std::endl;
 		std::string seralizedData(_recv_buffer.data(), bytes_transferred);
@@ -63,11 +66,12 @@ void udp_client::handle_receive(const boost::system::error_code &error, std::siz
 		boost::archive::binary_iarchive archive(iss);
 		std::vector<NetEnt> tmp;
 		archive >> tmp;
+		std::cout << "x: " << tmp[0].pos.x << "\n";
 		_reg.netEnts.mutex.lock();
 		_reg.netEnts.ents.insert(_reg.netEnts.ents.begin(), tmp.begin(), tmp.end());
 		_reg.netEnts.mutex.unlock();
-        start_receive();
     }
+	start_receive();
 }
 
 void udp_client::start_receive()
@@ -80,10 +84,13 @@ void udp_client::start_receive()
 
 void udp_client::handle_tick()
 {
-    MainToThread.release();
-    ThreadToMain.acquire();
-    timer.expires_from_now(boost::posix_time::millisec(50));
-    timer.async_wait(boost::bind(&udp_client::handle_tick, this));
+    while (true) {
+		MainToThread.release();
+		ThreadToMain.acquire();
+		timer.expires_from_now(boost::posix_time::millisec(50));
+		timer.wait();
+		handle_tick();
+    }
 }
 
 void udp_client::send_user()
@@ -106,11 +113,12 @@ udp_client::udp_client(boost::asio::io_context &_svc,const std::string &ip, cons
     _remote_point = *iter;
     tick = std::thread(&udp_client::handle_tick, this); //Timer thread
     sending = std::thread(&udp_client::send_user, this); // Snapshot thread
+    receive = std::thread(&udp_client::start_receive, this);
     tick.detach();
     sending.detach();
+    receive.detach();
     cmd.reset();
-    send();
-    start_receive();
+    //start_receive();
 }
 
 udp_client::~udp_client()

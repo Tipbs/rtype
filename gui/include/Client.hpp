@@ -39,6 +39,7 @@ class udp_client {
 
         std::thread tick;
         std::thread sending;
+        std::thread receive;
         std::mutex cmd_mutex;
 
         UserCmd cmd;
