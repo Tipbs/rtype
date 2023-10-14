@@ -13,4 +13,13 @@ namespace Utils {
             ar &y;
         };
     };
+
+    struct PlayerId {
+        std::size_t id;
+
+        template<class Archive>
+        void serialize(Archive &ar, const unsigned int version) {
+            ar &id;
+        };
+    };
 };
