@@ -12,18 +12,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install low-level dependency xorg-dev
-        run: sudo apt-get install xorg-dev
+        run: sudo apt-get update && sudo apt-get install xorg-dev
+    
+      - name: Install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
 
       - name: Checkout the repository
         uses: actions/checkout@v3.5.3
+        
+      - name: Create default profile
+        run: conan profile new default --detect
+        
+      - name: Install dependencies
+        run: conan install . -s --build=missing --pofile=default --install-folder=${{github.workspace}}/build
 
       - name: Configure the project
         uses: threeal/cmake-action@v1.3.0
         with:
-          source-dir: gui
+          args: "--preset=conan-release"
 
       - name: Build the project
-        run: cmake --build ${{ env.GUI_PATH }}/build
+        run: cmake --build --preset conan-release
 
 
   code_format:
