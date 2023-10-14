@@ -121,7 +121,7 @@ void udp_server::handle_receive(const boost::system::error_code &error, std::siz
         std::cout << "Received " << bytes_transferred << "bytes" << std::endl;
         if (clients.count(_remote_point) > 0 || clients.size() <= 4) {
             bool isClientNew = false;
-            if (clients.count(_remote_point) > 0)
+            if (clients.count(_remote_point) == 0)
                 isClientNew = true;
             clients[_remote_point]._timer = boost::posix_time::microsec_clock::universal_time();
             deserialize(bytes_transferred, isClientNew);
