@@ -65,7 +65,7 @@ private:
 template<typename Component>
 inline void Registry::erase(const Entity &entity)
 {
-	std::any_cast<sparse_array<Component>>(_components_arrays[typeid(Component)])[(size_t)entity] = std::nullopt;
+	std::any_cast<sparse_array<Component> &>(_components_arrays[typeid(Component)])[(size_t)entity] = std::nullopt;
 }
 
 /**
