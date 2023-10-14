@@ -25,7 +25,7 @@ jobs:
         run: conan profile detect
         
       - name: Install dependencies
-        run: conan install . --build=missing --profile=default -c tools.system.package_manager:mode=install
+        run: sudo conan install . --build=missing --profile=default -c tools.system.package_manager:mode=install
 
       - name: Configure the project
         uses: threeal/cmake-action@v1.3.0
