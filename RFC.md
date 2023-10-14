@@ -1,13 +1,13 @@
 ---
 Title: UDP-Server-Client Communication Protocol for R-Type
 Created: <2023-10-14>
-Authors: ["@<github-TAILLAN-Lucas>"]
+Authors: ["@TAILLAN-Lucas"]
 Contributors:
-- "@<github-Nestyles>"
-- "@<github-Tipbs>"
-- "@<github-TAILLAN-Lucas>"
-- "@<github-Draze999>"
-- "@<github-MizuriGit>"
+- "@Nestyles"
+- "@Tipbs"
+- "@TAILLAN-Lucas"
+- "@Draze999"
+- "@MizuriGit"
 ---
 
 # Summary
