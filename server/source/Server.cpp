@@ -63,6 +63,8 @@ void udp_server::multiple_broadcast(std::map<udp::endpoint, struct Clients> tmp,
         archive << netent;
         std::string serializedData = oss.str();
         for (const auto& client_endpoint : tmp) {
+            if (client_endpoint.second.isClientConnected == false)
+                continue;
             _socket.async_send_to(boost::asio::buffer(serializedData.c_str(), serializedData.size()), client_endpoint.first,
                 boost::bind(&udp_server::handle_broadcast, this,
                 boost::asio::placeholders::error,
@@ -103,17 +105,8 @@ void udp_server::handle_tick() // tick every seconds
 	}
 }
 
-void udp_server::deserialize(const std::size_t bytes_transferred, bool isClientNew)
+void udp_server::deserialize(const std::size_t bytes_transferred)
 {
-    if (isClientNew) {
-        Entity player = reg.spawn_entity();
-        Player nePlayer((size_t)player);
-        Position nePos(0,0);
-        reg.add_component(player, std::move(nePlayer));
-        reg.add_component(player, std::move(nePos));
-        clients[_remote_point]._id = (size_t)player;
-        std::cout << "salut je suis nouveau ici ^^";
-    }
     try {
         std::string seralizedData(_recv_buffer.data(), bytes_transferred);
         std::istringstream iss(seralizedData);
@@ -129,16 +122,64 @@ void udp_server::deserialize(const std::size_t bytes_transferred, bool isClientN
     }
 }
 
+void udp_server::handle_send(const boost::system::error_code &error, std::size_t bytes_transferred)
+{
+    if (!error) {
+
+    }
+}
+
+void udp_server::send_playerId(std::size_t playerId, udp::endpoint client_endpoint)
+{
+    Utils::PlayerId player;
+    player.id = playerId;
+    std::ostringstream oss;
+    boost::archive::binary_oarchive archive(oss);
+    archive << player;
+    std::string serializedData = oss.str();
+    _socket.async_send_to(boost::asio::buffer(serializedData.c_str(), serializedData.size()), client_endpoint,
+        boost::bind(&udp_server::handle_send, this,
+        boost::asio::placeholders::error,
+        boost::asio::placeholders::bytes_transferred));
+}
+
+void udp_server::wait_for_connexion(std::size_t bytes_transferred)
+{
+    if (bytes_transferred == 1 && clients.count(_remote_point) == 0) {
+        Entity player = reg.spawn_entity();
+        Player nePlayer((size_t)player);
+        Position nePos(0,0);
+        reg.add_component(player, std::move(nePlayer));
+        reg.add_component(player, std::move(nePos));
+        clients[_remote_point]._id = (size_t)player;
+        clients[_remote_point].isClientConnected = false;
+        clients[_remote_point]._timer = boost::posix_time::microsec_clock::universal_time();
+        send_playerId(clients[_remote_point]._id, _remote_point); 
+    } else if (bytes_transferred == 1 && clients.count(_remote_point) != 0) {
+        send_playerId(clients[_remote_point]._id, _remote_point); 
+    } else {
+        clients[_remote_point].isClientConnected = true;
+        clients[_remote_point]._timer = boost::posix_time::microsec_clock::universal_time();
+        deserialize(bytes_transferred);
+    }
+}
+
 void udp_server::handle_receive(const boost::system::error_code &error, std::size_t bytes_transferred) // Callback to the receive function
 {
     if (!error || error == boost::asio::error::message_size) {
         std::cout << "Received " << bytes_transferred << "bytes" << std::endl;
+        if (clients.count(_remote_point) == 0) {
+            wait_for_connexion(bytes_transferred); 
+            start_receive();
+        }
         if (clients.count(_remote_point) > 0 || clients.size() <= 4) {
-            bool isClientNew = false;
-            if (clients.count(_remote_point) == 0)
-                isClientNew = true;
-            clients[_remote_point]._timer = boost::posix_time::microsec_clock::universal_time();
-            deserialize(bytes_transferred, isClientNew);
+            if (clients[_remote_point].isClientConnected == false) {
+                wait_for_connexion(bytes_transferred);
+                start_receive();
+            } else {
+                clients[_remote_point]._timer = boost::posix_time::microsec_clock::universal_time();
+                deserialize(bytes_transferred);
+            }
         }
         start_receive();
     }
@@ -168,7 +209,6 @@ void extract(Registry &reg, sparse_array<Position> &positions)
 {
     for (size_t ind = 0; ind < positions.size(); ind++) {
         auto &pos = positions[ind];
-        std::cout << "entity: " << ind << std::endl;
         if (!pos) {
             continue;
         }

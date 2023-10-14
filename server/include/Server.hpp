@@ -13,6 +13,7 @@
 #include <semaphore>
 #include <thread>
 #include "../../shared/UserCmd.hpp"
+#include "../../shared/Utils.hpp"
 #include "../../shared/NetEnt.hpp"
 #include "../../shared/Systems.hpp"
 #include "../../shared/Registry.hpp"
@@ -37,6 +38,7 @@ struct Message {
 
 struct Clients {
     std::size_t _id;
+    bool isClientConnected;
     boost::posix_time::ptime _timer;
 };
 
@@ -50,11 +52,14 @@ class udp_server {
         void handle_response();
         void handle_tick();
         void handle_check(const boost::system::error_code &error);
+        void handle_send(const boost::system::error_code &error, std::size_t);
 
         void start_snapshot();
+        void send_playerId(std::size_t playerId, boost::asio::ip::udp::endpoint);
+        void wait_for_connexion(std::size_t);
         void handle_broadcast(const boost::system::error_code &, std::size_t);
         void multiple_broadcast(std::map<boost::asio::ip::udp::endpoint, struct Clients>, std::vector<NetEnt>);
-        void deserialize(const std::size_t, bool);
+        void deserialize(const std::size_t);
 
         void start_check();
         void start_receive();
