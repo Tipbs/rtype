@@ -31,9 +31,10 @@ jobs:
         uses: threeal/cmake-action@v1.3.0
         with:
           args: "--preset=conan-release"
+          build-dir: build/Release
 
       - name: Build the project
-        run: cmake --build build --preset conan-release
+        run: cmake --build --preset conan-release
 
 
   code_format:
