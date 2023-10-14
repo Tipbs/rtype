@@ -12,25 +12,35 @@ class zipper_iterator {
 	template <class Container>
 	using it_reference_t = typename iterator_t<Container>::reference;
 public:
-	using value_type = std::tuple<typename Containers::value_type...>;
+	using value_type = std::tuple<typename Containers::value_type &...>;
 	using reference = value_type;
 	using pointer = void;
 	using difference_type = size_t;
 	//using iterator_category = /* proper iterator tag */;
 	using iterator_tuple = std::tuple<iterator_t<Containers>...>;
 	// If we want zipper_iterator to be built by zipper only .
-	//friend containers::zipper<Containers...>;
+	// friend containers::zipper<Containers...>;
 	zipper_iterator(iterator_tuple const& it_tuple, size_t max);
+	zipper_iterator(iterator_tuple const& it_tuple, size_t idx, size_t max);
 public:
 	zipper_iterator(zipper_iterator const& z) = default;
 	zipper_iterator operator++();
 	zipper_iterator& operator++(int);
 	value_type operator*();
 	value_type operator->();
-	// friend bool operator==(zipper_iterator const& lhs, zipper_iterator const
-	// 	&rhs);
-	// friend bool operator!=(zipper_iterator const& lhs, zipper_iterator const
-	// 	&rhs);
+
+    template <class ...T>
+	friend bool operator==(zipper_iterator const& lhs, zipper_iterator const
+		&rhs)
+    {
+        return (lhs._idx == rhs._idx);
+    }
+    template <class ...T>
+	friend bool operator!=(zipper_iterator const& lhs, zipper_iterator const
+		&rhs)
+    {
+        return (lhs._idx != rhs._idx);
+    }
 private:
 	// Increment every iterator at the same time. It also skips to the next
 	template <size_t ...Is>
@@ -45,79 +55,74 @@ private:
 	iterator_tuple _current;
 	size_t _max; // compare this value to _idx to prevent infinite loop .
 	size_t _idx;
-	static constexpr std::index_sequence_for<Containers...> _seq{};
+	std::index_sequence_for<Containers...> _seq{};
 };
 
-/**
-* @brief Erase one entity from one component.
-*
-* @tparam  Component   The component from the entity will be erase.
-* @param   entity      The entity to erase.
-*/
 template<class ...Containers>
 inline zipper_iterator<Containers...>::zipper_iterator(iterator_tuple const& it_tuple, size_t max)
 {
 	_current = it_tuple;
 	_max = max;
+    _idx = 0;
+    for (; all_set(_seq) && _idx < _max; _idx++);
+}
+
+template<class ...Containers>
+inline zipper_iterator<Containers...>::zipper_iterator(iterator_tuple const& it_tuple, size_t idx, size_t max)
+{
+	_current = it_tuple;
+	_max = max;
+    _idx = idx;
+    for (; all_set(_seq) && _idx < _max; _idx++);
 }
 
 template<class ...Containers>
 inline zipper_iterator<Containers...> zipper_iterator<Containers...>::operator++()
 {
+    auto it = *this;
     incr_all(_seq);
-    // return _current[_idx];
+    return it;
 }
 
 template<class ...Containers>
 inline zipper_iterator<Containers...>& zipper_iterator<Containers...>::operator++(int)
 {
     incr_all(_seq);
-    // return _current[_idx - 1];
+    return *this;
 }
 
 template<class ...Containers>
 inline zipper_iterator<Containers...>::value_type zipper_iterator<Containers...>::operator*()
 {
-	// return std::make_tuple<typename Containers::reference_type...>(_current[_idx]);
+	return to_value(_seq);
 }
 
 template<class ...Containers>
 inline zipper_iterator<Containers...>::value_type zipper_iterator<Containers...>::operator->()
 {
-	// return std::make_tuple<typename Containers::reference_type...>(*_current);
-}
-
-template<class ...Containers>
-bool operator==(zipper_iterator<Containers...> const& lhs, zipper_iterator<Containers...> const& rhs)
-{
-	return lhs._idx == rhs._idx;
-}
-
-template<class ...Containers>
-bool operator!=(zipper_iterator<Containers...> const& lhs, zipper_iterator<Containers...> const& rhs)
-{
-	return !(lhs == rhs);
+	return to_value(_seq);
 }
 
 template<class ...Containers>
 template <size_t ...Is>
 inline void zipper_iterator<Containers...>::incr_all(std::index_sequence<Is...>)
 {
-    for (; all_set(_seq); _idx++) {
-        _idx += 1;
-    }
+    if (_idx >= _max)
+        return;
+    _idx++;
+    for (; all_set(_seq) && _idx < _max; _idx++);
 }
 
 template<class ...Containers>
 template <size_t... Is>
 inline bool zipper_iterator<Containers...>::all_set(std::index_sequence<Is ...> seq)
 {
-    return (... && (*_current[Is] == std::nullopt));
+    return (... || (!std::get<Is>(_current)[_idx].has_value()));
 }
 
 template<class ...Containers>
 template<size_t ...Is>
 inline zipper_iterator<Containers...>::value_type zipper_iterator<Containers...>::to_value(std::index_sequence<Is...>)
 {
-	return value_type();
+    return std::tie(std::get<Is>(_current)[_idx]...);
 }
