@@ -15,8 +15,6 @@ include_directories(
 aux_source_directory(./gui/source/ GUI_SRC_DIR)
 aux_source_directory(./gui/include/ GUI_INCLUDE_DIR)
 
-find_package(Catch2 REQUIRED)
-
 add_executable(r-type_client
   ${GUI_INCLUDE_DIR}
   ${GUI_SRC_DIR}

@@ -6,7 +6,7 @@
 #include "Component.hpp"
 #include "Systems.hpp"
 #include "Sparse_array.hpp"
-#include "Zipper.hpp"
+#include "zipper.hpp"
 #include "raylib.h"
 
 void logging_system(
