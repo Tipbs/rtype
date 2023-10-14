@@ -33,7 +33,7 @@ jobs:
           args: "--preset=conan-release"
 
       - name: Build the project
-        run: cmake --build --preset conan-release
+        run: cmake --build build --preset conan-release
 
 
   code_format:
