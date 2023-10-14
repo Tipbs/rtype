@@ -11,6 +11,11 @@
 	#include <raylib.h>
 #endif // !SERVER
 
+    struct Current_Player {
+        size_t id;
+        Current_Player() {id = -1;};
+        Current_Player(size_t x) {id = x;};
+    };
     struct Position {
         double pos_X = 0;
         double pos_Y = 0;

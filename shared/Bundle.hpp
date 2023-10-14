@@ -31,17 +31,18 @@ struct Weapon {
 };
 
 struct Player {
-	int id = 0;
+	int color_id = -1;
+    int id = -1;
     double count = 1;
     bool IsShooting = false;
     Weapon weapon = Weapon(1, 5);
 
-	Player(double x): count(x) {IsShooting = false; weapon = Weapon(1, 5);};
-	Player(int x): id(x) {count = 1;IsShooting = false; weapon = Weapon(1, 5);};
-	Player(double x, int i): id(i), count(x) {IsShooting = false; weapon = Weapon(1, 5);};
-	Player(int i, double x): id(i), count(x) {IsShooting = false; weapon = Weapon(1, 5);};
+	Player(double x): count(x) {id = -1;IsShooting = false; weapon = Weapon(1, 5);};
+	Player(int color_i): color_id(color_i) {id = -1;count = 1;IsShooting = false; weapon = Weapon(1, 5);};
+	Player(double x, int color_i): color_id(color_i), count(x) {id = -1;IsShooting = false; weapon = Weapon(1, 5);};
+	Player(int color_i, double x): color_id(color_i), count(x) {id = -1;IsShooting = false; weapon = Weapon(1, 5);};
 };
 
 
-void create_player(Registry &reg, int id);
+size_t create_player(Registry &reg, bool i);
 void create_ammo(Registry &reg, Position pos, Weapon original_weapon);

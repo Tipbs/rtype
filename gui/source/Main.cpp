@@ -38,6 +38,7 @@ int main()
     reg.register_component<Direction>();
     reg.register_component<SpawnGrace>();
     reg.register_component<Player>();
+    reg.register_component<Current_Player>();
 
     reg.add_component(background, std::move(bgPos));
     reg.add_component(background, std::move(bgSize));
@@ -45,7 +46,16 @@ int main()
     reg.add_component(background, std::move(bgspe));
     reg.add_component(background, std::move(bgdir));
 
-    create_player(reg, 0);
+    create_player(reg, true);
+    create_player(reg, true);
+    create_player(reg, true);
+    create_player(reg, true);
+    create_player(reg, true);
+    create_player(reg, true);
+    create_player(reg, true);
+    create_player(reg, true);
+    create_player(reg, true);
+    create_player(reg, true);
 
     reg.add_system<Position, Size, SpawnGrace>(colision);
     reg.add_system<Position, Speed, Direction>(move);

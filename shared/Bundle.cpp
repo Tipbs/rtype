@@ -1,20 +1,23 @@
 #include "Bundle.hpp"
 #include <cmath>
+#include <cstddef>
 #include <cstdlib>
 #include "Component.hpp"
 #include "random"
 
-void create_player(Registry &reg, int id)
+size_t create_player(Registry &reg, bool is_curret_player)
 {
     Entity const new_entity = reg.spawn_entity();
-    Player player(id, 1.);
-    Position Pos(0, 0);
+    Player player((size_t)new_entity % 5, 1.);
+    Position Pos((1280./10) * ((size_t)new_entity - 1), 300);
     Size Size(83, 43);
     std::string path = "./gui/ressources/Sprites/r-typesheet42.gif";
     Speed speedo(300);
     Direction diro(0, 0);
     SpawnGrace gra(5);
     Sprite sprite(path.c_str(), 83, 43, 5, 5);
+    if (is_curret_player)
+        player.id = (size_t)new_entity;
 
     reg.add_component(new_entity, std::move(Pos));
     reg.add_component(new_entity, std::move(Size));
@@ -23,6 +26,7 @@ void create_player(Registry &reg, int id)
     reg.add_component(new_entity, std::move(diro));
     reg.add_component(new_entity, std::move(gra));
     reg.add_component(new_entity, std::move(player));
+    return (size_t)new_entity;
 }
 
 void create_ammo(Registry &reg, Position pos, Weapon original_weapon)
