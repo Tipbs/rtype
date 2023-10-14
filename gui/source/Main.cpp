@@ -1,6 +1,5 @@
 #include <cstdio>
 #include <iostream>
-#include <utility>
 #include <semaphore>
 #include "../../shared/Registry.hpp"
 #include "../include/GraphicComponents.hpp"
@@ -8,8 +7,7 @@
 #include "raylib.h"
 #include "../../shared/Bundle.hpp"
 
-void logging_system(
-    Registry &r, sparse_array<Position> const &positions)
+void logging_system(Registry &r, sparse_array<Position> const &positions)
 {
     for (auto pos : positions)
         std::cout << "Position = { " << pos->pos_X << ", " << pos->pos_Y << " }"

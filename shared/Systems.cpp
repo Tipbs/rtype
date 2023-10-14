@@ -4,6 +4,7 @@
 #include <iostream>
 #include <ostream>
 #include "Systems.hpp"
+#include "indexed_zipper.hpp"
 
 #ifdef SERVER
     #include <chrono>
@@ -33,16 +34,23 @@ sparse_array<Position> &positions,
 sparse_array<Speed> &speed, 
 sparse_array<Direction> &dir)
 {
-    for (size_t ind = 0; ind < positions.size(); ind++) {
-        auto &pos = positions[ind];
-        auto &spe = speed[ind];
-        auto &diro = dir[ind];
+    for (auto &&[ind, pos, spe, diro]: indexed_zipper(positions, speed, dir)) {
         if (!(pos && spe && diro))
             continue;
-        double magnitude = std::sqrt((dir[ind].value().dir_X * dir[ind].value().dir_X) + (dir[ind].value().dir_Y * dir[ind].value().dir_Y));
+        double magnitude = std::sqrt(
+            (dir[ind].value().dir_X * 
+            dir[ind].value().dir_X) + 
+            (dir[ind].value().dir_Y * 
+            dir[ind].value().dir_Y));
         if (magnitude > 0.1) { //Added a magnitude threshold to avoid going straight to INT_MIN and INT_MAX when having a really low direction move
-            positions[ind].value().pos_X += (speed[ind].value().speed * (dir[ind].value().dir_X / magnitude)) * GetFrameTime();
-            positions[ind].value().pos_Y += (speed[ind].value().speed * (dir[ind].value().dir_Y / magnitude)) * GetFrameTime();
+            positions[ind].value().pos_X += 
+                (speed[ind].value().speed * 
+                (dir[ind].value().dir_X / magnitude)) * 
+                GetFrameTime();
+            positions[ind].value().pos_Y += 
+                (speed[ind].value().speed * 
+                (dir[ind].value().dir_Y / magnitude)) * 
+                GetFrameTime();
         }
     }
 }
@@ -53,9 +61,7 @@ sparse_array<Size> &size,
 sparse_array<SpawnGrace> &grace)
 {
     double time = GetTime();
-    for (size_t ind = 0; ind < positions.size(); ind++) {
-        auto & pos = positions[ind];
-        auto & siz = size[ind];
+    for (auto &&[ind, pos, siz]: indexed_zipper(positions, size)) {
         if (!(pos && siz))
             continue;
         if (grace[ind].value_or(SpawnGrace(0, 0)).creation_time + grace[ind].value_or(SpawnGrace(0, 0)).timer >= time)

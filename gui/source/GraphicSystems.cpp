@@ -3,6 +3,8 @@
 #include "GraphicSystems.hpp"
 #include "../../shared/Registry.hpp"
 #include "../../shared/Sparse_array.hpp"
+#include "zipper.hpp"
+#include "indexed_zipper.hpp"
 
 void display(Registry &r,
 sparse_array<Position> &positions, 
@@ -11,10 +13,7 @@ sparse_array<Sprite> &sprite,
 sparse_array<Player> &anim)
 {
     BeginDrawing();
-    for (size_t ind = 0; ind < sprite.size(); ind++) {
-        auto &pos = positions[ind];
-        auto &siz = size[ind];
-        auto &spri = sprite[ind];
+    for (auto &&[ind, pos, siz, spri]: indexed_zipper(positions, size, sprite)) {
         if (!(pos && siz && spri))
             continue;
         if (sprite[ind]->width_max == 9 && sprite[ind]->height_max == 1) {

@@ -1,25 +1,24 @@
+#include "Client.hpp"
 #include <exception>
 #include <iostream>
+#include <semaphore>
 #include <sstream>
 #include <string>
 #include <thread>
-#include <semaphore>
+#include <boost/archive/binary_oarchive.hpp>
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/bind.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include "Client.hpp"
 
 using boost::asio::ip::udp;
-std::binary_semaphore MainToThread{0};
-std::binary_semaphore ThreadToMain{0};
+std::binary_semaphore MainToThread {0};
+std::binary_semaphore ThreadToMain {0};
 
-void udp_client::handle_send(const boost::system::error_code &error, std::size_t bytes_transferred)
+void udp_client::handle_send(
+    const boost::system::error_code &error, std::size_t bytes_transferred)
 {
-    if (!error) {
-
-    }
+    if (!error) {}
 }
 
 void udp_client::send()
@@ -28,14 +27,18 @@ void udp_client::send()
     boost::archive::binary_oarchive archive(oss);
     archive << cmd;
     std::string serializedData = oss.str();
-    std::cout << "Sending " << serializedData.size() << "bytes from " << serializedData.data() << std::endl;
-    _socket.async_send_to(boost::asio::buffer(serializedData.c_str(), serializedData.size()), _remote_point,
-        boost::bind(&udp_client::handle_send, this,
-        boost::asio::placeholders::error,
-        boost::asio::placeholders::bytes_transferred));
+    std::cout << "Sending " << serializedData.size() << "bytes from "
+              << serializedData.data() << std::endl;
+    _socket.async_send_to(
+        boost::asio::buffer(serializedData.c_str(), serializedData.size()),
+        _remote_point,
+        boost::bind(
+            &udp_client::handle_send, this, boost::asio::placeholders::error,
+            boost::asio::placeholders::bytes_transferred));
 }
 
-void udp_client::handle_receive(const boost::system::error_code &error, std::size_t bytes_transferred)
+void udp_client::handle_receive(
+    const boost::system::error_code &error, std::size_t bytes_transferred)
 {
     if (!error) {
         std::cout << "Received " << bytes_transferred << " bytes" << std::endl;
@@ -45,10 +48,11 @@ void udp_client::handle_receive(const boost::system::error_code &error, std::siz
 
 void udp_client::start_receive()
 {
-    _socket.async_receive_from(boost::asio::buffer(_recv_buffer), _remote_point,
-        boost::bind(&udp_client::handle_receive, this,
-        boost::asio::placeholders::error,
-        boost::asio::placeholders::bytes_transferred));
+    _socket.async_receive_from(
+        boost::asio::buffer(_recv_buffer), _remote_point,
+        boost::bind(
+            &udp_client::handle_receive, this, boost::asio::placeholders::error,
+            boost::asio::placeholders::bytes_transferred));
 }
 
 void udp_client::handle_tick()
@@ -70,13 +74,16 @@ void udp_client::send_user()
     }
 }
 
-udp_client::udp_client(boost::asio::io_context &_svc,const std::string &ip, const std::string &port) : _socket(_svc, udp::v4()), timer(_svc)
+udp_client::udp_client(
+    boost::asio::io_context &_svc, const std::string &ip,
+    const std::string &port)
+    : _socket(_svc, udp::v4()), timer(_svc)
 {
     udp::resolver resolver(_svc);
     udp::resolver::query query(udp::v4(), ip, port);
     udp::resolver::iterator iter = resolver.resolve(query);
     _remote_point = *iter;
-    tick = std::thread(&udp_client::handle_tick, this); //Timer thread
+    tick = std::thread(&udp_client::handle_tick, this);  // Timer thread
     sending = std::thread(&udp_client::send_user, this); // Snapshot thread
     tick.detach();
     sending.detach();
