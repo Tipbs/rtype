@@ -1,4 +1,3 @@
-UDP-Server-Client Communication Protocol for R-Type
 ---
 Created: <2023-10-14>
 Authors: ["@TAILLAN-Lucas"]
@@ -9,6 +8,8 @@ Contributors:
 - "@Draze999"
 - "@MizuriGit"
 ---
+
+## UDP-Server-Client Communication Protocol for R-Type
 
 # Summary
 
