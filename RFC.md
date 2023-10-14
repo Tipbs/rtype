@@ -18,7 +18,7 @@ The UDP-Server-Client Communication Protocol is designed for use in a one-to-fou
 
 # Motivation
 
-We are a group of 3rd Year students at Epitech aiming to hone our skills in Network, Game, and Architectural programming. Developping a multiplayer game using Entity Component System Architectural pattern (ECS) is a really good way to develop all of it. The project here is to make a R-Type game, which basically is a Shoot'Em Up-type in which your goal is to shoot enemies and avoid attacks and/or obstacles.
+We are a group of 3rd Year students at Epitech aiming to hone our skills in Network, Game, and Architectural programming. Developping a multiplayer game using Entity Component System Architectural pattern (ECS) is a really good way to attain our objectives. The project here is to make a R-Type game, which basically is a Shoot'Em Up-type of game in which your goal is to shoot enemies and avoid attacks and/or obstacles.
 
 # Protocol Overview
 
@@ -39,6 +39,9 @@ We are a group of 3rd Year students at Epitech aiming to hone our skills in Netw
     3.2. NetEnt
         - Sent by the server to the clients to synchronize the ECS' game entities.
         - The structure is provided in the "shared folder located at the root of the project. It contains the ID of the entity, its relative position and its state.
+    3.3. PlayerId
+        - Sent by the server when a client first makes contact with it. The client has to send a 1 byte message indicating to the server that it wants to receive the PlayerId structure. 
+        - The structure is provided in the "shared" folder located at the root of the project. It contains the ID of the client's own player entity.
 
 4. Ticks
     - Datas are sent as a tick system. The server sends a NetEnt structures tick every 50 milliseconds, making it 20 ticks per seconds.
