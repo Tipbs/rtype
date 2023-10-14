@@ -33,6 +33,8 @@ void udp_server::handle_check(const boost::system::error_code &error)
         for (auto it = clients.begin(); it != clients.end(); ) {
             if ((now - it->second._timer).total_seconds() > 5) {
                 std::cout << "Client " << it->first << " disconnected\n";
+                std::cout << "Killed entity " << it->second._id << std::endl;
+                reg.kill_entity(reg.entity_from_index(it->second._id));
                 it = clients.erase(it);
             } else {
                 ++it;
@@ -55,12 +57,19 @@ void udp_server::multiple_broadcast(std::map<udp::endpoint, struct Clients> tmp,
     boost::archive::binary_oarchive archive(oss);
     archive << netent;
     std::string serializedData = oss.str();
-    for (const auto& client_endpoint : tmp) {
-        std::cout << "j'ai bien envoyé ^^ ;) salut\n";
-        _socket.async_send_to(boost::asio::buffer(serializedData.c_str(), serializedData.size()), client_endpoint.first,
-            boost::bind(&udp_server::handle_broadcast, this,
-            boost::asio::placeholders::error,
-            boost::asio::placeholders::bytes_transferred));
+    try {
+        std::ostringstream oss;
+        boost::archive::binary_oarchive archive(oss);
+        archive << netent;
+        std::string serializedData = oss.str();
+        for (const auto& client_endpoint : tmp) {
+            _socket.async_send_to(boost::asio::buffer(serializedData.c_str(), serializedData.size()), client_endpoint.first,
+                boost::bind(&udp_server::handle_broadcast, this,
+                boost::asio::placeholders::error,
+                boost::asio::placeholders::bytes_transferred));
+        }
+    } catch (boost::archive::archive_exception &e) {
+        std::cout << "Archive Error: " << e.what() << std::endl;
     }
 }
 
@@ -158,13 +167,15 @@ void synchronize(Registry &reg, sparse_array<Position> &positions)
 void extract(Registry &reg, sparse_array<Position> &positions)
 {
     for (size_t ind = 0; ind < positions.size(); ind++) {
-        NetEnt tmp;
         auto &pos = positions[ind];
-        tmp.id = ind;
-        if (pos) {
-            tmp.pos.x = pos->pos_X;
-            tmp.pos.y = pos->pos_Y;
+        std::cout << "entity: " << ind << std::endl;
+        if (!pos) {
+            continue;
         }
+        NetEnt tmp;
+        tmp.id = ind;
+        tmp.pos.x = pos->pos_X;
+        tmp.pos.y = pos->pos_Y;
         reg._netent.push_back(tmp);
     }
 }
