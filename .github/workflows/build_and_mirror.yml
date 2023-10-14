@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install low-level dependency xorg-dev
-        run: sudo apt-get update && sudo apt-get install xorg-dev
+        run: sudo apt-get update && sudo apt-get install xorg-dev libx11-dev libx11-xcb-dev libfontenc-dev libice-dev libsm-dev libxau-dev libxaw7-dev
     
       - name: Install Conan
         id: conan
@@ -25,7 +25,7 @@ jobs:
         run: conan profile detect
         
       - name: Install dependencies
-        run: sudo conan install . --build=missing --profile=default -c tools.system.package_manager:mode=install
+        run: conan install . --build=missing --profile=default
 
       - name: Configure the project
         uses: threeal/cmake-action@v1.3.0
