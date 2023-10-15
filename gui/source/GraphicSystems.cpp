@@ -1,12 +1,15 @@
 #include "GraphicSystems.hpp"
+#include <cstddef>
 #include <cstdlib>
 #include <raylib.h>
+#include "../../shared/indexed_zipper.hpp"
 #include "../../shared/Registry.hpp"
 #include "../../shared/Sparse_array.hpp"
 #include "GraphicSystems.hpp"
 #include "GraphicComponents.hpp"
 #include "../../shared/indexed_zipper.hpp"
 #include "../../shared/zipper.hpp"
+#include "GraphicComponents.hpp"
 
 void display(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
@@ -18,12 +21,12 @@ void display(
          indexed_zipper(positions, size, sprite)) {
         if (!(pos && siz && spri))
             continue;
-        if (sprite[ind]->width_max == 9 && sprite[ind]->height_max == 1) {
-            sprite[ind]->sprite.x =
+        if (sprite[ind]->width_max == 8 && sprite[ind]->height_max == 1) {
+            sprite[ind]->sprite.x +=
                 (sprite[ind]->sprite.x / sprite[ind]->width_padding ==
-                         sprite[ind]->width_max
-                     ? 0
-                     : (sprite[ind]->sprite.x + sprite[ind]->width_padding));
+                         sprite[ind]->width_max - 1
+                     ? 0 // - sprite[ind]->width_padding)
+                     : sprite[ind]->width_padding);
         }
         if (anim[ind]) {
             sprite[ind]->sprite.y =
@@ -117,24 +120,25 @@ void handle_shoot_inputs(
         if (!(anima && posi && sizo))
             continue;
         if (anim[ind]->id == ind) {
-            if (IsKeyDown(KEY_SPACE))
+            if (IsKeyDown(KEY_SPACE)) {
                 anim[ind]->IsShooting = true;
-            if (IsKeyReleased(KEY_SPACE))
-                anim[ind]->IsShooting = false;
-
-            if (anim[ind]->IsShooting) {
-                std::cout << "Player id " << anim[ind]->color_id
-                    << " just shoot with a " << anim[ind]->weapon._type
-                    << " typed weapon, with an attack speed of "
-                    << anim[ind]->weapon.attack_speed << std::endl;
-
-                create_ammo(
-                        r,
-                        Position(
-                            pos[ind]->pos_X + siz[ind]->size_X,
-                            pos[ind]->pos_Y + (siz[ind]->size_Y / 2.) - 15),
-                        anim[ind]->weapon);
+                anim[ind]->current_charge +=
+                    (anim[ind]->current_charge >= 3) ? 0 : 5 * GetFrameTime();
             }
+            if (IsKeyReleased(KEY_SPACE)) {
+                anim[ind]->IsShooting = false;
+                create_ammo(
+                    r,
+                    Position(
+                        pos[ind]->pos_X + (float) sizo->size_X,
+                        pos[ind]->pos_Y + (float) sizo->size_Y / 2),
+                    anim[ind]->current_charge);
+                anim[ind]->current_charge = 1.;
+            }
+
+            // if (anim[ind]->IsShooting) {
+            //     Animation de charge du tir
+            // }
         }
     }
 }
@@ -175,15 +179,22 @@ void make_infinite_background(
         Registry &r, sparse_array<Position> &pos, sparse_array<Size> &siz)
 {
     if (pos[0] && siz[0]) {
-        if (pos[0]->pos_X < -siz[0]->size_X)
-            pos[0]->pos_X += siz[0]->size_X;
-        if (pos[0]->pos_Y < -siz[0]->size_Y)
-            pos[0]->pos_Y += siz[0]->size_Y;
 
-        if (pos[0]->pos_X > 0)
-            pos[0]->pos_X -= siz[0]->size_X;
-        if (pos[0]->pos_Y > 0)
-            pos[0]->pos_Y -= siz[0]->size_Y;
+        // BG going to the Left
+        if (pos[0]->pos_X < -2 * siz[0]->size_X)
+            pos[0]->pos_X += 2 * siz[0]->size_X;
+
+        // BG going Upwards
+        // if (pos[0]->pos_Y < -siz[0]->size_Y)
+        //     pos[0]->pos_Y += siz[0]->size_Y;
+
+        // BG going to the Right
+        // if (pos[0]->pos_X > 0)
+        //     pos[0]->pos_X -= siz[0]->size_X;
+
+        // BG going Downwards
+        // if (pos[0]->pos_Y > 0)
+        //     pos[0]->pos_Y -= siz[0]->size_Y;
     }
 }
 
@@ -230,7 +241,7 @@ void updateWithSnapshots(Registry &r, sparse_array<Position> &positions, sparse_
         if (it == net_ents.end())
             break;
     }
-    for (auto i = 0; i < positions.size(); ++i) {
+    for (size_t i = 0; i < positions.size(); ++i) {
         auto &pos = positions[i];
         std::cout << "moved x: " << pos->pos_X << std::endl;
         auto const &player = players[i];

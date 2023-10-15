@@ -1,3 +1,4 @@
+#include <climits>
 #include <cstdio>
 #include <iostream>
 #include <semaphore>
@@ -24,16 +25,16 @@ int main()
     udp_client net_client(context, "127.0.0.1", "5000", reg);
     context.run();
     InitWindow(ScreenWidth, ScreenHeight, "R-Type");
-    SetTargetFPS(300);
+    SetTargetFPS(60);
 
     Entity const background = reg.spawn_entity();
     Position bgPos(0, 0);
     Size bgSize(ScreenWidth, ScreenHeight);
     std::string bgpath =
-        "./gui/ressources/Backgrounds/Back1bis.png"; // 2 > 3 > 1
+        "./gui/ressources/Backgrounds/Backtest.png"; // temp > 2 > 3 > 1
     Speed bgspe(200);
-    Direction bgdir(-4, -1);
-    Sprite bgsprite(bgpath.c_str(), 2 * ScreenWidth, 2 * ScreenHeight);
+    Direction bgdir(-4, 0);
+    Sprite bgsprite(bgpath.c_str(), 3 * ScreenWidth, ScreenHeight);
 
     Entity const new_entity = reg.spawn_entity();
     Player player((size_t)new_entity % 5, net_client.get_player_id());
@@ -52,6 +53,8 @@ int main()
     reg.register_component<Direction>();
     reg.register_component<SpawnGrace>();
     reg.register_component<Player>();
+    reg.register_component<Health>();
+    reg.register_component<Damages>();
     reg.register_component<Current_Player>();
     reg.register_component<InputField>();
     reg.register_component<Rectangle>();
@@ -70,7 +73,7 @@ int main()
     reg.add_component(new_entity, std::move(gra));
     reg.add_component(new_entity, std::move(player));
 
-    reg.add_system<Position, Size, SpawnGrace>(colision);
+    reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);
     reg.add_system<Position, Size, Sprite, Player, Rectangle, InputField>(display);
     reg.add_system<Direction, Player, Sprite>(handle_dir_inputs);

@@ -245,7 +245,7 @@ udp_server::udp_server(std::size_t port) : _svc(), _socket(_svc, udp::endpoint(u
     reg.register_component<SpawnGrace>();
     reg.register_component<Player>();
     reg.add_system<Position>(synchronize);
-    reg.add_system<Position, Size, SpawnGrace>(colision);
+    reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);
     reg.add_system<Position>(extract);
 
