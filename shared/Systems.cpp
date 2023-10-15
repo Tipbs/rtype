@@ -6,33 +6,36 @@
 #include "Component.hpp"
 #include "Systems.hpp"
 #include "Registry.hpp"
+#include <chrono>
 #include "indexed_zipper.hpp"
+#include "zipper.hpp"
 
 #ifdef SERVER
-    #include <chrono>
-
+	std::mutex mutex;
 	static auto time_since_last_tick = std::chrono::high_resolution_clock::now(); // voir si raylib utilise m�me chose
 	float GetFrameTime()
 	{
+		std::scoped_lock lock(mutex);
 		const auto now = std::chrono::high_resolution_clock::now();
 		return std::chrono::duration<double>(time_since_last_tick - now).count();
 	}
 
-    double GetTime()
-    {
-        return 1.0;
-    }
-
     void ResetFrameTime()
 	{
+		std::scoped_lock lock(mutex);
 		time_since_last_tick = std::chrono::high_resolution_clock::now();
 	}
 #else
 	#include <raylib.h>
 #endif // !SERVER
 
+std::chrono::steady_clock::time_point GetTimePoint()
+{
+	return std::chrono::steady_clock::now();
+}
+
 void move(Registry &r, 
-sparse_array<Position> &positions, 
+sparse_array<Position> &positions,
 sparse_array<Speed> &speed, 
 sparse_array<Direction> &dir)
 {
@@ -73,7 +76,6 @@ size_t i1, size_t i2)
         
 
 }
-
 void colision(Registry &r,
 sparse_array<Position> &positions, 
 sparse_array<Size> &size, 
@@ -81,14 +83,14 @@ sparse_array<SpawnGrace> &grace,
 sparse_array<Damages> &dam, 
 sparse_array<Health> &helth)
 {
-    double time = GetTime();
+    auto time = GetTimePoint();
     for (auto &&[ind, pos, siz, dama, halth]: indexed_zipper(positions, size, dam, helth)) {
         if (!(pos && siz && dama && halth))
             continue;
-        if (grace[ind].value_or(SpawnGrace(0, 0)).creation_time + grace[ind].value_or(SpawnGrace(0, 0)).timer >= time)
+        if (grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time + grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).timer >= time)
                 continue;
         for (size_t ind2 = ind + 1; ind2 < positions.size(); ind2++) {
-            if (grace[ind2].value_or(SpawnGrace(0, 0)).creation_time + grace[ind2].value_or(SpawnGrace(0, 0)).timer >= time)
+            if (grace[ind2].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time + grace[ind2].value_or(SpawnGrace(std::chrono::seconds(0))).timer >= time)
                 continue;
             if (positions[ind].value().pos_X > positions[ind2].value().pos_X + size[ind2].value().size_X)
                 continue;

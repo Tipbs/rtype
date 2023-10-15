@@ -24,3 +24,8 @@ public:
         ar &moved;
     };
 };
+
+struct ThreadUserCmd {
+    UserCmd cmd;
+    std::mutex mutex;
+};

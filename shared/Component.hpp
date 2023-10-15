@@ -2,15 +2,22 @@
 
 #include <string>
 #include <utility>
+#include <chrono>
 
 #ifdef SERVER
 	float GetFrameTime();
-	double GetTime();
 	void ResetFrameTime();
 #else
 	#include <raylib.h>
 #endif // !SERVER
-
+std::chrono::steady_clock::time_point GetTimePoint();
+    #ifdef SERVER
+        struct Player {
+            int id = 0;
+            Player(): id(0) {};
+            Player(int x): id(x) {};
+        };
+    #endif // !SERVER
     struct Current_Player {
         size_t id;
         Current_Player() {id = -1;};
@@ -44,10 +51,10 @@
         Direction(double x, double y): dir_X(x), dir_Y(y) {};
     };
     struct SpawnGrace {
-        double timer = 0;
-        double creation_time = 0;
-        SpawnGrace(double x, double y): timer(x), creation_time(y) {};
-        SpawnGrace(double timer): timer(timer) {
-            creation_time = GetTime();
-        };
+        std::chrono::duration<float> timer;
+        std::chrono::steady_clock::time_point creation_time;
+        SpawnGrace(std::chrono::duration<float> x, std::chrono::steady_clock::time_point y): timer(x), creation_time(y) {};
+        SpawnGrace(std::chrono::duration<float> timer): timer(timer) {
+        creation_time = GetTimePoint();
     };
+};

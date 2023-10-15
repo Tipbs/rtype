@@ -3,8 +3,8 @@
 #include <string>
 #include <utility>
 #include <raylib.h>
-#include "Registry.hpp"
-#include "Component.hpp"
+#include "../../shared/Registry.hpp"
+#include "../../shared/Component.hpp"
 #include "GraphicComponents.hpp"
 
 struct Ammo {
@@ -40,6 +40,7 @@ struct Player {
 
 	Player(double x): count(x) {current_charge = 0.;id = -1;IsShooting = false; weapon = Weapon(1, 5);};
 	Player(int color_i): color_id(color_i) {current_charge = 0.;id = -1;count = 1;IsShooting = false; weapon = Weapon(1, 5);};
+	Player(int color_i, size_t id): color_id(color_i), id(id) {current_charge = 0.;count = 1;IsShooting = false; weapon = Weapon(1, 5);};
 	Player(double x, int color_i): color_id(color_i), count(x) {current_charge = 0.;id = -1;IsShooting = false; weapon = Weapon(1, 5);};
 	Player(int color_i, double x): color_id(color_i), count(x) {current_charge = 0.;id = -1;IsShooting = false; weapon = Weapon(1, 5);};
 };
