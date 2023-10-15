@@ -77,9 +77,10 @@ sparse_array<SpawnGrace> &grace)
                 continue;
             else if (positions[ind2].value().pos_Y > positions[ind].value().pos_Y + size[ind].value().size_Y)
                 continue;
-            else {  }
-                //TODO
-                // std::cout << "y'a collision\n";
+            else {
+                std::cout << "y'a collision\n";
+
+            }
         }
     }
 }

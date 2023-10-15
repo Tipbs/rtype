@@ -1,3 +1,4 @@
+#include <climits>
 #include <cstdio>
 #include <iostream>
 #include <semaphore>
@@ -19,11 +20,12 @@ int main()
     const int ScreenWidth = 1280;
     const int ScreenHeight = 720;
     InitWindow(ScreenWidth, ScreenHeight, "R-Type");
-    SetTargetFPS(300);
+    SetTargetFPS(60);
 
     Registry reg;
 
     Entity const background = reg.spawn_entity();
+    SpawnGrace bgGrace(INT_MAX);
     Position bgPos(0, 0);
     Size bgSize(ScreenWidth, ScreenHeight);
     std::string bgpath =
@@ -39,6 +41,7 @@ int main()
     reg.register_component<Direction>();
     reg.register_component<SpawnGrace>();
     reg.register_component<Player>();
+    reg.register_component<Damages>();
     reg.register_component<Current_Player>();
 
     reg.add_component(background, std::move(bgPos));
@@ -46,16 +49,8 @@ int main()
     reg.add_component(background, std::move(bgsprite));
     reg.add_component(background, std::move(bgspe));
     reg.add_component(background, std::move(bgdir));
+    reg.add_component(background, std::move(bgGrace));
 
-    create_player(reg, true);
-    create_player(reg, true);
-    create_player(reg, true);
-    create_player(reg, true);
-    create_player(reg, true);
-    create_player(reg, true);
-    create_player(reg, true);
-    create_player(reg, true);
-    create_player(reg, true);
     create_player(reg, true);
 
     reg.add_system<Position, Size, SpawnGrace>(colision);

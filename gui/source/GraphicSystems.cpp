@@ -16,12 +16,12 @@ void display(
          indexed_zipper(positions, size, sprite)) {
         if (!(pos && siz && spri))
             continue;
-        if (sprite[ind]->width_max == 9 && sprite[ind]->height_max == 1) {
-            sprite[ind]->sprite.x =
+        if (sprite[ind]->width_max == 8 && sprite[ind]->height_max == 1) {
+            sprite[ind]->sprite.x +=
                 (sprite[ind]->sprite.x / sprite[ind]->width_padding ==
-                         sprite[ind]->width_max
-                     ? 0
-                     : (sprite[ind]->sprite.x + sprite[ind]->width_padding));
+                         sprite[ind]->width_max - 1
+                     ? 0// - sprite[ind]->width_padding)
+                     : sprite[ind]->width_padding);
         }
         if (anim[ind]) {
             sprite[ind]->sprite.y =
@@ -103,24 +103,24 @@ void handle_shoot_inputs(
         if (!(anima && posi && sizo))
             continue;
         if (anim[ind]->id == ind) {
-            if (IsKeyDown(KEY_SPACE))
+            if (IsKeyDown(KEY_SPACE)) {
                 anim[ind]->IsShooting = true;
-            if (IsKeyReleased(KEY_SPACE))
+                anim[ind]->current_charge += (anim[ind]->current_charge >= 1.5) ? 0 : 5 * GetFrameTime();
+            }
+            if (IsKeyReleased(KEY_SPACE)) {
                 anim[ind]->IsShooting = false;
-
-            if (anim[ind]->IsShooting) {
-                std::cout << "Player id " << anim[ind]->color_id
-                          << " just shoot with a " << anim[ind]->weapon.type
-                          << " typed weapon, with an attack speed of "
-                          << anim[ind]->weapon.attack_speed << std::endl;
-
                 create_ammo(
                     r,
                     Position(
-                        pos[ind]->pos_X + siz[ind]->size_X,
-                        pos[ind]->pos_Y + (siz[ind]->size_Y / 2.) - 15),
-                    anim[ind]->weapon);
-            }
+                        pos[ind]->pos_X + (float)sizo->size_X,
+                        pos[ind]->pos_Y + (float)sizo->size_Y/2),
+                    anim[ind]->current_charge);
+                anim[ind]->current_charge = 0;
+                }
+
+            // if (anim[ind]->IsShooting) {
+            //     Animation de charge du tir
+            // }
         }
     }
 }
