@@ -22,31 +22,31 @@ We are a group of 3rd Year students at Epitech aiming to hone our skills in Netw
 
 # Protocol Overview
 
-1. Communication
+## 1. Communication
     - Communication between the Server and its clients occurs over UDP sockets using Boost.Asio.
     - The server listens on a specific port (default: 5000) for incoming client connections.
     - The client connects to the server from this port and the IP address of the machine's server.
 
-2. Message Format
+## 2. Message Format
     - Messages are serialized using the Boost.Serialization library and are transmitted as binary data.
     - The server sends asynchronously a serialized vector of "NetEnd" structures and is waiting to receive a serialized "UserCmd" structure from every clients.
     - The clients must send a serialized "UserCmd" structure to the server and asynchronously receive a serialized vector of "NetEnd" structures.
 
-3. Message Types
-    3.1. UserCmd
+## 3. Message Types
+    1. UserCmd
         - Sent by clients to provide user input commands for the game.
         - The structure is provided in the "shared" folder located at the root of the project. It contains the relative position of the client sending the structure and its state.
-    3.2. NetEnt
+    2. NetEnt
         - Sent by the server to the clients to synchronize the ECS' game entities.
         - The structure is provided in the "shared folder located at the root of the project. It contains the ID of the entity, its relative position and its state.
-    3.3. PlayerId
+    3. PlayerId
         - Sent by the server when a client first makes contact with it. The client has to send a 1 byte message indicating to the server that it wants to receive the PlayerId structure. 
         - The structure is provided in the "shared" folder located at the root of the project. It contains the ID of the client's own player entity.
 
-4. Ticks
-    - Datas are sent as a tick system. The server sends a NetEnt structures tick every 50 milliseconds, making it 20 ticks per seconds.
-    - Clients are the same. They are meant to send 20 ticks of UserCmd structure per seconds.
-    - Ticks are meant to compensate for the UDP Protocol System of sending packets with the lack of transmission control. Sometimes packets can be lost or unreceived, so sending 20 tick per seconds make the loss of packets a little less concerning.
+## 4. Ticks
+        - Datas are sent as a tick system. The server sends a NetEnt structures tick every 50 milliseconds, making it 20 ticks per seconds.
+        - Clients are the same. They are meant to send 20 ticks of UserCmd structure per seconds.
+        - Ticks are meant to compensate for the UDP Protocol System of sending packets with the lack of transmission control. Sometimes packets can be lost or unreceived, so sending 20 tick per seconds make the loss of packets a little less concerning.
 
 # Alternatives
 
