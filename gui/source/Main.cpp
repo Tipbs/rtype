@@ -35,6 +35,7 @@ int main()
     Sprite bgsprite(bgpath.c_str(), ScreenWidth, ScreenHeight);
 
     Entity const new_entity = reg.spawn_entity();
+    Player p(net_client.get_player_id());
     Position nePos(0, 0);
     Size neSize(83, 43);
     std::string nepath = "./gui/ressources/Sprites/r-typesheet42.gif";
@@ -64,6 +65,7 @@ int main()
     reg.add_component(new_entity, std::move(diro));
     reg.add_component(new_entity, std::move(gra));
     reg.add_component(new_entity, std::move(play0count));
+    reg.add_component(new_entity, std::move(p));
 
     reg.add_system<Position, Size, SpawnGrace>(colision);
     reg.add_system<Position, Speed, Direction>(move);
@@ -72,5 +74,6 @@ int main()
     reg.add_system<Position, Player>(updateWithSnapshots);
     while (!WindowShouldClose()) {
         reg.run_systems();
+        context.run();
     }
 }
