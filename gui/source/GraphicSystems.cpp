@@ -230,6 +230,7 @@ void updateWithSnapshots(Registry &r, sparse_array<Position> &positions, sparse_
     }
     for (auto i = 0; i < positions.size(); ++i) {
         auto &pos = positions[i];
+        std::cout << "moved x: " << pos->pos_X << std::endl;
         auto const &player = players[i];
         if (pos && player) {
             auto finded = std::find_if(net_ents.begin(), net_ents.end(), [&] (NetEnt &ent) {

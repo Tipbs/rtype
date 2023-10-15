@@ -182,6 +182,7 @@ void udp_server::handle_receive(
             if (clients[_remote_point].isClientConnected == false) {
                 wait_for_connexion(bytes_transferred);
                 start_receive();
+                return;
             } else {
                 clients[_remote_point]._timer = boost::posix_time::microsec_clock::universal_time();
                 deserialize(bytes_transferred);

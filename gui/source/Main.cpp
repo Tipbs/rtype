@@ -26,7 +26,6 @@ int main()
     InitWindow(ScreenWidth, ScreenHeight, "R-Type");
     SetTargetFPS(300);
 
-
     Entity const background = reg.spawn_entity();
     Position bgPos(0, 0);
     Size bgSize(ScreenWidth, ScreenHeight);
@@ -82,6 +81,7 @@ int main()
 
     while (!WindowShouldClose()) {
         reg.run_systems();
+        net_client.start_receive();
         context.poll();
         context.reset();
     }

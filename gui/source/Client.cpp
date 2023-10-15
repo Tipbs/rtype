@@ -58,9 +58,9 @@ void udp_client::send()
 void udp_client::handle_receive(
     const boost::system::error_code &error, std::size_t bytes_transferred)
 {
-    std::cout << "Received mais erreur\n";
+    //std::cout << "Received mais erreur\n";
     if (!error) {
-        std::cout << "Received " << bytes_transferred << " bytes" << std::endl;
+        //std::cout << "Received " << bytes_transferred << " bytes" << std::endl;
         try {
 			std::string seralizedData(_recv_buffer.data(), bytes_transferred);
 			std::istringstream iss(seralizedData);
