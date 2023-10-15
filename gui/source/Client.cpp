@@ -61,15 +61,20 @@ void udp_client::handle_receive(const boost::system::error_code &error, std::siz
     std::cout << "Received mais erreur\n";
     if (!error) {
         std::cout << "Received " << bytes_transferred << " bytes" << std::endl;
-		std::string seralizedData(_recv_buffer.data(), bytes_transferred);
-		std::istringstream iss(seralizedData);
-		boost::archive::binary_iarchive archive(iss);
-		std::vector<NetEnt> tmp;
-		archive >> tmp;
-		std::cout << "x: " << tmp[0].pos.x << "\n";
-		_reg.netEnts.mutex.lock();
-		_reg.netEnts.ents.insert(_reg.netEnts.ents.begin(), tmp.begin(), tmp.end());
-		_reg.netEnts.mutex.unlock();
+        try {
+			std::string seralizedData(_recv_buffer.data(), bytes_transferred);
+			std::istringstream iss(seralizedData);
+			boost::archive::binary_iarchive archive(iss);
+			std::vector<NetEnt> tmp;
+			archive >> tmp;
+			_reg.netEnts.mutex.lock();
+			_reg.netEnts.ents.insert(_reg.netEnts.ents.begin(), tmp.begin(), tmp.end());
+			_reg.netEnts.mutex.unlock();
+        }
+        catch (std::exception& err) {
+			std::cout << "Error in handle_receive: " << err.what()
+					  << " (probably normal)\n";
+        }
     }
 	start_receive();
 }
