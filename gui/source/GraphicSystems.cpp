@@ -1,4 +1,5 @@
 #include "GraphicSystems.hpp"
+#include <cstddef>
 #include <cstdlib>
 #include <raylib.h>
 #include "../../shared/indexed_zipper.hpp"
@@ -238,7 +239,7 @@ void updateWithSnapshots(Registry &r, sparse_array<Position> &positions, sparse_
         if (it == net_ents.end())
             break;
     }
-    for (auto i = 0; i < positions.size(); ++i) {
+    for (size_t i = 0; i < positions.size(); ++i) {
         auto &pos = positions[i];
         std::cout << "moved x: " << pos->pos_X << std::endl;
         auto const &player = players[i];
