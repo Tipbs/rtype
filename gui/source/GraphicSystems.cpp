@@ -1,11 +1,11 @@
 #include "GraphicSystems.hpp"
 #include <cstdlib>
 #include <raylib.h>
+#include "../../shared/indexed_zipper.hpp"
 #include "../../shared/Registry.hpp"
 #include "../../shared/Sparse_array.hpp"
-#include "GraphicComponents.hpp"
-#include "../../shared/indexed_zipper.hpp"
 #include "../../shared/zipper.hpp"
+#include "GraphicComponents.hpp"
 
 void display(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
@@ -20,7 +20,7 @@ void display(
             sprite[ind]->sprite.x +=
                 (sprite[ind]->sprite.x / sprite[ind]->width_padding ==
                          sprite[ind]->width_max - 1
-                     ? 0// - sprite[ind]->width_padding)
+                     ? 0 // - sprite[ind]->width_padding)
                      : sprite[ind]->width_padding);
         }
         if (anim[ind]) {
@@ -105,18 +105,19 @@ void handle_shoot_inputs(
         if (anim[ind]->id == ind) {
             if (IsKeyDown(KEY_SPACE)) {
                 anim[ind]->IsShooting = true;
-                anim[ind]->current_charge += (anim[ind]->current_charge >= 3) ? 0 : 5 * GetFrameTime();
+                anim[ind]->current_charge +=
+                    (anim[ind]->current_charge >= 3) ? 0 : 5 * GetFrameTime();
             }
             if (IsKeyReleased(KEY_SPACE)) {
                 anim[ind]->IsShooting = false;
                 create_ammo(
                     r,
                     Position(
-                        pos[ind]->pos_X + (float)sizo->size_X,
-                        pos[ind]->pos_Y + (float)sizo->size_Y/2),
+                        pos[ind]->pos_X + (float) sizo->size_X,
+                        pos[ind]->pos_Y + (float) sizo->size_Y / 2),
                     anim[ind]->current_charge);
                 anim[ind]->current_charge = 1.;
-                }
+            }
 
             // if (anim[ind]->IsShooting) {
             //     Animation de charge du tir
@@ -129,14 +130,21 @@ void make_infinite_background(
     Registry &r, sparse_array<Position> &pos, sparse_array<Size> &siz)
 {
     if (pos[0] && siz[0]) {
-        if (pos[0]->pos_X < -siz[0]->size_X)
-            pos[0]->pos_X += siz[0]->size_X;
-        if (pos[0]->pos_Y < -siz[0]->size_Y)
-            pos[0]->pos_Y += siz[0]->size_Y;
 
-        if (pos[0]->pos_X > 0)
-            pos[0]->pos_X -= siz[0]->size_X;
-        if (pos[0]->pos_Y > 0)
-            pos[0]->pos_Y -= siz[0]->size_Y;
+        // BG going to the Left
+        if (pos[0]->pos_X < -2 * siz[0]->size_X)
+            pos[0]->pos_X += 2 * siz[0]->size_X;
+
+        // BG going Upwards
+        // if (pos[0]->pos_Y < -siz[0]->size_Y)
+        //     pos[0]->pos_Y += siz[0]->size_Y;
+
+        // BG going to the Right
+        // if (pos[0]->pos_X > 0)
+        //     pos[0]->pos_X -= siz[0]->size_X;
+
+        // BG going Downwards
+        // if (pos[0]->pos_Y > 0)
+        //     pos[0]->pos_Y -= siz[0]->size_Y;
     }
 }

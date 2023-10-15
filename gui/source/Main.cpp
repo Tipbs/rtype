@@ -29,10 +29,10 @@ int main()
     Position bgPos(0, 0);
     Size bgSize(ScreenWidth, ScreenHeight);
     std::string bgpath =
-        "./gui/ressources/Backgrounds/Back1bis.png"; // 2 > 3 > 1
+        "./gui/ressources/Backgrounds/Backtest.png"; // temp > 2 > 3 > 1
     Speed bgspe(200);
-    Direction bgdir(-4, -1);
-    Sprite bgsprite(bgpath.c_str(), 2 * ScreenWidth, 2 * ScreenHeight);
+    Direction bgdir(-4, 0);
+    Sprite bgsprite(bgpath.c_str(), 3 * ScreenWidth, ScreenHeight);
 
     reg.register_component<Size>();
     reg.register_component<Position>();

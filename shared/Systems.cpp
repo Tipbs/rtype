@@ -67,9 +67,9 @@ size_t i1, size_t i2)
     healt[i2]->health -= dama[i1]->damages;
     std::cout << "User " << i2 << " has taken " << dama[i1]->damages << " damages. He now have " << healt[i2]->health << " HP." << std::endl;
     if (healt[i1]->health <= 0)
-        r.kill_entity(i1);
+        r.kill_entity(r.entity_from_index(i1));
     if (healt[i2]->health <= 0)
-        r.kill_entity(i2);
+        r.kill_entity(r.entity_from_index(i2));
         
 
 }
