@@ -45,3 +45,4 @@ CMakePresets.json
 CMakeUserPresets.json
 /Debug
 *.pdb
+Release

@@ -43,7 +43,6 @@ sparse_array<Direction> &dir,
 sparse_array<MoveAnimCounter> &anim, 
 sparse_array<Sprite> &sprite)
 {
-    std::cout << "test\n";
     const double AnimationPad = 0.02;
     double heigh = 1;
     if (anim[1])
@@ -114,11 +113,10 @@ void updateWithSnapshots(Registry &r, sparse_array<Position> &positions, sparse_
         if (finded != players.end()) {
             continue;
         }
-        std::cout << "test\n";
         auto pos = Position(net.pos.x, net.pos.y);
         create_player(r, net.id, pos);
         // create entity with info from net ent
-        net_ents.erase(it);
+        it = net_ents.erase(it);
     }
     for (auto i = 0; i < positions.size(); ++i) {
         auto &pos = positions[i];
