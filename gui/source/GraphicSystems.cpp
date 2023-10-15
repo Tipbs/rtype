@@ -10,7 +10,8 @@
 
 void display(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
-    sparse_array<Sprite> &sprite, sparse_array<Player> &anim)
+    sparse_array<Sprite> &sprite, sparse_array<Player> &anim,
+    sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields)
 {
     BeginDrawing();
     for (auto &&[ind, pos, siz, spri] :
@@ -45,6 +46,10 @@ void display(
         DrawTextureRec(
             sprite[ind].value().spritesheet, sprite[ind].value().sprite,
             Rectpos, WHITE);
+
+        // for (auto &&[inputField, rectangle]: zipper(inputFields, rectangles)) {
+            // DrawText(inputField->field.c_str(), (int)rectangle->x + 5, (int)rectangle->y + 8, 40, MAROON);
+        // }
     }
     EndDrawing();
 }
@@ -129,6 +134,38 @@ void handle_shoot_inputs(
                         pos[ind]->pos_Y + (siz[ind]->size_Y / 2.) - 15),
                     anim[ind]->weapon);
             }
+        }
+    }
+}
+
+void hadle_text_inputs(
+    Registry &r, sparse_array<InputField> &inputFields,
+    sparse_array<Rectangle> &rectangles)
+{
+    for (auto &&[inputField, rectangle]: zipper(inputFields, rectangles)) {
+        if (CheckCollisionPointRec(GetMousePosition(), rectangle.value())) {
+            SetMouseCursor(MOUSE_CURSOR_IBEAM);
+            int key = GetCharPressed();
+            int letterCount = 0;
+
+            // Check if more characters have been pressed on the same frame
+            while (key > 0) {
+                if ((key >= 32) && (key <= 125) && (letterCount < 16)) {
+                    inputField->field[letterCount] = (char)key;
+                    inputField->field[letterCount+1] = '\0'; // Add null terminator at the end of the string.
+                    letterCount++;
+                }
+                key = GetCharPressed();  // Check next character in the queue
+            }
+            if (IsKeyPressed(KEY_BACKSPACE)) {
+                letterCount--;
+                if (letterCount < 0) {
+                    letterCount = 0;
+                }
+                inputField->field[letterCount] = '\0';
+            }
+        } else {
+            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
         }
     }
 }
