@@ -10,19 +10,16 @@
 #include <iostream>
 #include <istream>
 #include <map>
-#include <thread>
 #include <semaphore>
 #include "Server.hpp"
 #include "../../shared/Component.hpp"
 
 using boost::asio::ip::udp;
-std::binary_semaphore MainToThread{0};
-std::binary_semaphore ThreadToMain{0};
-
+std::binary_semaphore MainToThread {0};
+std::binary_semaphore ThreadToMain {0};
 void udp_server::handle_broadcast(const boost::system::error_code &error, std::size_t bytes_transferred) //Callback to broadcast
 {
-    if (!error) {
-    }
+    if (!error) {}
 }
 
 void udp_server::handle_check(const boost::system::error_code &error)
@@ -47,8 +44,8 @@ void udp_server::handle_check(const boost::system::error_code &error)
 void udp_server::start_check()
 {
     check_timer.expires_from_now(boost::posix_time::seconds(1));
-    check_timer.async_wait(boost::bind(&udp_server::handle_check, this,
-        boost::asio::placeholders::error));
+    check_timer.async_wait(boost::bind(
+        &udp_server::handle_check, this, boost::asio::placeholders::error));
 }
 
 void udp_server::multiple_broadcast(std::map<udp::endpoint, struct Clients> tmp, std::vector<NetEnt> netent)
@@ -170,7 +167,9 @@ void udp_server::wait_for_connexion(std::size_t bytes_transferred)
     }
 }
 
-void udp_server::handle_receive(const boost::system::error_code &error, std::size_t bytes_transferred) // Callback to the receive function
+void udp_server::handle_receive(
+    const boost::system::error_code &error,
+    std::size_t bytes_transferred) // Callback to the receive function
 {
     if (!error || error == boost::asio::error::message_size) {
         std::cout << "Received " << bytes_transferred << "bytes" << std::endl;
@@ -196,8 +195,8 @@ void udp_server::start_receive() // Receive function
 {
     _socket.async_receive_from(
         boost::asio::buffer(_recv_buffer), _remote_point,
-        boost::bind(&udp_server::handle_receive, this,
-            boost::asio::placeholders::error,
+        boost::bind(
+            &udp_server::handle_receive, this, boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred));
 }
 

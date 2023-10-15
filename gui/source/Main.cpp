@@ -1,15 +1,14 @@
 #include <cstdio>
 #include <iostream>
-#include <utility>
 #include <semaphore>
+#include "../../shared/Bundle.hpp"
 #include "../../shared/Registry.hpp"
 #include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
 #include "Client.hpp"
 #include "raylib.h"
 
-void logging_system(
-    Registry &r, sparse_array<Position> const &positions)
+void logging_system(Registry &r, sparse_array<Position> const &positions)
 {
     for (auto &pos : positions)
         std::cout << "Position = { " << pos->pos_X << ", " << pos->pos_Y << " }"
@@ -25,14 +24,18 @@ int main()
     udp_client net_client(context, "127.0.0.1", "5000", reg);
     context.run();
     InitWindow(ScreenWidth, ScreenHeight, "R-Type");
-    SetTargetFPS(144);
+    SetTargetFPS(300);
 
 
     Entity const background = reg.spawn_entity();
     Position bgPos(0, 0);
     Size bgSize(ScreenWidth, ScreenHeight);
-    std::string bgpath = "./gui/ressources/Backgrounds/Back.png";
     Sprite bgsprite(bgpath.c_str(), ScreenWidth, ScreenHeight);
+    std::string bgpath =
+        "./gui/ressources/Backgrounds/Back1bis.png"; // 2 > 3 > 1
+    Speed bgspe(200);
+    Direction bgdir(-4, -1);
+    Sprite bgsprite(bgpath.c_str(), 2 * ScreenWidth, 2 * ScreenHeight);
 
     Entity const new_entity = reg.spawn_entity();
     Player p(net_client.get_player_id());
@@ -53,10 +56,13 @@ int main()
     reg.register_component<SpawnGrace>();
     reg.register_component<MoveAnimCounter>();
     reg.register_component<Player>();
+    reg.register_component<Current_Player>();
 
     reg.add_component(background, std::move(bgPos));
     reg.add_component(background, std::move(bgSize));
     reg.add_component(background, std::move(bgsprite));
+    reg.add_component(background, std::move(bgspe));
+    reg.add_component(background, std::move(bgdir));
 
     reg.add_component(new_entity, std::move(nePos));
     reg.add_component(new_entity, std::move(neSize));
@@ -71,11 +77,12 @@ int main()
     reg.add_system<Position, Speed, Direction>(move);
     reg.add_system<Position, Size, Sprite, MoveAnimCounter>(display);
     reg.add_system<Direction, MoveAnimCounter, Sprite>(handle_dir_inputs);
+    reg.add_system<Player, Position, Size>(handle_shoot_inputs);
+    reg.add_system<Position, Size>(make_infinite_background);
     reg.add_system<Position, Player>(updateWithSnapshots);
-    boost::asio::io_context::work work(context);
+
     while (!WindowShouldClose()) {
         reg.run_systems();
-        net_client.start_receive();
         context.poll();
         context.reset();
     }

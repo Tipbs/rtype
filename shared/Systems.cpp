@@ -8,7 +8,7 @@
 
 #ifdef SERVER
 	std::mutex mutex;
-	static auto time_since_last_tick = std::chrono::high_resolution_clock::now(); // voir si raylib utilise même chose
+	static auto time_since_last_tick = std::chrono::high_resolution_clock::now(); // voir si raylib utilise mï¿½me chose
 	float GetFrameTime()
 	{
 		std::scoped_lock(mutex);
@@ -35,20 +35,24 @@ sparse_array<Position> &positions,
 sparse_array<Speed> &speed, 
 sparse_array<Direction> &dir)
 {
-    for (size_t ind = 0; ind < positions.size(); ind++) {
-        auto &pos = positions[ind];
-        auto &spe = speed[ind];
-        auto &diro = dir[ind];
+    for (auto &&[ind, pos, spe, diro]: indexed_zipper(positions, speed, dir)) {
         if (!(pos && spe && diro))
             continue;
-        //std::cout << "BEFORE : pos : " << positions[ind].value().pos_X << ", " << positions[ind].value().pos_Y << "\nspeed : " << speed[ind].value().speed << "\ndir : " << dir[ind].value().dir_X << ", " << dir[ind].value().dir_Y << std::endl << std::endl;
-        double magnitude = std::sqrt((dir[ind].value().dir_X * dir[ind].value().dir_X) + (dir[ind].value().dir_Y * dir[ind].value().dir_Y));
-        //std::cout << "magnitude " << magnitude << std::endl;
+        double magnitude = std::sqrt(
+            (dir[ind].value().dir_X * 
+            dir[ind].value().dir_X) + 
+            (dir[ind].value().dir_Y * 
+            dir[ind].value().dir_Y));
         if (magnitude > 0.1) { //Added a magnitude threshold to avoid going straight to INT_MIN and INT_MAX when having a really low direction move
-            positions[ind].value().pos_X += (speed[ind].value().speed * (dir[ind].value().dir_X / magnitude)) * GetFrameTime();
-            positions[ind].value().pos_Y += (speed[ind].value().speed * (dir[ind].value().dir_Y / magnitude)) * GetFrameTime();
+            positions[ind].value().pos_X += 
+                (speed[ind].value().speed * 
+                (dir[ind].value().dir_X / magnitude)) * 
+                GetFrameTime();
+            positions[ind].value().pos_Y += 
+                (speed[ind].value().speed * 
+                (dir[ind].value().dir_Y / magnitude)) * 
+                GetFrameTime();
         }
-        //std::cout << "AFTER : pos : " << positions[ind].value().pos_X << ", " << positions[ind].value().pos_Y << "\nspeed : " << speed[ind].value().speed << "\ndir : " << dir[ind].value().dir_X << ", " << dir[ind].value().dir_Y << std::endl << std::endl;
     }
 }
 
@@ -58,11 +62,7 @@ sparse_array<Size> &size,
 sparse_array<SpawnGrace> &grace)
 {
     std::chrono::steady_clock::time_point time = GetTimePoint();
-    for (size_t ind = 0; ind < positions.size(); ind++) {
-        auto &pos = positions[ind];
-        auto &siz = size[ind];
-        if (!(pos && siz))
-            continue;
+    for (auto &&[ind, pos, siz]: indexed_zipper(positions, size)) {
         //std::cout << "temps d'origine : "
         //    << grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time.time_since_epoch()
         //          << std::endl;
@@ -86,8 +86,9 @@ sparse_array<SpawnGrace> &grace)
                 continue;
             else if (positions[ind2].value().pos_Y > positions[ind].value().pos_Y + size[ind].value().size_Y)
                 continue;
-            else
-                std::cout << "y'a collision\n";
+            else {  }
+                //TODO
+                // std::cout << "y'a collision\n";
         }
     }
 }

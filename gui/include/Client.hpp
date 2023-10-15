@@ -12,6 +12,7 @@
 // mandatory since raylib and windows.h are incompatible, thread include windows.h
 
 #include <cstddef>
+#include <boost/array.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/io_context.hpp>
@@ -46,5 +47,5 @@ class udp_client {
         std::thread receive;
         std::mutex cmd_mutex;
 
-        UserCmd cmd;
+    UserCmd cmd;
 };

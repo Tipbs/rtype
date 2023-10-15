@@ -1,14 +1,15 @@
+#include "Client.hpp"
 #include <exception>
 #include <iostream>
+#include <semaphore>
 #include <sstream>
 #include <string>
 #include <thread>
-#include <semaphore>
+#include <boost/archive/binary_oarchive.hpp>
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/bind.hpp>
-#include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 #include "Client.hpp"
 #include "../../shared/NetEnt.hpp"
@@ -27,14 +28,13 @@ void throw_exception(std::exception const &e, boost::source_location const &)
 } // namespace boost
 
 using boost::asio::ip::udp;
-std::binary_semaphore MainToThread{0};
-std::binary_semaphore ThreadToMain{0};
+std::binary_semaphore MainToThread {0};
+std::binary_semaphore ThreadToMain {0};
 
-void udp_client::handle_send(const boost::system::error_code &error, std::size_t bytes_transferred)
+void udp_client::handle_send(
+    const boost::system::error_code &error, std::size_t bytes_transferred)
 {
-    if (!error) {
-
-    }
+    if (!error) {}
 }
 
 void udp_client::send()
@@ -56,7 +56,8 @@ void udp_client::send()
         boost::asio::placeholders::bytes_transferred));
 }
 
-void udp_client::handle_receive(const boost::system::error_code &error, std::size_t bytes_transferred)
+void udp_client::handle_receive(
+    const boost::system::error_code &error, std::size_t bytes_transferred)
 {
     std::cout << "Received mais erreur\n";
     if (!error) {
@@ -81,10 +82,11 @@ void udp_client::handle_receive(const boost::system::error_code &error, std::siz
 
 void udp_client::start_receive()
 {
-    _socket.async_receive_from(boost::asio::buffer(_recv_buffer), _remote_point,
-        boost::bind(&udp_client::handle_receive, this,
-        boost::asio::placeholders::error,
-        boost::asio::placeholders::bytes_transferred));
+    _socket.async_receive_from(
+        boost::asio::buffer(_recv_buffer), _remote_point,
+        boost::bind(
+            &udp_client::handle_receive, this, boost::asio::placeholders::error,
+            boost::asio::placeholders::bytes_transferred));
 }
 
 void udp_client::handle_tick()

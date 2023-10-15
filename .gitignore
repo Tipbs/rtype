@@ -36,6 +36,7 @@ unit_tests
 # CMake
 build/
 CMakeUserPresets.json
+CMakePresets.json
 
 # clangd
 compile_commands.json
