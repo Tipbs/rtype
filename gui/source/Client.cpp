@@ -94,7 +94,6 @@ void udp_client::handle_tick()
 		ThreadToMain.acquire();
 		timer.expires_from_now(boost::posix_time::millisec(50));
 		timer.wait();
-		handle_tick();
     }
 }
 

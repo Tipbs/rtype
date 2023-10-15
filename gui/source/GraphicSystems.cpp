@@ -102,9 +102,7 @@ void updateWithSnapshots(Registry &r, sparse_array<Position> &positions, sparse_
 {
     auto &net_ents = r.netEnts.ents;
 
-    std::cout << "bahh\n";
     r.netEnts.mutex.lock();
-    std::cout << "size: " << r.netEnts.ents.size();
     for (auto it = net_ents.begin(); it != net_ents.end(); ++it) {
         auto net = *it;
         auto finded = std::find_if(players.begin(), players.end(), [&](std::optional<Player> &player) {

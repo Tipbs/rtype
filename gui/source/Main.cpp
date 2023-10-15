@@ -72,8 +72,11 @@ int main()
     reg.add_system<Position, Size, Sprite, MoveAnimCounter>(display);
     reg.add_system<Direction, MoveAnimCounter, Sprite>(handle_dir_inputs);
     reg.add_system<Position, Player>(updateWithSnapshots);
+    boost::asio::io_context::work work(context);
     while (!WindowShouldClose()) {
         reg.run_systems();
-        context.run();
+        net_client.start_receive();
+        context.poll();
+        context.reset();
     }
 }
