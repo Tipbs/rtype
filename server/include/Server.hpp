@@ -61,6 +61,7 @@ class udp_server {
         void multiple_broadcast(std::map<boost::asio::ip::udp::endpoint, struct Clients>, std::vector<NetEnt>);
         void deserialize(const std::size_t);
 
+        void start_threads();
         void start_check();
         void start_receive();
         void run_system();
