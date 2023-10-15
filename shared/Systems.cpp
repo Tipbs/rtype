@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <ostream>
+#include "Component.hpp"
 #include "Systems.hpp"
 #include "indexed_zipper.hpp"
 
@@ -55,14 +56,28 @@ sparse_array<Direction> &dir)
     }
 }
 
+void damages(
+sparse_array<Health> &healt,
+sparse_array<Damages> &dama, 
+size_t i1, size_t i2)
+{
+    healt[i1]->health -= dama[i2]->damages;
+    std::cout << "User " << i1 << " has taken " << dama[i2]->damages << " damages. He now have " << healt[i1]->health << " HP." << std::endl;
+    healt[i2]->health -= dama[i1]->damages;
+    std::cout << "User " << i2 << " has taken " << dama[i1]->damages << " damages. He now have " << healt[i2]->health << " HP." << std::endl;
+
+}
+
 void colision(Registry &r,
 sparse_array<Position> &positions, 
 sparse_array<Size> &size, 
-sparse_array<SpawnGrace> &grace)
+sparse_array<SpawnGrace> &grace, 
+sparse_array<Damages> &dam, 
+sparse_array<Health> &helth)
 {
     double time = GetTime();
-    for (auto &&[ind, pos, siz]: indexed_zipper(positions, size)) {
-        if (!(pos && siz))
+    for (auto &&[ind, pos, siz, dama, halth]: indexed_zipper(positions, size, dam, helth)) {
+        if (!(pos && siz && dama && halth))
             continue;
         if (grace[ind].value_or(SpawnGrace(0, 0)).creation_time + grace[ind].value_or(SpawnGrace(0, 0)).timer >= time)
                 continue;
@@ -78,8 +93,7 @@ sparse_array<SpawnGrace> &grace)
             else if (positions[ind2].value().pos_Y > positions[ind].value().pos_Y + size[ind].value().size_Y)
                 continue;
             else {
-                std::cout << "y'a collision\n";
-
+                damages(helth, dam, ind, ind2);
             }
         }
     }

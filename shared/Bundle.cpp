@@ -15,6 +15,8 @@ size_t create_player(Registry &reg, bool is_curret_player)
     Speed speedo(300);
     Direction diro(0, 0);
     SpawnGrace gra(5);
+    Damages damag(0);
+    Health healt(1);
     Sprite sprite(path.c_str(), 83, 43, 5, 5);
     if (is_curret_player)
         player.id = (size_t)new_entity;
@@ -26,6 +28,8 @@ size_t create_player(Registry &reg, bool is_curret_player)
     reg.add_component(new_entity, std::move(diro));
     reg.add_component(new_entity, std::move(gra));
     reg.add_component(new_entity, std::move(player));
+    reg.add_component(new_entity, std::move(damag));
+    reg.add_component(new_entity, std::move(healt));
     return (size_t)new_entity;
 }
 
@@ -38,7 +42,7 @@ void create_ammo(Registry &reg, Position pos, float damage_mult)
     std::string path = "./gui/ressources/Sprites/shoot_ammo.png"; // fichier de la munition
     Speed speedo(450);
     Damages damag(damage_mult);
-    SpawnGrace grac(0.5 * damage_mult);
+    Health healt(1);
     Direction diro = Direction(1, 0); //std::pow(-1, rand()) * rand()
     Sprite sprite(path.c_str(), hitwidth, hitheight, 8, 1); // width height are the visual box
 
@@ -50,5 +54,5 @@ void create_ammo(Registry &reg, Position pos, float damage_mult)
     reg.add_component(new_entity, std::move(speedo));
     reg.add_component(new_entity, std::move(diro));
     reg.add_component(new_entity, std::move(damag));
-    reg.add_component(new_entity, std::move(grac));
+    reg.add_component(new_entity, std::move(healt));
 }

@@ -20,7 +20,7 @@ int main()
     const int ScreenWidth = 1280;
     const int ScreenHeight = 720;
     InitWindow(ScreenWidth, ScreenHeight, "R-Type");
-    SetTargetFPS(60);
+    SetTargetFPS(10);
 
     Registry reg;
 
@@ -41,6 +41,7 @@ int main()
     reg.register_component<Direction>();
     reg.register_component<SpawnGrace>();
     reg.register_component<Player>();
+    reg.register_component<Health>();
     reg.register_component<Damages>();
     reg.register_component<Current_Player>();
 
@@ -53,7 +54,7 @@ int main()
 
     create_player(reg, true);
 
-    reg.add_system<Position, Size, SpawnGrace>(colision);
+    reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);
     reg.add_system<Position, Size, Sprite, Player>(display);
     reg.add_system<Direction, Player, Sprite>(handle_dir_inputs);
