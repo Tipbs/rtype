@@ -49,9 +49,9 @@ int main()
     reg.add_component(background, std::move(bgspe));
     reg.add_component(background, std::move(bgdir));
 
-    // Entity const textField = reg.spawn_entity();
-    // reg.emplace_component<InputField>(textField, "");
-    // reg.emplace_component<Rectangle>(textField, ScreenWidth / 2.0f - 100, 180, 225, 50);
+    Entity const textField = reg.spawn_entity();
+    reg.emplace_component<InputField>(textField, "");
+    reg.emplace_component<Rectangle>(textField, ScreenWidth / 2.0f - 200, 180, 400, 50);
 
     create_player(reg, true);
     create_player(reg, true);

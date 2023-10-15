@@ -112,4 +112,6 @@ struct Animation {
 
 struct InputField {
     std::string field;
+    int letterCount = 0;
+    bool mouseOnText = false;
 };

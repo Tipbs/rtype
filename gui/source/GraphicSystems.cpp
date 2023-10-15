@@ -46,9 +46,12 @@ void display(
             sprite[ind].value().spritesheet, sprite[ind].value().sprite,
             Rectpos, WHITE);
 
-        // for (auto &&[inputField, rectangle]: zipper(inputFields, rectangles)) {
-            // DrawText(inputField->field.c_str(), (int)rectangle->x + 5, (int)rectangle->y + 8, 40, MAROON);
-        // }
+    }
+    for (auto &&[inputField, rectangle]: zipper(inputFields, rectangles)) {
+        DrawRectangleRec(rectangle.value(), BLANK);
+        DrawRectangleLinesEx(rectangle.value(), 3, RED);
+        DrawText("IP du Serveur", (int)rectangle->x + 50, (int)rectangle->y - 48, 40, MAROON);
+        DrawText(inputField->field.c_str(), (int)rectangle->x + 5, (int)rectangle->y + 8, 40, MAROON);
     }
     EndDrawing();
 }
@@ -135,26 +138,26 @@ void hadle_text_inputs(
     sparse_array<Rectangle> &rectangles)
 {
     for (auto &&[inputField, rectangle]: zipper(inputFields, rectangles)) {
-        if (CheckCollisionPointRec(GetMousePosition(), rectangle.value())) {
+        inputField->mouseOnText = CheckCollisionPointRec(GetMousePosition(), rectangle.value());
+        if (inputField->mouseOnText) {
             SetMouseCursor(MOUSE_CURSOR_IBEAM);
             int key = GetCharPressed();
-            int letterCount = 0;
 
             // Check if more characters have been pressed on the same frame
             while (key > 0) {
-                if ((key >= 32) && (key <= 125) && (letterCount < 16)) {
-                    inputField->field[letterCount] = (char)key;
-                    inputField->field[letterCount+1] = '\0'; // Add null terminator at the end of the string.
-                    letterCount++;
+                if ((key >= 46) && (key <= 57) && (inputField->letterCount < 15)) {
+                    inputField->field[inputField->letterCount] = (char)key;
+                    inputField->field[inputField->letterCount + 1] = '\0'; // Add null terminator at the end of the string.
+                    inputField->letterCount++;
                 }
                 key = GetCharPressed();  // Check next character in the queue
             }
             if (IsKeyPressed(KEY_BACKSPACE)) {
-                letterCount--;
-                if (letterCount < 0) {
-                    letterCount = 0;
+                inputField->letterCount--;
+                if (inputField->letterCount < 0) {
+                    inputField->letterCount = 0;
                 }
-                inputField->field[letterCount] = '\0';
+                inputField->field[inputField->letterCount] = '\0';
             }
         } else {
             SetMouseCursor(MOUSE_CURSOR_DEFAULT);
