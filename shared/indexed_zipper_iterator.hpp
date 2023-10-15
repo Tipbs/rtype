@@ -22,7 +22,6 @@ class indexed_zipper_iterator {
     using iterator_tuple = std::tuple<iterator_t<Containers>...>;
     // If we want indexed_zipper_iterator to be built by zipper only .
     // friend containers::zipper<Containers...>;
-    indexed_zipper_iterator(iterator_tuple const &it_tuple, size_t max);
     indexed_zipper_iterator(
         iterator_tuple const &it_tuple, size_t max, size_t idx = 0);
 
