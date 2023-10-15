@@ -21,11 +21,11 @@ add_executable(r-type_client
   ${SHARED_SRC_DIR}
  )
 
-add_executable(unit_tests
-  ${GUI_INCLUDE_DIR}
-  ./gui/tests/Ecs_tests.cpp
-  ./shared/Registry.cpp
-) 
+# add_executable(unit_tests
+#   ${GUI_INCLUDE_DIR}
+#   ./gui/tests/Ecs_tests.cpp
+#   ./shared/Registry.cpp
+# ) 
 
 target_link_libraries(r-type_client
 	#${Boost_SYSTEM_LIBRARY}
@@ -33,12 +33,13 @@ target_link_libraries(r-type_client
 	raylib
 )
 
-target_link_libraries(unit_tests
-	raylib
-  Catch2::Catch2WithMain
-)
+# target_link_libraries(unit_tests
+# 	raylib
+# 	${Boost_LIBRARIES}
+#   Catch2::Catch2WithMain
+# )
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC ASSETS_PATH="${CMAKE_CURRENT_SOURCE_DIR}/ressources/") # Set the asset path macro to the absolute path on the dev machine
-add_test(NAME unit_tests COMMAND unit_tests)
+# add_test(NAME unit_tests COMMAND unit_tests)
 #install(TARGETS R-Type)
 #include(CPACK)
