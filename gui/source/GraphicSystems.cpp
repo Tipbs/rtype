@@ -4,8 +4,8 @@
 #include "../../shared/Registry.hpp"
 #include "../../shared/Sparse_array.hpp"
 #include "GraphicComponents.hpp"
-#include "indexed_zipper.hpp"
-#include "zipper.hpp"
+#include "../../shared/indexed_zipper.hpp"
+#include "../../shared/zipper.hpp"
 
 void display(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,

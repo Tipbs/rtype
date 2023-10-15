@@ -1,7 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
 #include "../../shared/Registry.hpp"
-#include "zipper.hpp"
+#include "../../shared/zipper.hpp"
 #include "../../shared/Sparse_array.hpp"
 #include "../../shared/Systems.hpp"
 
