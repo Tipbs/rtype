@@ -5,11 +5,9 @@
 #include "../../shared/indexed_zipper.hpp"
 #include "../../shared/Registry.hpp"
 #include "../../shared/Sparse_array.hpp"
-#include "GraphicSystems.hpp"
-#include "GraphicComponents.hpp"
-#include "../../shared/indexed_zipper.hpp"
 #include "../../shared/zipper.hpp"
 #include "GraphicComponents.hpp"
+#include "GraphicSystems.hpp"
 
 void display(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
@@ -50,8 +48,9 @@ void display(
             sprite[ind].value().spritesheet, sprite[ind].value().sprite,
             Rectpos, WHITE);
 
-        // for (auto &&[inputField, rectangle]: zipper(inputFields, rectangles)) {
-            // DrawText(inputField->field.c_str(), (int)rectangle->x + 5, (int)rectangle->y + 8, 40, MAROON);
+        // for (auto &&[inputField, rectangle]: zipper(inputFields, rectangles))
+        // { DrawText(inputField->field.c_str(), (int)rectangle->x + 5,
+        // (int)rectangle->y + 8, 40, MAROON);
         // }
     }
     EndDrawing();
@@ -87,34 +86,35 @@ void handle_dir_inputs(
                 heigh = (heigh <= 0) ? 0 : heigh - (5 * AnimationPad);
             }
 
-    if (dir[1]) { //1 is the entity num representing the player seen here
-        dir[1].value().dir_X = Moves.x;
-        dir[1].value().dir_Y = Moves.y;
-        r.currentCmd.mutex.lock();
-			r.currentCmd.cmd.moved.x += Moves.x;
-			r.currentCmd.cmd.moved.y += Moves.y;
-        r.currentCmd.mutex.unlock();
-            if (IsKeyPressed(KEY_C)) {
-                anim[ind]->color_id =
-                    anim[ind]->color_id == 4 ? 0 : anim[ind]->color_id + 1;
-            }
+            if (dir[1]) { // 1 is the entity num representing the player seen
+                          // here
+                dir[1].value().dir_X = Moves.x;
+                dir[1].value().dir_Y = Moves.y;
+                r.currentCmd.mutex.lock();
+                r.currentCmd.cmd.moved.x += Moves.x;
+                r.currentCmd.cmd.moved.y += Moves.y;
+                r.currentCmd.mutex.unlock();
+                if (IsKeyPressed(KEY_C)) {
+                    anim[ind]->color_id =
+                        anim[ind]->color_id == 4 ? 0 : anim[ind]->color_id + 1;
+                }
 
-            if (dir[ind]) { // 1 is the entity num representing the player seen
-                            // here
-                dir[ind].value().dir_X = Moves.x;
-                dir[ind].value().dir_Y = Moves.y;
-            }
+                if (dir[ind]) { // 1 is the entity num representing the player
+                                // seen here
+                    dir[ind].value().dir_X = Moves.x;
+                    dir[ind].value().dir_Y = Moves.y;
+                }
 
-            if (anim[ind])
-                anim[ind]->count = heigh;
+                if (anim[ind])
+                    anim[ind]->count = heigh;
+            }
         }
     }
 }
-}
 
 void handle_shoot_inputs(
-        Registry &r, sparse_array<Player> &anim, sparse_array<Position> &pos,
-        sparse_array<Size> &siz)
+    Registry &r, sparse_array<Player> &anim, sparse_array<Position> &pos,
+    sparse_array<Size> &siz)
 {
     for (auto &&[ind, anima, posi, sizo] : indexed_zipper(anim, pos, siz)) {
         if (!(anima && posi && sizo))
@@ -144,10 +144,10 @@ void handle_shoot_inputs(
 }
 
 void hadle_text_inputs(
-        Registry &r, sparse_array<InputField> &inputFields,
-        sparse_array<Rectangle> &rectangles)
+    Registry &r, sparse_array<InputField> &inputFields,
+    sparse_array<Rectangle> &rectangles)
 {
-    for (auto &&[inputField, rectangle]: zipper(inputFields, rectangles)) {
+    for (auto &&[inputField, rectangle] : zipper(inputFields, rectangles)) {
         if (CheckCollisionPointRec(GetMousePosition(), rectangle.value())) {
             SetMouseCursor(MOUSE_CURSOR_IBEAM);
             int key = GetCharPressed();
@@ -156,17 +156,17 @@ void hadle_text_inputs(
             // Check if more characters have been pressed on the same frame
             while (key > 0) {
                 if ((key >= 32) && (key <= 125) && (letterCount < 16)) {
-                    inputField->field[letterCount] = (char)key;
-                    inputField->field[letterCount+1] = '\0'; // Add null terminator at the end of the string.
+                    inputField->field[letterCount] = (char) key;
+                    inputField->field[letterCount + 1] =
+                        '\0'; // Add null terminator at the end of the string.
                     letterCount++;
                 }
-                key = GetCharPressed();  // Check next character in the queue
+                key = GetCharPressed(); // Check next character in the queue
             }
             if (IsKeyPressed(KEY_BACKSPACE)) {
                 letterCount--;
-                if (letterCount < 0) {
+                if (letterCount < 0)
                     letterCount = 0;
-                }
                 inputField->field[letterCount] = '\0';
             }
         } else {
@@ -176,7 +176,7 @@ void hadle_text_inputs(
 }
 
 void make_infinite_background(
-        Registry &r, sparse_array<Position> &pos, sparse_array<Size> &siz)
+    Registry &r, sparse_array<Position> &pos, sparse_array<Size> &siz)
 {
     if (pos[0] && siz[0]) {
 
@@ -219,21 +219,23 @@ void create_player(Registry &reg, int id, Position &pos)
     reg.add_component(new_entity, std::move(player));
 }
 
-void updateWithSnapshots(Registry &r, sparse_array<Position> &positions, sparse_array<Player> &players)
+void updateWithSnapshots(
+    Registry &r, sparse_array<Position> &positions,
+    sparse_array<Player> &players)
 {
     auto &net_ents = r.netEnts.ents;
 
     r.netEnts.mutex.lock();
     for (auto it = net_ents.begin(); it != net_ents.end(); ++it) {
         auto net = *it;
-        auto finded = std::find_if(players.begin(), players.end(), [&](std::optional<Player> &player) {
-                if (player) 
+        auto finded = std::find_if(
+            players.begin(), players.end(), [&](std::optional<Player> &player) {
+                if (player)
                     return player.value().id == net.id;
                 return false;
-                });
-        if (finded != players.end()) {
+            });
+        if (finded != players.end())
             continue;
-        }
         auto pos = Position(net.pos.x, net.pos.y);
         create_player(r, net.id, pos);
         // create entity with info from net ent
@@ -246,9 +248,9 @@ void updateWithSnapshots(Registry &r, sparse_array<Position> &positions, sparse_
         std::cout << "moved x: " << pos->pos_X << std::endl;
         auto const &player = players[i];
         if (pos && player) {
-            auto finded = std::find_if(net_ents.begin(), net_ents.end(), [&] (NetEnt &ent) {
-                    return ent.id == player.value().id;
-                    });
+            auto finded = std::find_if(
+                net_ents.begin(), net_ents.end(),
+                [&](NetEnt &ent) { return ent.id == player.value().id; });
             if (finded == net_ents.end())
                 continue;
             pos.value().pos_X = finded->pos.x;

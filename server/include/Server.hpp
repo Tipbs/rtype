@@ -10,11 +10,11 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
+#include "../../shared/NetEnt.hpp"
+#include "../../shared/Registry.hpp"
+#include "../../shared/Systems.hpp"
 #include "../../shared/UserCmd.hpp"
 #include "../../shared/Utils.hpp"
-#include "../../shared/NetEnt.hpp"
-#include "../../shared/Systems.hpp"
-#include "../../shared/Registry.hpp"
 
 namespace boost {
 #ifdef BOOST_NO_EXCEPTIONS
@@ -45,23 +45,26 @@ class udp_server {
     udp_server(std::size_t port);
     ~udp_server();
 
-        void handle_receive(const boost::system::error_code &, std::size_t);
-        void handle_response();
-        void handle_tick();
-        void handle_check(const boost::system::error_code &error);
-        void handle_send(const boost::system::error_code &error, std::size_t);
+    void handle_receive(const boost::system::error_code &, std::size_t);
+    void handle_response();
+    void handle_tick();
+    void handle_check(const boost::system::error_code &error);
+    void handle_send(const boost::system::error_code &error, std::size_t);
 
-        void start_snapshot();
-        void send_playerId(std::size_t playerId, boost::asio::ip::udp::endpoint);
-        void wait_for_connexion(std::size_t);
-        void handle_broadcast(const boost::system::error_code &, std::size_t);
-        void multiple_broadcast(std::map<boost::asio::ip::udp::endpoint, struct Clients>, std::vector<NetEnt>);
-        void deserialize(const std::size_t);
+    void start_snapshot();
+    void send_playerId(std::size_t playerId, boost::asio::ip::udp::endpoint);
+    void wait_for_connexion(std::size_t);
+    void handle_broadcast(const boost::system::error_code &, std::size_t);
+    void multiple_broadcast(
+        std::map<boost::asio::ip::udp::endpoint, struct Clients>,
+        std::vector<NetEnt>);
+    void deserialize(const std::size_t);
 
-        void start_threads();
-        void start_check();
-        void start_receive();
-        void run_system();
+    void start_threads();
+    void start_check();
+    void start_receive();
+    void run_system();
+
   private:
     Registry reg;
 

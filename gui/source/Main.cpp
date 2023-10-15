@@ -2,11 +2,11 @@
 #include <cstdio>
 #include <iostream>
 #include <semaphore>
-#include "Bundle.hpp"
 #include "../../shared/Registry.hpp"
+#include "Bundle.hpp"
+#include "Client.hpp"
 #include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
-#include "Client.hpp"
 #include "raylib.h"
 
 void logging_system(Registry &r, sparse_array<Position> const &positions)
@@ -37,7 +37,7 @@ int main()
     Sprite bgsprite(bgpath.c_str(), 3 * ScreenWidth, ScreenHeight);
 
     Entity const new_entity = reg.spawn_entity();
-    Player player((size_t)new_entity % 5, net_client.get_player_id());
+    Player player((size_t) new_entity % 5, net_client.get_player_id());
     Position nePos(0, 0);
     Size neSize(83, 43);
     std::string nepath = "./gui/ressources/Sprites/r-typesheet42.gif";
@@ -75,10 +75,11 @@ int main()
 
     reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);
-    reg.add_system<Position, Size, Sprite, Player, Rectangle, InputField>(display);
+    reg.add_system<Position, Size, Sprite, Player, Rectangle, InputField>(
+        display);
     reg.add_system<Direction, Player, Sprite>(handle_dir_inputs);
     reg.add_system<Player, Position, Size>(handle_shoot_inputs);
-//    reg.add_system<InputField, Rectangle>(hadle_text_inputs); 
+    //    reg.add_system<InputField, Rectangle>(hadle_text_inputs);
     reg.add_system<Position, Size>(make_infinite_background);
     reg.add_system<Position, Player>(updateWithSnapshots);
 
