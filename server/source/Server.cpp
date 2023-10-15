@@ -1,32 +1,23 @@
-#include "Server.hpp"
+#include <boost/archive/archive_exception.hpp>
+#include <boost/asio.hpp>
+#include <boost/asio/buffer.hpp>
+#include <boost/asio/deadline_timer.hpp>
+#include <boost/asio/io_context.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/bind.hpp>
 #include <exception>
 #include <iostream>
 #include <istream>
 #include <map>
 #include <semaphore>
-#include <thread>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/asio.hpp>
-#include <boost/asio/buffer.hpp>
-#include <boost/asio/deadline_timer.hpp>
-#include <boost/asio/io_context.hpp>
-#include <boost/bind.hpp>
+#include "Server.hpp"
+#include "../../shared/Component.hpp"
 
 using boost::asio::ip::udp;
 std::binary_semaphore MainToThread {0};
 std::binary_semaphore ThreadToMain {0};
-
-void udp_server::handle_send(
-    const boost::system::error_code &error,
-    std::size_t bytes_transferred) // Callback to the send function
-{
-    if (!error)
-        start_receive();
-}
-
-void udp_server::handle_broadcast(
-    const boost::system::error_code &error,
-    std::size_t bytes_transferred) // Callback to broadcast
+void udp_server::handle_broadcast(const boost::system::error_code &error, std::size_t bytes_transferred) //Callback to broadcast
 {
     if (!error) {}
 }
@@ -34,11 +25,13 @@ void udp_server::handle_broadcast(
 void udp_server::handle_check(const boost::system::error_code &error)
 {
     if (!error) {
-        std::cout << "check" << std::endl;
         auto now = boost::posix_time::microsec_clock::universal_time();
-        for (auto it = clients.begin(); it != clients.end();) {
-            if ((now - it->second).total_seconds() > 5) {
+                std::cout << "check\n";
+        for (auto it = clients.begin(); it != clients.end(); ) {
+            if ((now - it->second._timer).total_seconds() > 5) {
                 std::cout << "Client " << it->first << " disconnected\n";
+                std::cout << "Killed entity " << it->second._id << std::endl;
+                reg.kill_entity(reg.entity_from_index(it->second._id));
                 it = clients.erase(it);
             } else {
                 ++it;
@@ -55,68 +48,123 @@ void udp_server::start_check()
         &udp_server::handle_check, this, boost::asio::placeholders::error));
 }
 
-void start_snapshot(UserCmd state, std::size_t id) {}
-
-void udp_server::multiple_broadcast(
-    std::map<udp::endpoint, boost::posix_time::ptime> tmp,
-    std::map<std::size_t, std::vector<UserCmd>> commands)
+void udp_server::multiple_broadcast(std::map<udp::endpoint, struct Clients> tmp, std::vector<NetEnt> netent)
 {
-    Message test;
-    test.type = 1;
-    for (const auto &client : commands)
-        for (const auto &client_command : client.second)
-            start_snapshot(client_command, client.first);
-
-    for (const auto &client_endpoint : tmp) {
-        _socket.async_send_to(
-            boost::asio::buffer(&test, sizeof(test)), client_endpoint.first,
-            boost::bind(
-                &udp_server::handle_broadcast, this,
+    std::ostringstream oss;
+    boost::archive::binary_oarchive archive(oss);
+    archive << netent;
+    std::string serializedData = oss.str();
+    try {
+        std::ostringstream oss;
+        boost::archive::binary_oarchive archive(oss);
+        archive << netent;
+        std::string serializedData = oss.str();
+        for (const auto& client_endpoint : tmp) {
+            if (client_endpoint.second.isClientConnected == false)
+                continue;
+            _socket.async_send_to(boost::asio::buffer(serializedData.c_str(), serializedData.size()), client_endpoint.first,
+                boost::bind(&udp_server::handle_broadcast, this,
                 boost::asio::placeholders::error,
                 boost::asio::placeholders::bytes_transferred));
+        }
+    } catch (boost::archive::archive_exception &e) {
+        std::cout << "Archive Error: " << e.what() << std::endl;
     }
 }
 
-void run_system() {}
+void udp_server::run_system()
+{
+    reg.user_cmds = std::move(cmd);
+    reg.run_systems();
+}
 
-void udp_server::broadcast() // Broadcast a message to all connected clients
-                             // that already sent a message
+void udp_server::start_snapshot() // Broadcast a message to all connected clients that already sent a message 
 {
     while (1) {
         MainToThread.acquire();
-        std::map<udp::endpoint, boost::posix_time::ptime> tmp = clients;
-        run_system();
-        ThreadToMain.release();
+        auto tmp = clients;
         cmd_mutex.lock();
-        multiple_broadcast(tmp, std::move(cmd));
+        run_system();
+        std::vector<NetEnt> netent = std::move(reg._netent);
         cmd_mutex.unlock();
+        multiple_broadcast(tmp, netent);
+        ThreadToMain.release();
     }
 }
 
 void udp_server::handle_tick() // tick every seconds
 {
-    MainToThread.release();
-    ThreadToMain.acquire();
-    tick_timer.expires_from_now(boost::posix_time::millisec(50));
-    tick_timer.async_wait(boost::bind(&udp_server::handle_tick, this));
+    while (true) {
+        MainToThread.release();
+		ThreadToMain.acquire();
+		tick_timer.expires_from_now(boost::posix_time::millisec(50));
+        ResetFrameTime();
+		tick_timer.wait();
+	}
 }
 
 void udp_server::deserialize(const std::size_t bytes_transferred)
 {
-    std::size_t i = 1;
-    for (const auto &client_endpoint : clients) {
-        if (client_endpoint.first == _remote_point)
-            break;
-        i++;
+    try {
+        std::string seralizedData(_recv_buffer.data(), bytes_transferred);
+        std::istringstream iss(seralizedData);
+        boost::archive::binary_iarchive archive(iss);
+        UserCmd tmp;
+        archive >> tmp;
+        //std::cout << "je suis le cmd moved x: " << tmp.moved.x << std::endl;
+        cmd_mutex.lock();
+        cmd[clients[_remote_point]._id].push_back(tmp);
+        cmd_mutex.unlock();
+    } catch (boost::archive::archive_exception &e) {
+        std::cerr << "deserialization failed: "  << e.what() << std::endl;
     }
-    std::string seralizedData(_recv_buffer.data(), bytes_transferred);
-    std::istringstream iss(seralizedData);
-    boost::archive::binary_iarchive archive(iss);
-    UserCmd tmp;
-    archive >> tmp;
-    cmd_mutex.lock();
-    cmd[i].push_back(tmp);
-    cmd_mutex.unlock();
+}
+
+void udp_server::handle_send(const boost::system::error_code &error, std::size_t bytes_transferred)
+{
+    if (!error) {
+
+    }
+}
+
+void udp_server::send_playerId(std::size_t playerId, udp::endpoint client_endpoint)
+{
+    Utils::PlayerId player;
+    player.id = playerId;
+    std::ostringstream oss;
+    boost::archive::binary_oarchive archive(oss);
+    archive << player;
+    std::string serializedData = oss.str();
+    _socket.async_send_to(boost::asio::buffer(serializedData.c_str(), serializedData.size()), client_endpoint,
+        boost::bind(&udp_server::handle_send, this,
+        boost::asio::placeholders::error,
+        boost::asio::placeholders::bytes_transferred));
+}
+
+void udp_server::wait_for_connexion(std::size_t bytes_transferred)
+{
+    if (bytes_transferred != 1 && clients.size() == 0)
+        return;
+    if (bytes_transferred == 1 && clients.count(_remote_point) == 0) {
+        if (clients.size() == 0)
+            start_threads();
+        Entity player = reg.spawn_entity();
+        Player nePlayer((size_t)player);
+        Position nePos(0,0);
+        reg.add_component(player, std::move(nePlayer));
+        reg.add_component(player, std::move(nePos));
+        clients[_remote_point]._id = (size_t)player;
+        clients[_remote_point].isClientConnected = false;
+        clients[_remote_point]._timer = boost::posix_time::microsec_clock::universal_time();
+        send_playerId(clients[_remote_point]._id, _remote_point); 
+    } else if (bytes_transferred == 1 && clients.count(_remote_point) != 0) {
+        clients[_remote_point]._timer = boost::posix_time::microsec_clock::universal_time();
+        send_playerId(clients[_remote_point]._id, _remote_point); 
+    } else {
+        clients[_remote_point].isClientConnected = true;
+        clients[_remote_point]._timer = boost::posix_time::microsec_clock::universal_time();
+        deserialize(bytes_transferred);
+    }
 }
 
 void udp_server::handle_receive(
@@ -125,10 +173,19 @@ void udp_server::handle_receive(
 {
     if (!error || error == boost::asio::error::message_size) {
         std::cout << "Received " << bytes_transferred << "bytes" << std::endl;
+        if (clients.count(_remote_point) == 0) {
+            wait_for_connexion(bytes_transferred); 
+            start_receive();
+            return;
+        }
         if (clients.count(_remote_point) > 0 || clients.size() <= 4) {
-            clients[_remote_point] =
-                boost::posix_time::microsec_clock::universal_time();
-            deserialize(bytes_transferred);
+            if (clients[_remote_point].isClientConnected == false) {
+                wait_for_connexion(bytes_transferred);
+                start_receive();
+            } else {
+                clients[_remote_point]._timer = boost::posix_time::microsec_clock::universal_time();
+                deserialize(bytes_transferred);
+            }
         }
         start_receive();
     }
@@ -143,18 +200,57 @@ void udp_server::start_receive() // Receive function
             boost::asio::placeholders::bytes_transferred));
 }
 
-udp_server::udp_server(std::size_t port)
-    : _svc(), _socket(_svc, udp::endpoint(udp::v4(), port)), tick_timer(_svc),
-      check_timer(_svc)
+void synchronize(Registry &reg, sparse_array<Position> &positions)
 {
-    _port = port;
-    tick = std::thread(&udp_server::handle_tick, this);       // Timer thread
-    broadcasting = std::thread(&udp_server::broadcast, this); // Snapshot thread
+    for (auto &player : reg.user_cmds) {
+        auto &pos = positions[player.first];
+        for (auto &cmds : player.second) {
+            pos->pos_X += cmds.moved.x;
+            pos->pos_Y += cmds.moved.y;
+        }
+    }
+}
+
+void extract(Registry &reg, sparse_array<Position> &positions)
+{
+    for (size_t ind = 0; ind < positions.size(); ind++) {
+        auto &pos = positions[ind];
+        if (!pos) {
+            continue;
+        }
+        NetEnt tmp;
+        tmp.id = ind;
+        tmp.pos.x = pos->pos_X;
+        tmp.pos.y = pos->pos_Y;
+        reg._netent.push_back(tmp);
+    }
+}
+
+void udp_server::start_threads()
+{
+    tick = std::thread(&udp_server::handle_tick, this); //Timer thread
+    broadcasting = std::thread(&udp_server::start_snapshot, this); // Snapshot thread
     tick.detach();
     broadcasting.detach();
-
-    start_receive();
     start_check();
+}
+
+udp_server::udp_server(std::size_t port) : _svc(), _socket(_svc, udp::endpoint(udp::v4(), port)), tick_timer(_svc), check_timer(_svc)
+{
+    reg.register_component<Size>();
+    reg.register_component<Position>();
+    reg.register_component<Speed>();
+    reg.register_component<Direction>();
+    reg.register_component<SpawnGrace>();
+    reg.register_component<Player>();
+    reg.add_system<Position>(synchronize);
+    reg.add_system<Position, Size, SpawnGrace>(colision);
+    reg.add_system<Position, Speed, Direction>(move);
+    reg.add_system<Position>(extract);
+
+    _port = port;
+
+    start_receive(); 
     _svc.run();
 }
 
@@ -165,10 +261,20 @@ udp_server::~udp_server()
     broadcasting.std::thread::~thread();
 }
 
+int helper()
+{
+    std::cout << "USAGE\n";
+    std::cout << "\t./server <port>\n";
+    std::cout << " port\tport number of the server\n";
+    return 0;
+}
+
 int main(int ac, char **av)
 {
     try {
         std::size_t port = 5000;
+        if (ac == 2 && (std::string(av[1]) == "-h" || std::string(av[1]) == "--help"))
+            return helper();
         if (ac == 2 && std::stoi(av[1]))
             port = std::stoi(av[1]);
         udp_server server(port);

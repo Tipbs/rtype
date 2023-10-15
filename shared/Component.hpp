@@ -2,14 +2,15 @@
 
 #include <string>
 #include <utility>
+#include <chrono>
 
 #ifdef SERVER
 	float GetFrameTime();
-	double GetTime();
 	void ResetFrameTime();
 #else
 	#include <raylib.h>
 #endif // !SERVER
+std::chrono::steady_clock::time_point GetTimePoint();
 
     struct Current_Player {
         size_t id;

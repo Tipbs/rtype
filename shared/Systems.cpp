@@ -4,34 +4,36 @@
 #include <iostream>
 #include <ostream>
 #include "Systems.hpp"
+#include <chrono>
 #include "indexed_zipper.hpp"
 #include "zipper.hpp"
 
 #ifdef SERVER
-    #include <chrono>
-
+	std::mutex mutex;
 	static auto time_since_last_tick = std::chrono::high_resolution_clock::now(); // voir si raylib utilise m�me chose
 	float GetFrameTime()
 	{
+		std::scoped_lock(mutex);
 		const auto now = std::chrono::high_resolution_clock::now();
 		return std::chrono::duration<double>(time_since_last_tick - now).count();
 	}
 
-    double GetTime()
-    {
-        return 1.0;
-    }
-
     void ResetFrameTime()
 	{
+		std::scoped_lock(mutex);
 		time_since_last_tick = std::chrono::high_resolution_clock::now();
 	}
 #else
 	#include <raylib.h>
 #endif // !SERVER
 
+std::chrono::steady_clock::time_point GetTimePoint()
+{
+	return std::chrono::steady_clock::now();
+}
+
 void move(Registry &r, 
-sparse_array<Position> &positions, 
+sparse_array<Position> &positions,
 sparse_array<Speed> &speed, 
 sparse_array<Direction> &dir)
 {
@@ -61,12 +63,22 @@ sparse_array<Position> &positions,
 sparse_array<Size> &size, 
 sparse_array<SpawnGrace> &grace)
 {
-    double time = GetTime();
-    for (auto &&[pos, siz, gra]: zipper(positions, size, grace)) {
-        if (gra.value_or(SpawnGrace(0, 0)).creation_time + gra.value_or(SpawnGrace(0, 0)).timer >= time)
-                continue;
-        for (auto &&[pos2, siz2, gra2]: zipper(positions, size, grace)) {
-            if (gra2.value_or(SpawnGrace(0, 0)).creation_time + gra2.value_or(SpawnGrace(0, 0)).timer >= time)
+    std::chrono::steady_clock::time_point time = GetTimePoint();
+    for (auto &&[ind, pos, siz]: zipper(positions, size)) {
+        //std::cout << "temps d'origine : "
+        //    << grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time.time_since_epoch()
+        //          << std::endl;
+        //std::cout << "temps de grace : "
+        //    << grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).timer
+        //          << std::endl;
+        //std::cout << "temps actuel : " << time.time_since_epoch() << std::endl;
+        if (grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time + grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).timer >=
+            time)
+            continue;
+        for (size_t ind2 = ind + 1; ind2 < positions.size(); ind2++) {
+            if (grace[ind2].value().creation_time +
+                    grace[ind2].value().timer >=
+                time)
                 continue;
             if (pos.value().pos_X > pos2.value().pos_X + siz2.value().size_X)
                 continue;

@@ -47,6 +47,13 @@ class Registry {
         _insert_funcs;
     std::vector<std::function<void(Registry &)>> _systems;
     size_t _maxId = 0;
+    #ifndef SERVER
+		ThreadNetEnt netEnts;
+        ThreadUserCmd currentCmd;
+	#else
+        std::map<std::size_t, std::vector<UserCmd>> user_cmds;
+        std::vector<NetEnt> _netent;
+    #endif // !SERVER
 };
 
 /**
@@ -58,8 +65,7 @@ class Registry {
 template<typename Component>
 inline void Registry::erase(const Entity &entity)
 {
-    std::any_cast<sparse_array<Component>>(
-        _components_arrays[typeid(Component)])[(size_t) entity] = std::nullopt;
+	std::any_cast<sparse_array<Component> &>(_components_arrays[typeid(Component)])[(size_t)entity] = std::nullopt;
 }
 
 /**
