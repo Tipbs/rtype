@@ -129,6 +129,7 @@ void udp_client::net_get_id(const boost::system::error_code &error, std::size_t 
 void udp_client::fetch_player_id()
 {
     std::chrono::system_clock::time_point timeout = std::chrono::system_clock::now();
+    _socket.send_to(boost::asio::buffer({'\0'}, 1), _remote_point);
     boost::asio::ip::udp::endpoint test;
     _socket.async_receive_from(boost::asio::buffer(_recv_buffer), test,
         boost::bind(&udp_client::net_get_id, this,
@@ -149,15 +150,16 @@ void udp_client::fetch_player_id()
 }
 
 udp_client::udp_client(boost::asio::io_context &svc, const std::string &ip, const std::string &port, Registry &reg)
-    : _socket(svc, udp::v4()), timer(svc), _reg(reg), _svc(svc)
+    : _socket(svc), timer(svc), _reg(reg), _svc(svc)
 {
+    _socket.open(udp::v4());
     udp::resolver resolver(svc);
-    udp::resolver::query query(udp::v4(), ip, port);
+    udp::resolver::query query(boost::asio::ip::udp::v4(), ip, port);
     udp::resolver::iterator iter = resolver.resolve(query);
     _remote_point = *iter;
-    //fetch_player_id();
-    std::thread fetch(&udp_client::fetch_player_id, this);
-    fetch.join();
+    fetch_player_id();
+    //std::thread fetch(&udp_client::fetch_player_id, this);
+    //fetch.join();
     tick = std::thread(&udp_client::handle_tick, this); //Timer thread
     sending = std::thread(&udp_client::send_user, this); // Snapshot thread
     receive = std::thread(&udp_client::start_receive, this);
