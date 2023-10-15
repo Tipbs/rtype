@@ -8,6 +8,7 @@
 #include "Sparse_array.hpp"
 #include "Systems.hpp"
 #include "zipper.hpp"
+#include "Parser.hpp"
 
 void logging_system(Registry &r, sparse_array<Position> const &positions)
 {

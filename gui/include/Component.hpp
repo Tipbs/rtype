@@ -6,15 +6,19 @@
 #define COMPONENT_HPP
 
 struct Player {
+};
+
+struct NetworkEntity {
     int id = 0;
-    Player() : id(0) {};
-    Player(int x) : id(x) {};
+    NetworkEntity() : id(0) {};
+    NetworkEntity(int x) : id(x) {};
 };
 
 struct Position {
     double pos_X = 0;
     double pos_Y = 0;
     Position(double x, double y) : pos_X(x), pos_Y(y) {};
+    Position(Utils::Vec2 vec) : pos_X(vec.x), pos_Y(vec.y) {};
 };
 
 struct Damages {

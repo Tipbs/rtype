@@ -12,14 +12,30 @@ void print_position(Registry &r, sparse_array<Position> positions)
         std::cout << "Position = { " << pos->pos_X << ", " << pos->pos_Y << " }" << std::endl;
 }
 
-TEST_CASE("Register", "ECS")
+TEST_CASE("Spawn_entity", "REGISTER")
 {
     Registry reg;
-    sparse_array<Position> positions(0);
     Entity const entity = reg.spawn_entity();
 
     reg.register_component<Position>();
     reg.emplace_component<Position>(entity, 1, 2);
+    const sparse_array<Position> &pos = reg.get_components<Position>();
+    REQUIRE(pos[0].has_value());
+    REQUIRE(pos[0].value().pos_X == 1);
+    REQUIRE(pos[0].value().pos_Y == 2);
+}
+
+TEST_CASE("Kill_entity", "REGISTER")
+{
+    sparse_array<Position> positions;
+    Registry reg;
+    Entity const entity = reg.spawn_entity();
+
+    reg.register_component<Position>();
+    reg.emplace_component<Position>(entity, 1, 2);
+    reg.kill_entity(entity);
+    const sparse_array<Position> &pos = reg.get_components<Position>();
+    REQUIRE(!(pos[0].has_value()));
 }
 
 TEST_CASE("System", "ECS")
@@ -51,8 +67,6 @@ void print_position_zipper(Registry &r, sparse_array<Position> positions, sparse
 
 TEST_CASE("zipper_iterator", "ECS")
 {
-    sparse_array<Position> positions;
-    sparse_array<Damages> damage;
     Registry reg;
     Entity const entity = reg.spawn_entity();
     Entity const entity2 = reg.spawn_entity();

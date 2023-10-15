@@ -16,6 +16,8 @@ class Registry {
   public:
     template<class Component>
     sparse_array<Component> &register_component();
+    template<class ...Component>
+    std::tuple<sparse_array<Component>...> &register_components();
     template<class Component>
     sparse_array<Component> &get_components();
     template<class Component>
@@ -93,6 +95,18 @@ inline sparse_array<Component> &Registry::register_component()
         typeid(Component), &Registry::insert<Component>);
     return std::any_cast<sparse_array<Component> &>(
         _components_arrays.at(typeid(Component)));
+}
+
+/**
+ * @brief Add many new component with its erase and insert function.
+ *
+ * @tparam  Component   The Components to insert.
+ * @return  The tuple of sparse_array of Component newly created.
+ */
+template<typename ...Component>
+inline std::tuple<sparse_array<Component>...> &Registry::register_components()
+{
+    return std::tie(register_components<Component>()...);    
 }
 
 /**
