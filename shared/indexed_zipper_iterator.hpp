@@ -22,9 +22,8 @@ class indexed_zipper_iterator {
     using iterator_tuple = std::tuple<iterator_t<Containers>...>;
     // If we want indexed_zipper_iterator to be built by zipper only .
     // friend containers::zipper<Containers...>;
-    indexed_zipper_iterator(iterator_tuple const &it_tuple, size_t max);
     indexed_zipper_iterator(
-        iterator_tuple const &it_tuple, size_t idx, size_t max);
+        iterator_tuple const &it_tuple, size_t max, size_t idx = 0);
 
   public:
     indexed_zipper_iterator(indexed_zipper_iterator const &z) = default;
@@ -68,23 +67,12 @@ class indexed_zipper_iterator {
 
 template<class... Containers>
 inline indexed_zipper_iterator<Containers...>::indexed_zipper_iterator(
-    iterator_tuple const &it_tuple, size_t max)
-{
-    _current = it_tuple;
-    _max = max;
-    _idx = 0;
-    for (; all_set(_seq) && _idx < _max; _idx++)
-        ;
-}
-
-template<class... Containers>
-inline indexed_zipper_iterator<Containers...>::indexed_zipper_iterator(
-    iterator_tuple const &it_tuple, size_t idx, size_t max)
+    iterator_tuple const &it_tuple, size_t max, size_t idx)
 {
     _current = it_tuple;
     _max = max;
     _idx = idx;
-    for (; all_set(_seq) && _idx < _max; _idx++)
+    for (; _idx < _max && all_set(_seq); _idx++)
         ;
 }
 
