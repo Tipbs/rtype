@@ -5,6 +5,7 @@
 #include <ostream>
 #include "Systems.hpp"
 #include "indexed_zipper.hpp"
+#include "zipper.hpp"
 
 #ifdef SERVER
     #include <chrono>
@@ -61,21 +62,19 @@ sparse_array<Size> &size,
 sparse_array<SpawnGrace> &grace)
 {
     double time = GetTime();
-    for (auto &&[ind, pos, siz]: indexed_zipper(positions, size)) {
-        if (!(pos && siz))
-            continue;
-        if (grace[ind].value_or(SpawnGrace(0, 0)).creation_time + grace[ind].value_or(SpawnGrace(0, 0)).timer >= time)
+    for (auto &&[pos, siz, gra]: zipper(positions, size, grace)) {
+        if (gra.value_or(SpawnGrace(0, 0)).creation_time + gra.value_or(SpawnGrace(0, 0)).timer >= time)
                 continue;
-        for (size_t ind2 = ind + 1; ind2 < positions.size(); ind2++) {
-            if (grace[ind2].value_or(SpawnGrace(0, 0)).creation_time + grace[ind2].value_or(SpawnGrace(0, 0)).timer >= time)
+        for (auto &&[pos2, siz2, gra2]: zipper(positions, size, grace)) {
+            if (gra2.value_or(SpawnGrace(0, 0)).creation_time + gra2.value_or(SpawnGrace(0, 0)).timer >= time)
                 continue;
-            if (positions[ind].value().pos_X > positions[ind2].value().pos_X + size[ind2].value().size_X)
+            if (pos.value().pos_X > pos2.value().pos_X + siz2.value().size_X)
                 continue;
-            else if (positions[ind].value().pos_Y > positions[ind2].value().pos_Y + size[ind2].value().size_Y)
+            else if (pos.value().pos_Y > pos2.value().pos_Y + siz2.value().size_Y)
                 continue;
-            else if (positions[ind2].value().pos_X > positions[ind].value().pos_X + size[ind].value().size_X)
+            else if (pos2.value().pos_X > pos.value().pos_X + siz.value().size_X)
                 continue;
-            else if (positions[ind2].value().pos_Y > positions[ind].value().pos_Y + size[ind].value().size_Y)
+            else if (pos2.value().pos_Y > pos.value().pos_Y + siz.value().size_Y)
                 continue;
             else {  }
                 //TODO
