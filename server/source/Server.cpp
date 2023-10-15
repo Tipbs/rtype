@@ -101,6 +101,7 @@ void udp_server::handle_tick() // tick every seconds
         MainToThread.release();
 		ThreadToMain.acquire();
 		tick_timer.expires_from_now(boost::posix_time::millisec(50));
+        ResetFrameTime();
 		tick_timer.wait();
 	}
 }

@@ -7,16 +7,18 @@
 #include <chrono>
 
 #ifdef SERVER
-
+	std::mutex mutex;
 	static auto time_since_last_tick = std::chrono::high_resolution_clock::now(); // voir si raylib utilise même chose
 	float GetFrameTime()
 	{
+		std::scoped_lock(mutex);
 		const auto now = std::chrono::high_resolution_clock::now();
 		return std::chrono::duration<double>(time_since_last_tick - now).count();
 	}
 
     void ResetFrameTime()
 	{
+		std::scoped_lock(mutex);
 		time_since_last_tick = std::chrono::high_resolution_clock::now();
 	}
 #else
