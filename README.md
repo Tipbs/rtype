@@ -1,24 +1,26 @@
 # R-Type
 
-[Project's description]
+R-Type is a video game based on the famous game series of the same name. In this game, you control a starship and your goal is to kill wave of starship's enemies.
 
 ## How does it work?
 
-[Explain how this project is working]
+There is a r-type_client and a r-type_server. You can play from 1 to 4 player on the same server
 
 ## Getting Started
 
 ### Installation
 
-[Explain how to install all of the project's dependencies]
+conan install . --build=missing --profile=default
 
 ### Quickstart
 
-[Explain how to run this project]
+cd build && cmake .. --preset=conan-release
+cd .. && cmake --build --preset conan-release
 
 ### Usage
 
-[Explain how to use this project]
+./build/r-type_client
+./build/r-type_server
 
 ## Our team :heart:
 
