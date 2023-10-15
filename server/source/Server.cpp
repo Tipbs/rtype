@@ -28,8 +28,8 @@ void udp_server::handle_broadcast(const boost::system::error_code &error, std::s
 void udp_server::handle_check(const boost::system::error_code &error)
 {
     if (!error) {
-        std::cout << "check" << std::endl;
         auto now = boost::posix_time::microsec_clock::universal_time();
+                std::cout << "check\n";
         for (auto it = clients.begin(); it != clients.end(); ) {
             if ((now - it->second._timer).total_seconds() > 5) {
                 std::cout << "Client " << it->first << " disconnected\n";
@@ -145,7 +145,11 @@ void udp_server::send_playerId(std::size_t playerId, udp::endpoint client_endpoi
 
 void udp_server::wait_for_connexion(std::size_t bytes_transferred)
 {
+    if (bytes_transferred != 1 && clients.size() == 0)
+        return;
     if (bytes_transferred == 1 && clients.count(_remote_point) == 0) {
+        if (clients.size() == 0)
+            start_threads();
         Entity player = reg.spawn_entity();
         Player nePlayer((size_t)player);
         Position nePos(0,0);
@@ -156,6 +160,7 @@ void udp_server::wait_for_connexion(std::size_t bytes_transferred)
         clients[_remote_point]._timer = boost::posix_time::microsec_clock::universal_time();
         send_playerId(clients[_remote_point]._id, _remote_point); 
     } else if (bytes_transferred == 1 && clients.count(_remote_point) != 0) {
+        clients[_remote_point]._timer = boost::posix_time::microsec_clock::universal_time();
         send_playerId(clients[_remote_point]._id, _remote_point); 
     } else {
         clients[_remote_point].isClientConnected = true;
@@ -171,6 +176,7 @@ void udp_server::handle_receive(const boost::system::error_code &error, std::siz
         if (clients.count(_remote_point) == 0) {
             wait_for_connexion(bytes_transferred); 
             start_receive();
+            return;
         }
         if (clients.count(_remote_point) > 0 || clients.size() <= 4) {
             if (clients[_remote_point].isClientConnected == false) {
@@ -220,6 +226,15 @@ void extract(Registry &reg, sparse_array<Position> &positions)
     }
 }
 
+void udp_server::start_threads()
+{
+    tick = std::thread(&udp_server::handle_tick, this); //Timer thread
+    broadcasting = std::thread(&udp_server::start_snapshot, this); // Snapshot thread
+    tick.detach();
+    broadcasting.detach();
+    start_check();
+}
+
 udp_server::udp_server(std::size_t port) : _svc(), _socket(_svc, udp::endpoint(udp::v4(), port)), tick_timer(_svc), check_timer(_svc)
 {
     reg.register_component<Size>();
@@ -234,13 +249,8 @@ udp_server::udp_server(std::size_t port) : _svc(), _socket(_svc, udp::endpoint(u
     reg.add_system<Position>(extract);
 
     _port = port;
-    tick = std::thread(&udp_server::handle_tick, this); //Timer thread
-    broadcasting = std::thread(&udp_server::start_snapshot, this); // Snapshot thread
-    tick.detach();
-    broadcasting.detach();
 
     start_receive(); 
-    start_check();
     _svc.run();
 }
 
