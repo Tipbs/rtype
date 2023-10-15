@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <iostream>
 #include <semaphore>
-#include "../../shared/Bundle.hpp"
+#include "Bundle.hpp"
 #include "../../shared/Registry.hpp"
 #include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
@@ -30,7 +30,6 @@ int main()
     Entity const background = reg.spawn_entity();
     Position bgPos(0, 0);
     Size bgSize(ScreenWidth, ScreenHeight);
-    Sprite bgsprite(bgpath.c_str(), ScreenWidth, ScreenHeight);
     std::string bgpath =
         "./gui/ressources/Backgrounds/Back1bis.png"; // 2 > 3 > 1
     Speed bgspe(200);
@@ -38,7 +37,7 @@ int main()
     Sprite bgsprite(bgpath.c_str(), 2 * ScreenWidth, 2 * ScreenHeight);
 
     Entity const new_entity = reg.spawn_entity();
-    Player p(net_client.get_player_id());
+    Player player((size_t)new_entity % 5, net_client.get_player_id());
     Position nePos(0, 0);
     Size neSize(83, 43);
     std::string nepath = "./gui/ressources/Sprites/r-typesheet42.gif";
@@ -46,7 +45,6 @@ int main()
     Direction diro(50, 0);
     SpawnGrace gra(std::chrono::seconds(5));
     Sprite nesprite(nepath.c_str(), 83, 43, 5, 5);
-    MoveAnimCounter play0count(1);
 
     reg.register_component<Size>();
     reg.register_component<Position>();
@@ -54,7 +52,6 @@ int main()
     reg.register_component<Speed>();
     reg.register_component<Direction>();
     reg.register_component<SpawnGrace>();
-    reg.register_component<MoveAnimCounter>();
     reg.register_component<Player>();
     reg.register_component<Current_Player>();
     reg.register_component<InputField>();
@@ -72,13 +69,12 @@ int main()
     reg.add_component(new_entity, std::move(speedo));
     reg.add_component(new_entity, std::move(diro));
     reg.add_component(new_entity, std::move(gra));
-    reg.add_component(new_entity, std::move(play0count));
-    reg.add_component(new_entity, std::move(p));
+    reg.add_component(new_entity, std::move(player));
 
     reg.add_system<Position, Size, SpawnGrace>(colision);
     reg.add_system<Position, Speed, Direction>(move);
     reg.add_system<Position, Size, Sprite, Player, Rectangle, InputField>(display);
-    reg.add_system<Direction, MoveAnimCounter, Sprite>(handle_dir_inputs);
+    reg.add_system<Direction, Player, Sprite>(handle_dir_inputs);
     reg.add_system<Player, Position, Size>(handle_shoot_inputs);
     reg.add_system<InputField, Rectangle>(hadle_text_inputs); 
     reg.add_system<Position, Size>(make_infinite_background);

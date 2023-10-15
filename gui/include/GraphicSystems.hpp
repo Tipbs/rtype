@@ -1,5 +1,5 @@
 #pragma once
-#include "../../shared/Bundle.hpp"
+#include "Bundle.hpp"
 #include "../../shared/Sparse_array.hpp"
 #include "../../shared/Systems.hpp"
 #include "GraphicComponents.hpp"

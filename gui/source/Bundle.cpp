@@ -1,8 +1,8 @@
 #include "Bundle.hpp"
+#include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
-#include "Component.hpp"
 #include "random"
 
 size_t create_player(Registry &reg, bool is_curret_player)
@@ -14,7 +14,7 @@ size_t create_player(Registry &reg, bool is_curret_player)
     std::string path = "./gui/ressources/Sprites/r-typesheet42.gif";
     Speed speedo(300);
     Direction diro(0, 0);
-    SpawnGrace gra(5);
+    SpawnGrace gra(std::chrono::seconds(5));
     Sprite sprite(path.c_str(), 83, 43, 5, 5);
     if (is_curret_player)
         player.id = (size_t)new_entity;

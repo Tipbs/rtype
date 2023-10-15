@@ -1,11 +1,16 @@
 #pragma once
 
 #include <any>
-#include <functional>
-#include <typeindex>
 #include <unordered_map>
-#include "Entity.hpp"
+#include <typeindex>
+#include <functional>
 #include "Sparse_array.hpp"
+#include "Entity.hpp"
+#include "NetEnt.hpp"
+#include "UserCmd.hpp"
+#ifdef SERVER
+    #include <map>
+#endif // !SERVER
 
 class Registry {
     template<typename Component>
@@ -37,6 +42,13 @@ class Registry {
     template<class... Components, typename Function>
     void add_system(Function const &f); // taking it by reference .
     void run_systems();
+    #ifndef SERVER
+		ThreadNetEnt netEnts;
+        ThreadUserCmd currentCmd;
+	#else
+        std::map<std::size_t, std::vector<UserCmd>> user_cmds;
+        std::vector<NetEnt> _netent;
+    #endif // !SERVER
 
   private:
     std::unordered_map<std::type_index, std::any> _components_arrays;
@@ -47,13 +59,6 @@ class Registry {
         _insert_funcs;
     std::vector<std::function<void(Registry &)>> _systems;
     size_t _maxId = 0;
-    #ifndef SERVER
-		ThreadNetEnt netEnts;
-        ThreadUserCmd currentCmd;
-	#else
-        std::map<std::size_t, std::vector<UserCmd>> user_cmds;
-        std::vector<NetEnt> _netent;
-    #endif // !SERVER
 };
 
 /**

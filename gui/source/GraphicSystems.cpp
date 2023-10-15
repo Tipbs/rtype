@@ -107,10 +107,11 @@ void handle_dir_inputs(
         }
     }
 }
+}
 
 void handle_shoot_inputs(
-    Registry &r, sparse_array<Player> &anim, sparse_array<Position> &pos,
-    sparse_array<Size> &siz)
+        Registry &r, sparse_array<Player> &anim, sparse_array<Position> &pos,
+        sparse_array<Size> &siz)
 {
     for (auto &&[ind, anima, posi, sizo] : indexed_zipper(anim, pos, siz)) {
         if (!(anima && posi && sizo))
@@ -123,24 +124,24 @@ void handle_shoot_inputs(
 
             if (anim[ind]->IsShooting) {
                 std::cout << "Player id " << anim[ind]->color_id
-                          << " just shoot with a " << anim[ind]->weapon.type
-                          << " typed weapon, with an attack speed of "
-                          << anim[ind]->weapon.attack_speed << std::endl;
+                    << " just shoot with a " << anim[ind]->weapon._type
+                    << " typed weapon, with an attack speed of "
+                    << anim[ind]->weapon.attack_speed << std::endl;
 
                 create_ammo(
-                    r,
-                    Position(
-                        pos[ind]->pos_X + siz[ind]->size_X,
-                        pos[ind]->pos_Y + (siz[ind]->size_Y / 2.) - 15),
-                    anim[ind]->weapon);
+                        r,
+                        Position(
+                            pos[ind]->pos_X + siz[ind]->size_X,
+                            pos[ind]->pos_Y + (siz[ind]->size_Y / 2.) - 15),
+                        anim[ind]->weapon);
             }
         }
     }
 }
 
 void hadle_text_inputs(
-    Registry &r, sparse_array<InputField> &inputFields,
-    sparse_array<Rectangle> &rectangles)
+        Registry &r, sparse_array<InputField> &inputFields,
+        sparse_array<Rectangle> &rectangles)
 {
     for (auto &&[inputField, rectangle]: zipper(inputFields, rectangles)) {
         if (CheckCollisionPointRec(GetMousePosition(), rectangle.value())) {
@@ -171,7 +172,7 @@ void hadle_text_inputs(
 }
 
 void make_infinite_background(
-    Registry &r, sparse_array<Position> &pos, sparse_array<Size> &siz)
+        Registry &r, sparse_array<Position> &pos, sparse_array<Size> &siz)
 {
     if (pos[0] && siz[0]) {
         if (pos[0]->pos_X < -siz[0]->size_X)
@@ -215,8 +216,8 @@ void updateWithSnapshots(Registry &r, sparse_array<Position> &positions, sparse_
     for (auto it = net_ents.begin(); it != net_ents.end(); ++it) {
         auto net = *it;
         auto finded = std::find_if(players.begin(), players.end(), [&](std::optional<Player> &player) {
-			if (player) return player.value().id == net.id;
-        });
+                if (player) return player.value().id == net.id;
+                });
         if (finded != players.end()) {
             continue;
         }
@@ -232,8 +233,8 @@ void updateWithSnapshots(Registry &r, sparse_array<Position> &positions, sparse_
         auto const &player = players[i];
         if (pos && player) {
             auto finded = std::find_if(net_ents.begin(), net_ents.end(), [&] (NetEnt &ent) {
-                return ent.id == player.value().id;
-			});
+                    return ent.id == player.value().id;
+                    });
             if (finded == net_ents.end())
                 continue;
             pos.value().pos_X = finded->pos.x;

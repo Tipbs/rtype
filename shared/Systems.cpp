@@ -13,14 +13,14 @@
 	static auto time_since_last_tick = std::chrono::high_resolution_clock::now(); // voir si raylib utilise m�me chose
 	float GetFrameTime()
 	{
-		std::scoped_lock(mutex);
+		std::scoped_lock lock(mutex);
 		const auto now = std::chrono::high_resolution_clock::now();
 		return std::chrono::duration<double>(time_since_last_tick - now).count();
 	}
 
     void ResetFrameTime()
 	{
-		std::scoped_lock(mutex);
+		std::scoped_lock lock(mutex);
 		time_since_last_tick = std::chrono::high_resolution_clock::now();
 	}
 #else
@@ -57,40 +57,31 @@ sparse_array<Direction> &dir)
         }
     }
 }
-
 void colision(Registry &r,
 sparse_array<Position> &positions, 
 sparse_array<Size> &size, 
 sparse_array<SpawnGrace> &grace)
 {
-    std::chrono::steady_clock::time_point time = GetTimePoint();
-    for (auto &&[ind, pos, siz]: zipper(positions, size)) {
-        //std::cout << "temps d'origine : "
-        //    << grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time.time_since_epoch()
-        //          << std::endl;
-        //std::cout << "temps de grace : "
-        //    << grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).timer
-        //          << std::endl;
-        //std::cout << "temps actuel : " << time.time_since_epoch() << std::endl;
-        if (grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time + grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).timer >=
-            time)
+    auto time = GetTimePoint();
+    for (auto &&[ind, pos, siz]: indexed_zipper(positions, size)) {
+        if (!(pos && siz))
             continue;
+        if (grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time + grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).timer >= time)
+                continue;
         for (size_t ind2 = ind + 1; ind2 < positions.size(); ind2++) {
-            if (grace[ind2].value().creation_time +
-                    grace[ind2].value().timer >=
-                time)
+            if (grace[ind2].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time + grace[ind2].value_or(SpawnGrace(std::chrono::seconds(0))).timer >= time)
                 continue;
-            if (pos.value().pos_X > pos2.value().pos_X + siz2.value().size_X)
+            if (positions[ind].value().pos_X > positions[ind2].value().pos_X + size[ind2].value().size_X)
                 continue;
-            else if (pos.value().pos_Y > pos2.value().pos_Y + siz2.value().size_Y)
+            else if (positions[ind].value().pos_Y > positions[ind2].value().pos_Y + size[ind2].value().size_Y)
                 continue;
-            else if (pos2.value().pos_X > pos.value().pos_X + siz.value().size_X)
+            else if (positions[ind2].value().pos_X > positions[ind].value().pos_X + size[ind].value().size_X)
                 continue;
-            else if (pos2.value().pos_Y > pos.value().pos_Y + siz.value().size_Y)
+            else if (positions[ind2].value().pos_Y > positions[ind].value().pos_Y + size[ind].value().size_Y)
                 continue;
-            else {  }
-                //TODO
-                // std::cout << "y'a collision\n";
+            else {
+                std::cout << "ya collision\n";
+            }
         }
     }
 }
