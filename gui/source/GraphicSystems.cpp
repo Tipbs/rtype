@@ -117,6 +117,8 @@ void updateWithSnapshots(Registry &r, sparse_array<Position> &positions, sparse_
         create_player(r, net.id, pos);
         // create entity with info from net ent
         it = net_ents.erase(it);
+        if (it == net_ents.end())
+            break;
     }
     for (auto i = 0; i < positions.size(); ++i) {
         auto &pos = positions[i];
@@ -131,5 +133,6 @@ void updateWithSnapshots(Registry &r, sparse_array<Position> &positions, sparse_
             pos.value().pos_Y = finded->pos.y;
         } // pour le moment il n'y a pas l'ajout de nouvelles entités
     }
+    net_ents.clear();
     r.netEnts.mutex.unlock();
 }
