@@ -5,6 +5,7 @@
 #include <ostream>
 #include "Component.hpp"
 #include "Systems.hpp"
+#include "Registry.hpp"
 #include "indexed_zipper.hpp"
 
 #ifdef SERVER
@@ -56,7 +57,7 @@ sparse_array<Direction> &dir)
     }
 }
 
-void damages(
+void damages(Registry &r,
 sparse_array<Health> &healt,
 sparse_array<Damages> &dama, 
 size_t i1, size_t i2)
@@ -65,6 +66,11 @@ size_t i1, size_t i2)
     std::cout << "User " << i1 << " has taken " << dama[i2]->damages << " damages. He now have " << healt[i1]->health << " HP." << std::endl;
     healt[i2]->health -= dama[i1]->damages;
     std::cout << "User " << i2 << " has taken " << dama[i1]->damages << " damages. He now have " << healt[i2]->health << " HP." << std::endl;
+    if (healt[i1]->health <= 0)
+        r.kill_entity(i1);
+    if (healt[i2]->health <= 0)
+        r.kill_entity(i2);
+        
 
 }
 
@@ -93,7 +99,7 @@ sparse_array<Health> &helth)
             else if (positions[ind2].value().pos_Y > positions[ind].value().pos_Y + size[ind].value().size_Y)
                 continue;
             else {
-                damages(helth, dam, ind, ind2);
+                damages(r, helth, dam, ind, ind2);
             }
         }
     }

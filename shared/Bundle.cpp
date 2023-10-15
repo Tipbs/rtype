@@ -15,7 +15,7 @@ size_t create_player(Registry &reg, bool is_curret_player)
     Speed speedo(300);
     Direction diro(0, 0);
     SpawnGrace gra(5);
-    Damages damag(0);
+    Damages damag(1);
     Health healt(1);
     Sprite sprite(path.c_str(), 83, 43, 5, 5);
     if (is_curret_player)
@@ -36,8 +36,8 @@ size_t create_player(Registry &reg, bool is_curret_player)
 void create_ammo(Registry &reg, Position pos, float damage_mult)
 {
     Entity const new_entity = reg.spawn_entity();
-    int hitwidth = 120 * damage_mult;
-    int hitheight = 24 * damage_mult;
+    int hitwidth = 120 * (damage_mult / 2);
+    int hitheight = 24 * (damage_mult / 2);
     Size Size(hitwidth, hitheight); //hitbox
     std::string path = "./gui/ressources/Sprites/shoot_ammo.png"; // fichier de la munition
     Speed speedo(450);

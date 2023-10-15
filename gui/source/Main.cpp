@@ -20,7 +20,7 @@ int main()
     const int ScreenWidth = 1280;
     const int ScreenHeight = 720;
     InitWindow(ScreenWidth, ScreenHeight, "R-Type");
-    SetTargetFPS(10);
+    SetTargetFPS(60);
 
     Registry reg;
 
@@ -52,7 +52,7 @@ int main()
     reg.add_component(background, std::move(bgdir));
     reg.add_component(background, std::move(bgGrace));
 
-    create_player(reg, true);
+    reg.kill_entity(create_player(reg, true));
 
     reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);

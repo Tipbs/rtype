@@ -105,7 +105,7 @@ void handle_shoot_inputs(
         if (anim[ind]->id == ind) {
             if (IsKeyDown(KEY_SPACE)) {
                 anim[ind]->IsShooting = true;
-                anim[ind]->current_charge += (anim[ind]->current_charge >= 1.5) ? 0 : 5 * GetFrameTime();
+                anim[ind]->current_charge += (anim[ind]->current_charge >= 3) ? 0 : 5 * GetFrameTime();
             }
             if (IsKeyReleased(KEY_SPACE)) {
                 anim[ind]->IsShooting = false;
@@ -115,7 +115,7 @@ void handle_shoot_inputs(
                         pos[ind]->pos_X + (float)sizo->size_X,
                         pos[ind]->pos_Y + (float)sizo->size_Y/2),
                     anim[ind]->current_charge);
-                anim[ind]->current_charge = 0;
+                anim[ind]->current_charge = 1.;
                 }
 
             // if (anim[ind]->IsShooting) {
