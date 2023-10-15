@@ -1,11 +1,11 @@
 #include <cstdio>
 #include <iostream>
 #include <semaphore>
+#include "../../shared/Bundle.hpp"
 #include "../../shared/Registry.hpp"
 #include "../include/GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
 #include "raylib.h"
-#include "../../shared/Bundle.hpp"
 
 void logging_system(Registry &r, sparse_array<Position> const &positions)
 {
@@ -26,7 +26,8 @@ int main()
     Entity const background = reg.spawn_entity();
     Position bgPos(0, 0);
     Size bgSize(ScreenWidth, ScreenHeight);
-    std::string bgpath = "./gui/ressources/Backgrounds/Back1bis.png"; // 2 > 3 > 1
+    std::string bgpath =
+        "./gui/ressources/Backgrounds/Back1bis.png"; // 2 > 3 > 1
     Speed bgspe(200);
     Direction bgdir(-4, -1);
     Sprite bgsprite(bgpath.c_str(), 2 * ScreenWidth, 2 * ScreenHeight);
@@ -63,7 +64,6 @@ int main()
     reg.add_system<Direction, Player, Sprite>(handle_dir_inputs);
     reg.add_system<Player, Position, Size>(handle_shoot_inputs);
     reg.add_system<Position, Size>(make_infinite_background);
-    while (!WindowShouldClose()) {
+    while (!WindowShouldClose())
         reg.run_systems();
-    }
 }
