@@ -104,44 +104,60 @@ void udp_client::send_user()
     }
 }
 
-void udp_client::net_get_id(const boost::system::error_code &error, std::size_t bytes_transferred, std::atomic_int &id)
+void udp_client::net_get_id(const boost::system::error_code &error, std::size_t bytes_transferred)
 {
+    std::cout << "Received mais erreur net_get_id ;)" << bytes_transferred << "\n";
     if (!error) {
         std::cout << "net_get_id: Received " << bytes_transferred << " bytes" << std::endl;
-		std::string seralizedData(_recv_buffer.data(), bytes_transferred);
-		std::istringstream iss(seralizedData);
-		boost::archive::binary_iarchive archive(iss);
-		Utils::PlayerId tmp;
-		archive >> tmp;
-        id = tmp.id;;
+        try {
+			std::string seralizedData(_recv_buffer.data(), bytes_transferred);
+			std::istringstream iss(seralizedData);
+			boost::archive::binary_iarchive archive(iss);
+			Utils::PlayerId tmp;
+			archive >> tmp;
+			_player_id = tmp.id;
+        }
+        catch (std::exception err) {
+            std::cerr << "serialization exception: " << err.what();
+			throw err;
+        }
+    } else {
+        std::cout << "Erreur dans net_get_id: " << error.message() << std::endl;
     }
 }
 
 void udp_client::fetch_player_id()
 {
-    std::atomic_int player_id = -1;
-    std::chrono::steady_clock::time_point timeout = std::chrono::steady_clock::now();
-    _socket.async_receive_from(boost::asio::buffer(_recv_buffer), _remote_point,
-        boost::bind(&udp_client::handle_receive, this,
+    std::chrono::system_clock::time_point timeout = std::chrono::system_clock::now();
+    boost::asio::ip::udp::endpoint test;
+    _socket.async_receive_from(boost::asio::buffer(_recv_buffer), test,
+        boost::bind(&udp_client::net_get_id, this,
         boost::asio::placeholders::error,
         boost::asio::placeholders::bytes_transferred));
-    while (player_id == -1) {
-        if (timeout - std::chrono::steady_clock::now() > std::chrono::seconds(4))
+    while (_player_id == -1) {
+        if (std::chrono::system_clock::now() - timeout >
+            std::chrono::seconds(10)) {
+            std::cerr << "Failed to get player id from server\n";
             throw std::runtime_error("Failed to get player id from server");
-        _socket.send(boost::asio::buffer({'\0'}));
+        }
+        _socket.send_to(boost::asio::buffer({'\0'}, 1), _remote_point);
+        std::cout << "looping " << std::endl;
+        _svc.run();
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-    _player_id = player_id;
+    std::cout << "player id: " << _player_id << "\n";
 }
 
-udp_client::udp_client(boost::asio::io_context &_svc,const std::string &ip, const std::string &port, Registry &reg)
-    : _socket(_svc, udp::v4()), timer(_svc), _reg(reg)
+udp_client::udp_client(boost::asio::io_context &svc, const std::string &ip, const std::string &port, Registry &reg)
+    : _socket(svc, udp::v4()), timer(svc), _reg(reg), _svc(svc)
 {
-    udp::resolver resolver(_svc);
+    udp::resolver resolver(svc);
     udp::resolver::query query(udp::v4(), ip, port);
     udp::resolver::iterator iter = resolver.resolve(query);
     _remote_point = *iter;
-    get_player_id();
+    //fetch_player_id();
+    std::thread fetch(&udp_client::fetch_player_id, this);
+    fetch.join();
     tick = std::thread(&udp_client::handle_tick, this); //Timer thread
     sending = std::thread(&udp_client::send_user, this); // Snapshot thread
     receive = std::thread(&udp_client::start_receive, this);
