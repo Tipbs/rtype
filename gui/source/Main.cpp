@@ -78,7 +78,7 @@ int main()
     reg.add_system<Position, Size, Sprite, Player, Rectangle, InputField>(display);
     reg.add_system<Direction, Player, Sprite>(handle_dir_inputs);
     reg.add_system<Player, Position, Size>(handle_shoot_inputs);
-    reg.add_system<InputField, Rectangle>(hadle_text_inputs); 
+//    reg.add_system<InputField, Rectangle>(hadle_text_inputs); 
     reg.add_system<Position, Size>(make_infinite_background);
     reg.add_system<Position, Player>(updateWithSnapshots);
 
