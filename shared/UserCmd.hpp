@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <boost/serialization/serialization.hpp>
+#include <mutex>
 #include "Utils.hpp"
 
 class UserCmd {

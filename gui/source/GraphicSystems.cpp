@@ -84,26 +84,28 @@ void handle_dir_inputs(
                 heigh = (heigh <= 0) ? 0 : heigh - (5 * AnimationPad);
             }
 
-    if (dir[1]) { //1 is the entity num representing the player seen here
-        dir[1].value().dir_X = Moves.x;
-        dir[1].value().dir_Y = Moves.y;
-        r.currentCmd.mutex.lock();
-			r.currentCmd.cmd.moved.x += Moves.x;
-			r.currentCmd.cmd.moved.y += Moves.y;
-        r.currentCmd.mutex.unlock();
-            if (IsKeyPressed(KEY_C)) {
-                anim[ind]->color_id =
-                    anim[ind]->color_id == 4 ? 0 : anim[ind]->color_id + 1;
-            }
+            if (dir[1]) { // 1 is the entity num representing the player seen
+                          // here
+                dir[1].value().dir_X = Moves.x;
+                dir[1].value().dir_Y = Moves.y;
+                r.currentCmd.mutex.lock();
+                r.currentCmd.cmd.moved.x += Moves.x;
+                r.currentCmd.cmd.moved.y += Moves.y;
+                r.currentCmd.mutex.unlock();
+                if (IsKeyPressed(KEY_C)) {
+                    anim[ind]->color_id =
+                        anim[ind]->color_id == 4 ? 0 : anim[ind]->color_id + 1;
+                }
 
-            if (dir[ind]) { // 1 is the entity num representing the player seen
-                            // here
-                dir[ind].value().dir_X = Moves.x;
-                dir[ind].value().dir_Y = Moves.y;
-            }
+                if (dir[ind]) { // 1 is the entity num representing the player
+                                // seen here
+                    dir[ind].value().dir_X = Moves.x;
+                    dir[ind].value().dir_Y = Moves.y;
+                }
 
-            if (anim[ind])
-                anim[ind]->count = heigh;
+                if (anim[ind])
+                    anim[ind]->count = heigh;
+            }
         }
     }
 }

@@ -37,6 +37,7 @@ struct Player {
     bool IsShooting = false;
     Weapon weapon = Weapon(1, 5);
 
+    Player(size_t id) : id(id) {};
 	Player(double x): count(x) {id = -1;IsShooting = false; weapon = Weapon(1, 5);};
 	Player(int color_i): color_id(color_i) {id = -1;count = 1;IsShooting = false; weapon = Weapon(1, 5);};
 	Player(double x, int color_i): color_id(color_i), count(x) {id = -1;IsShooting = false; weapon = Weapon(1, 5);};

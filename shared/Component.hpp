@@ -45,10 +45,10 @@ std::chrono::steady_clock::time_point GetTimePoint();
         Direction(double x, double y): dir_X(x), dir_Y(y) {};
     };
     struct SpawnGrace {
-        double timer = 0;
-        double creation_time = 0;
-        SpawnGrace(double x, double y): timer(x), creation_time(y) {};
-        SpawnGrace(double timer): timer(timer) {
-            creation_time = GetTime();
+        std::chrono::duration<float> time;
+        std::chrono::steady_clock::time_point creation_time;
+        SpawnGrace(std::chrono::duration<float> x, std::chrono::steady_clock::time_point y): time(x), creation_time(y) {};
+        SpawnGrace(std::chrono::duration<float> timer): time(timer) {
+            creation_time = GetTimePoint();
         };
     };
