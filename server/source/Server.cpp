@@ -13,6 +13,7 @@
 #include <semaphore>
 #include "Server.hpp"
 #include "../../shared/Component.hpp"
+#include "../../shared/Bundle.hpp"
 
 using boost::asio::ip::udp;
 std::binary_semaphore MainToThread {0};
