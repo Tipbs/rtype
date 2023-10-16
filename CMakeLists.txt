@@ -14,7 +14,7 @@ project(R-Type)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ..)
 
-find_package(Boost 1.82.0 COMPONENTS system filesystem regex asio REQUIRED)
+find_package(Boost 1.82.0 COMPONENTS system filesystem regex asio serialization REQUIRED)
 find_package(raylib REQUIRED)
 find_package(Catch2 REQUIRED)
 

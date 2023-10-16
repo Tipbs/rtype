@@ -15,13 +15,17 @@ size_t create_player(Registry &reg, bool is_curret_player)
     Speed speedo(300);
     Direction diro(0, 0);
     SpawnGrace gra(std::chrono::seconds(5));
+    #ifndef SERVER
     Sprite sprite(path.c_str(), 83, 43, 5, 5);
+    #endif
     if (is_curret_player)
         player.id = (size_t)new_entity;
 
     reg.add_component(new_entity, std::move(Pos));
     reg.add_component(new_entity, std::move(Size));
+    #ifndef SERVER
     reg.add_component(new_entity, std::move(sprite));
+    #endif
     reg.add_component(new_entity, std::move(speedo));
     reg.add_component(new_entity, std::move(diro));
     reg.add_component(new_entity, std::move(gra));
@@ -29,6 +33,7 @@ size_t create_player(Registry &reg, bool is_curret_player)
     return (size_t)new_entity;
 }
 
+#ifndef SERVER
 void create_ammo(Registry &reg, Position pos, Weapon original_weapon)
 {
     Entity const new_entity = reg.spawn_entity();
@@ -46,3 +51,4 @@ void create_ammo(Registry &reg, Position pos, Weapon original_weapon)
     reg.add_component(new_entity, std::move(speedo));
     reg.add_component(new_entity, std::move(diro));
 }
+#endif

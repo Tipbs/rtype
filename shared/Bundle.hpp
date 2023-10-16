@@ -9,6 +9,7 @@
 #include "Component.hpp"
 
 #ifndef SERVER
+#include "GraphicComponents.hpp"
 struct Ammo {
     Sprite sprite = Sprite("./gui/ressources/Sprites/shoot_charge.png");
     Speed speed = Speed(300);
