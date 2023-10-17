@@ -112,7 +112,7 @@ void udp_server::deserialize(const std::size_t bytes_transferred)
         boost::archive::binary_iarchive archive(iss);
         UserCmd tmp;
         archive >> tmp;
-        //std::cout << "je suis le cmd moved x: " << tmp.moved.x << std::endl;
+        std::cout << "je suis le cmd moved x: " << tmp.moved.x << std::endl;
         cmd_mutex.lock();
         cmd[clients[_remote_point]._id].push_back(tmp);
         cmd_mutex.unlock();

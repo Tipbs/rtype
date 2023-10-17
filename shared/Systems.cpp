@@ -13,14 +13,14 @@
 	static auto time_since_last_tick = std::chrono::high_resolution_clock::now(); // voir si raylib utilise m�me chose
 	float GetFrameTime()
 	{
-		std::scoped_lock(mutex);
+		std::scoped_lock lock(mutex);
 		const auto now = std::chrono::high_resolution_clock::now();
 		return std::chrono::duration<double>(time_since_last_tick - now).count();
 	}
 
     void ResetFrameTime()
 	{
-		std::scoped_lock(mutex);
+		std::scoped_lock lock(mutex);
 		time_since_last_tick = std::chrono::high_resolution_clock::now();
 	}
 #else
@@ -40,7 +40,7 @@ sparse_array<Direction> &dir)
     for (auto &&[ind, pos, spe, diro]: indexed_zipper(positions, speed, dir)) {
         if (!(pos && spe && diro))
             continue;
-        std::cout << "y = " << pos->pos_Y << " and x = " << pos->pos_X << std::endl;
+        std::cout << "y = " << pos->pos_Y << "  x = " << pos->pos_X << std::endl;
         double magnitude = std::sqrt(
             (dir[ind].value().dir_X * 
             dir[ind].value().dir_X) + 
