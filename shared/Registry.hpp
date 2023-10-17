@@ -1,16 +1,16 @@
 #pragma once
 
 #include <any>
-#include <functional>
-#include <typeindex>
 #include <unordered_map>
-#include "Entity.hpp"
+#include <typeindex>
+#include <functional>
 #include "Sparse_array.hpp"
-#include "UserCmd.hpp"
+#include "Entity.hpp"
 #include "NetEnt.hpp"
+#include "UserCmd.hpp"
 #ifdef SERVER
     #include <map>
-#endif
+#endif // !SERVER
 
 class Registry {
     template<typename Component>

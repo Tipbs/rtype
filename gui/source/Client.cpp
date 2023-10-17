@@ -5,13 +5,12 @@
 #include <sstream>
 #include <string>
 #include <thread>
+#include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/bind.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include "Client.hpp"
 #include "../../shared/NetEnt.hpp"
 
 namespace boost {
@@ -20,6 +19,7 @@ void throw_exception(std::exception const &e)
 {
     throw e; // or whatever
 };
+
 void throw_exception(std::exception const &e, boost::source_location const &)
 {
     throw e; // or whatever
@@ -41,43 +41,47 @@ void udp_client::send()
 {
     std::ostringstream oss;
     boost::archive::binary_oarchive archive(oss);
-    //std::cout << "coucou je suis hardstuck\n";
+    // std::cout << "coucou je suis hardstuck\n";
     _reg.currentCmd.mutex.lock();
-		auto copyCmd = _reg.currentCmd.cmd;
-		_reg.currentCmd.cmd.reset();
+    auto copyCmd = _reg.currentCmd.cmd;
+    _reg.currentCmd.cmd.reset();
     _reg.currentCmd.mutex.unlock();
-    //std::cout << "eeqsdqsd\n";
+    // std::cout << "eeqsdqsd\n";
     archive << copyCmd;
     std::string serializedData = oss.str();
-    //std::cout << "Sending " << serializedData.size() << "bytes from " << serializedData.data() << std::endl;
-    _socket.async_send_to(boost::asio::buffer(serializedData.c_str(), serializedData.size()), _remote_point,
-        boost::bind(&udp_client::handle_send, this,
-        boost::asio::placeholders::error,
-        boost::asio::placeholders::bytes_transferred));
+    // std::cout << "Sending " << serializedData.size() << "bytes from " <<
+    // serializedData.data() << std::endl;
+    _socket.async_send_to(
+        boost::asio::buffer(serializedData.c_str(), serializedData.size()),
+        _remote_point,
+        boost::bind(
+            &udp_client::handle_send, this, boost::asio::placeholders::error,
+            boost::asio::placeholders::bytes_transferred));
 }
 
 void udp_client::handle_receive(
     const boost::system::error_code &error, std::size_t bytes_transferred)
 {
-    std::cout << "Received mais erreur\n";
+    // std::cout << "Received mais erreur\n";
     if (!error) {
-        std::cout << "Received " << bytes_transferred << " bytes" << std::endl;
+        // std::cout << "Received " << bytes_transferred << " bytes" <<
+        // std::endl;
         try {
-			std::string seralizedData(_recv_buffer.data(), bytes_transferred);
-			std::istringstream iss(seralizedData);
-			boost::archive::binary_iarchive archive(iss);
-			std::vector<NetEnt> tmp;
-			archive >> tmp;
-			_reg.netEnts.mutex.lock();
-			_reg.netEnts.ents.insert(_reg.netEnts.ents.begin(), tmp.begin(), tmp.end());
-			_reg.netEnts.mutex.unlock();
-        }
-        catch (std::exception& err) {
-			std::cout << "Error in handle_receive: " << err.what()
-					  << " (probably normal)\n";
+            std::string seralizedData(_recv_buffer.data(), bytes_transferred);
+            std::istringstream iss(seralizedData);
+            boost::archive::binary_iarchive archive(iss);
+            std::vector<NetEnt> tmp;
+            archive >> tmp;
+            _reg.netEnts.mutex.lock();
+            _reg.netEnts.ents.insert(
+                _reg.netEnts.ents.begin(), tmp.begin(), tmp.end());
+            _reg.netEnts.mutex.unlock();
+        } catch (std::exception &err) {
+            std::cout << "Error in handle_receive: " << err.what()
+                      << " (probably normal)\n";
         }
     }
-	start_receive();
+    start_receive();
 }
 
 void udp_client::start_receive()
@@ -92,10 +96,10 @@ void udp_client::start_receive()
 void udp_client::handle_tick()
 {
     while (true) {
-		MainToThread.release();
-		ThreadToMain.acquire();
-		timer.expires_from_now(boost::posix_time::millisec(50));
-		timer.wait();
+        MainToThread.release();
+        ThreadToMain.acquire();
+        timer.expires_from_now(boost::posix_time::millisec(50));
+        timer.wait();
     }
 }
 
@@ -110,22 +114,24 @@ void udp_client::send_user()
     }
 }
 
-void udp_client::net_get_id(const boost::system::error_code &error, std::size_t bytes_transferred)
+void udp_client::net_get_id(
+    const boost::system::error_code &error, std::size_t bytes_transferred)
 {
-    std::cout << "Received mais erreur net_get_id ;)" << bytes_transferred << "\n";
+    std::cout << "Received mais erreur net_get_id ;)" << bytes_transferred
+              << "\n";
     if (!error) {
-        std::cout << "net_get_id: Received " << bytes_transferred << " bytes" << std::endl;
+        std::cout << "net_get_id: Received " << bytes_transferred << " bytes"
+                  << std::endl;
         try {
-			std::string seralizedData(_recv_buffer.data(), bytes_transferred);
-			std::istringstream iss(seralizedData);
-			boost::archive::binary_iarchive archive(iss);
-			Utils::PlayerId tmp;
-			archive >> tmp;
-			_player_id = tmp.id;
-        }
-        catch (std::exception err) {
+            std::string seralizedData(_recv_buffer.data(), bytes_transferred);
+            std::istringstream iss(seralizedData);
+            boost::archive::binary_iarchive archive(iss);
+            Utils::PlayerId tmp;
+            archive >> tmp;
+            _player_id = tmp.id;
+        } catch (std::exception err) {
             std::cerr << "serialization exception: " << err.what();
-			throw err;
+            throw err;
         }
     } else {
         std::cout << "Erreur dans net_get_id: " << error.message() << std::endl;
@@ -134,13 +140,15 @@ void udp_client::net_get_id(const boost::system::error_code &error, std::size_t 
 
 void udp_client::fetch_player_id()
 {
-    std::chrono::system_clock::time_point timeout = std::chrono::system_clock::now();
+    std::chrono::system_clock::time_point timeout =
+        std::chrono::system_clock::now();
     _socket.send_to(boost::asio::buffer({'\0'}, 1), _remote_point);
     boost::asio::ip::udp::endpoint test;
-    _socket.async_receive_from(boost::asio::buffer(_recv_buffer), test,
-        boost::bind(&udp_client::net_get_id, this,
-        boost::asio::placeholders::error,
-        boost::asio::placeholders::bytes_transferred));
+    _socket.async_receive_from(
+        boost::asio::buffer(_recv_buffer), test,
+        boost::bind(
+            &udp_client::net_get_id, this, boost::asio::placeholders::error,
+            boost::asio::placeholders::bytes_transferred));
     while (_player_id == -1) {
         if (std::chrono::system_clock::now() - timeout >
             std::chrono::seconds(10)) {
@@ -150,12 +158,14 @@ void udp_client::fetch_player_id()
         _socket.send_to(boost::asio::buffer({'\0'}, 1), _remote_point);
         std::cout << "looping " << std::endl;
         _svc.run();
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     std::cout << "player id: " << _player_id << "\n";
 }
 
-udp_client::udp_client(boost::asio::io_context &svc, const std::string &ip, const std::string &port, Registry &reg)
+udp_client::udp_client(
+    boost::asio::io_context &svc, const std::string &ip,
+    const std::string &port, Registry &reg)
     : _socket(svc), timer(svc), _reg(reg), _svc(svc)
 {
     _socket.open(udp::v4());
@@ -164,16 +174,16 @@ udp_client::udp_client(boost::asio::io_context &svc, const std::string &ip, cons
     udp::resolver::iterator iter = resolver.resolve(query);
     _remote_point = *iter;
     fetch_player_id();
-    //std::thread fetch(&udp_client::fetch_player_id, this);
-    //fetch.join();
-    tick = std::thread(&udp_client::handle_tick, this); //Timer thread
+    // std::thread fetch(&udp_client::fetch_player_id, this);
+    // fetch.join();
+    tick = std::thread(&udp_client::handle_tick, this);  // Timer thread
     sending = std::thread(&udp_client::send_user, this); // Snapshot thread
     receive = std::thread(&udp_client::start_receive, this);
     tick.detach();
     sending.detach();
     receive.detach();
     cmd.reset();
-    //start_receive();
+    // start_receive();
 }
 
 udp_client::~udp_client()

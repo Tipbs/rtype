@@ -11,7 +11,13 @@
 	#include <raylib.h>
 #endif // !SERVER
 std::chrono::steady_clock::time_point GetTimePoint();
-
+    #ifdef SERVER
+        struct Player {
+            int id = 0;
+            Player(): id(0) {};
+            Player(int x): id(x) {};
+        };
+    #endif // !SERVER
     struct Current_Player {
         size_t id;
         Current_Player() {id = -1;};
