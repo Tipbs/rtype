@@ -5,7 +5,6 @@
 #include <chrono>
 #include "../../shared/Bundle.hpp"
 #include "../../shared/Registry.hpp"
-#include "Bundle.hpp"
 #include "Client.hpp"
 #include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
@@ -73,7 +72,7 @@ int main()
     reg.add_component(new_entity, std::move(speedo));
     reg.add_component(new_entity, std::move(diro));
     reg.add_component(new_entity, std::move(gra));
-    reg.add_component(new_entity, std::move(p));
+    reg.add_component(new_entity, std::move(player));
 
     reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);

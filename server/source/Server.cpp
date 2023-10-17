@@ -11,7 +11,7 @@
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/io_context.hpp>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include "../../shared/Component.hpp"
 #include "../../shared/Bundle.hpp"
 

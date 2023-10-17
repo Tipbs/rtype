@@ -1,3 +1,22 @@
+#define _WIN32_WINNT 0x0501
+namespace boost {
+#ifdef BOOST_NO_EXCEPTIONS
+//void throw_exception(const std::exception &e)
+//{
+//    throw e; // or whatever
+//};
+
+void throw_exception(std::exception const &e)
+{
+    throw e; // or whatever
+};
+
+void throw_exception(std::exception const &e, boost::source_location const &)
+{
+    throw e; // or whatever
+};
+#endif
+} // namespace boost
 #include <chrono>
 #include <cstdint>
 #include <map>
@@ -10,25 +29,13 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
+
+
 #include "../../shared/NetEnt.hpp"
 #include "../../shared/Registry.hpp"
 #include "../../shared/Systems.hpp"
 #include "../../shared/UserCmd.hpp"
 #include "../../shared/Utils.hpp"
-
-namespace boost {
-#ifdef BOOST_NO_EXCEPTIONS
-void throw_exception(std::exception const &e)
-{
-    throw e; // or whatever
-};
-
-void throw_exception(std::exception const &e, boost::source_location const &)
-{
-    throw e; // or whatever
-};
-#endif
-} // namespace boost
 
 struct Message {
     int type;

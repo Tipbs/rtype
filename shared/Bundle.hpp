@@ -44,7 +44,8 @@ struct Player {
     Weapon weapon = Weapon(1, 5);
     #endif
 
-    Player(size_t id) : id(id) {};
+    Player(size_t id) : id(id) {}
+    Player(int x, size_t id) : id(id), count(x) {}
 	Player(double x): count(x) {
         id = -1;
         IsShooting = false;
@@ -78,6 +79,7 @@ struct Player {
 
 
 size_t create_player(Registry &reg, bool i);
+size_t create_player(Registry &reg, int id, Position &pos);
 #ifndef SERVER
 void create_ammo(Registry &reg, Position pos, Weapon original_weapon);
 #endif

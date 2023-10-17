@@ -6,6 +6,7 @@
 #include "../../shared/Registry.hpp"
 #include "../../shared/Sparse_array.hpp"
 #include "../../shared/zipper.hpp"
+#include "../../shared/Bundle.hpp"
 #include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
 
@@ -120,25 +121,24 @@ void handle_shoot_inputs(
         if (!(anima && posi && sizo))
             continue;
         if (anim[ind]->id == ind) {
-            if (IsKeyDown(KEY_SPACE)) {
+            if (IsKeyDown(KEY_SPACE))
                 anim[ind]->IsShooting = true;
-                anim[ind]->current_charge +=
-                    (anim[ind]->current_charge >= 3) ? 0 : 5 * GetFrameTime();
-            }
-            if (IsKeyReleased(KEY_SPACE)) {
+            if (IsKeyReleased(KEY_SPACE))
                 anim[ind]->IsShooting = false;
+
+            if (anim[ind]->IsShooting) {
+                std::cout << "Player id " << anim[ind]->color_id
+                          << " just shoot with a " << anim[ind]->weapon.type
+                          << " typed weapon, with an attack speed of "
+                          << anim[ind]->weapon.attack_speed << std::endl;
+
                 create_ammo(
                     r,
                     Position(
-                        pos[ind]->pos_X + (float) sizo->size_X,
-                        pos[ind]->pos_Y + (float) sizo->size_Y / 2),
-                    anim[ind]->current_charge);
-                anim[ind]->current_charge = 1.;
+                        pos[ind]->pos_X + siz[ind]->size_X,
+                        pos[ind]->pos_Y + (siz[ind]->size_Y / 2.) - 15),
+                    anim[ind]->weapon);
             }
-
-            // if (anim[ind]->IsShooting) {
-            //     Animation de charge du tir
-            // }
         }
     }
 }
@@ -198,26 +198,6 @@ void make_infinite_background(
     }
 }
 
-// temporary bundle
-void create_player(Registry &reg, int id, Position &pos)
-{
-    Entity const new_entity = reg.spawn_entity();
-    Player player(id);
-    Size Size(83, 43);
-    std::string path = "./gui/ressources/Sprites/r-typesheet42.gif";
-    Speed speedo(300);
-    Direction diro(0, 0);
-    SpawnGrace gra(std::chrono::seconds(1));
-    Sprite sprite(path.c_str(), 83, 43, 5, 5);
-
-    reg.add_component(new_entity, std::move(pos));
-    reg.add_component(new_entity, std::move(Size));
-    reg.add_component(new_entity, std::move(sprite));
-    reg.add_component(new_entity, std::move(speedo));
-    reg.add_component(new_entity, std::move(diro));
-    reg.add_component(new_entity, std::move(gra));
-    reg.add_component(new_entity, std::move(player));
-}
 
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
