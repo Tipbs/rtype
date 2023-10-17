@@ -40,6 +40,7 @@ sparse_array<Direction> &dir)
     for (auto &&[ind, pos, spe, diro]: indexed_zipper(positions, speed, dir)) {
         if (!(pos && spe && diro))
             continue;
+        std::cout << "y = " << pos->pos_Y << " and x = " << pos->pos_X << std::endl;
         double magnitude = std::sqrt(
             (dir[ind].value().dir_X * 
             dir[ind].value().dir_X) + 
@@ -99,8 +100,8 @@ void colision(
                 positions[ind2].value().pos_Y >
                 positions[ind].value().pos_Y + size[ind].value().size_Y)
                 continue;
-            else
-                std::cout << "y a collision\n";
+            else {
+            }
         }
     }
 }
