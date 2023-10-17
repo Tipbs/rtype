@@ -42,6 +42,7 @@ sparse_array<Direction> &dir)
     for (auto &&[ind, pos, spe, diro]: indexed_zipper(positions, speed, dir)) {
         if (!(pos && spe && diro))
             continue;
+        std::cout << "y = " << pos->pos_Y << "  x = " << pos->pos_X << std::endl;
         double magnitude = std::sqrt(
             (dir[ind].value().dir_X * 
             dir[ind].value().dir_X) + 

@@ -208,13 +208,12 @@ void updateWithSnapshots(
     r.netEnts.mutex.lock();
     for (auto it = net_ents.begin(); it != net_ents.end(); ++it) {
         auto net = *it;
-        auto finded = std::find_if(
-            players.begin(), players.end(), [&](std::optional<Player> &player) {
-                if (player)
-                    return player.value().id == net.id;
-                return false;
-            });
-        if (finded != players.end())
+        auto finded = std::find_if(players.begin(), players.end(), [&](std::optional<Player> &player) {
+			if (player)
+                return player.value().id == net.id;
+            return false;
+        });
+        if (finded != players.end()) {
             continue;
         auto pos = Position(net.pos.x, net.pos.y);
         create_player(r, net.id, pos);
@@ -228,9 +227,10 @@ void updateWithSnapshots(
         std::cout << "moved x: " << pos->pos_X << std::endl;
         auto const &player = players[i];
         if (pos && player) {
-            auto finded = std::find_if(
-                net_ents.begin(), net_ents.end(),
-                [&](NetEnt &ent) { return ent.id == player.value().id; });
+            auto finded = std::find_if(net_ents.begin(), net_ents.end(), [&] (NetEnt &ent) {
+                std::cout << "ent x = " << ent.pos.x << std::endl;
+                return ent.id == player.value().id;
+			});
             if (finded == net_ents.end())
                 continue;
             pos.value().pos_X = finded->pos.x;

@@ -158,8 +158,6 @@ void udp_server::wait_for_connexion(std::size_t bytes_transferred)
     if (bytes_transferred != 1 && clients.size() == 0)
         return;
     if (bytes_transferred == 1 && clients.count(_remote_point) == 0) {
-        if (clients.size() == 0)
-            start_threads();
         Entity player = reg.spawn_entity();
         Player nePlayer((size_t) player);
         Position nePos(0, 0);
