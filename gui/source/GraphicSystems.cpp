@@ -6,6 +6,7 @@
 #include "../../shared/Registry.hpp"
 #include "../../shared/Sparse_array.hpp"
 #include "../../shared/zipper.hpp"
+#include "../../shared/Bundle.hpp"
 #include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
 
@@ -196,27 +197,6 @@ void make_infinite_background(
         // if (pos[0]->pos_Y > 0)
         //     pos[0]->pos_Y -= siz[0]->size_Y;
     }
-}
-
-// temporary bundle
-void create_player(Registry &reg, int id, Position &pos)
-{
-    Entity const new_entity = reg.spawn_entity();
-    Player player(id);
-    Size Size(83, 43);
-    std::string path = "./gui/ressources/Sprites/r-typesheet42.gif";
-    Speed speedo(300);
-    Direction diro(0, 0);
-    SpawnGrace gra(std::chrono::seconds(1));
-    Sprite sprite(path.c_str(), 83, 43, 5, 5);
-
-    reg.add_component(new_entity, std::move(pos));
-    reg.add_component(new_entity, std::move(Size));
-    reg.add_component(new_entity, std::move(sprite));
-    reg.add_component(new_entity, std::move(speedo));
-    reg.add_component(new_entity, std::move(diro));
-    reg.add_component(new_entity, std::move(gra));
-    reg.add_component(new_entity, std::move(player));
 }
 
 void updateWithSnapshots(

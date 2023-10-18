@@ -2,35 +2,40 @@
 
 #include <string>
 #include <utility>
+#ifndef SERVER
 #include <raylib.h>
-#include "../../shared/Component.hpp"
-#include "../../shared/Registry.hpp"
-#include "GraphicComponents.hpp"
+#endif
+#include "Registry.hpp"
+#include "Component.hpp"
 
+#ifndef SERVER
+#include "GraphicComponents.hpp"
 struct Ammo {
     Sprite sprite = Sprite("./gui/ressources/Sprites/shoot_charge.png");
     Speed speed = Speed(300);
     Damages damages = Damages(1);
-    Size size = Size(1, 1);
+    Size size = Size(1,1);
     Health health = Health(1);
-    Direction dir = Direction(1, 0);
+    Direction dir = Direction(1,0);
 };
 
 struct Weapon {
     int type = 1;
-    Size size = Size(1, 1);
+    Size size = Size(1,1);
     double attack_speed = 1.;
     Sprite sprite = Sprite("./gui/ressources/Sprites/r-typesheet42.gif");
 
-    Weapon(int type, int ammo_per_sec)
-    {
+    Weapon(int type, int ammo_per_sec){
         type = type;
-        size = Size(1, 1);
+        size = Size(1,1);
         attack_speed = 1. / ammo_per_sec;
         sprite = Sprite("./gui/ressources/Sprites/r-typesheet42.gif");
     };
 };
+#endif SERVER
 
+
+#ifndef SERVER
 struct Player {
     int color_id = -1;
     int id = -1;
@@ -80,6 +85,11 @@ struct Player {
         weapon = Weapon(1, 5);
     };
 };
+#endif SERVER
 
 size_t create_player(Registry &reg, bool i);
-void create_ammo(Registry &reg, Position pos, float current_charge);
+size_t create_player(Registry &reg, int id, Position &pos);
+#ifndef SERVER
+void create_ammo(Registry &reg, Position pos, Weapon original_weapon);
+void create_ammo(Registry &reg, Position pos, float damage_mult);
+#endif

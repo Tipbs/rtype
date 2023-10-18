@@ -2,8 +2,9 @@
 #include <cstdio>
 #include <iostream>
 #include <semaphore>
+#include <chrono>
+#include "../../shared/Bundle.hpp"
 #include "../../shared/Registry.hpp"
-#include "Bundle.hpp"
 #include "Client.hpp"
 #include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"

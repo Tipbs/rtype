@@ -23,7 +23,7 @@ struct Velocity {
 void logging_system(Registry& r,
 	sparse_array<Position> const& positions,
 	sparse_array<Velocity> const& velocities) {
-	for (auto &&[i, pos, vel] : indexed_zipper(positions, velocities)) {
+	for (auto &&[i, pos, vel] : zipper(positions, velocities)) {
 		if (pos && vel) {
 			std::cerr << i << ": Position = { " << pos.value().x << ", " << pos.value
 			().y << " } , Velocity = { " << vel.value().vx << ", " << vel.value() .

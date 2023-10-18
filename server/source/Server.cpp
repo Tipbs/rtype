@@ -11,8 +11,9 @@
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/io_context.hpp>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include "../../shared/Component.hpp"
+#include "../../shared/Bundle.hpp"
 
 using boost::asio::ip::udp;
 std::binary_semaphore MainToThread {0};
@@ -157,13 +158,13 @@ void udp_server::wait_for_connexion(std::size_t bytes_transferred)
     if (bytes_transferred != 1 && clients.size() == 0)
         return;
     if (bytes_transferred == 1 && clients.count(_remote_point) == 0) {
-        if (clients.size() == 0)
-            start_threads();
         Entity player = reg.spawn_entity();
         Player nePlayer((size_t) player);
         Position nePos(0, 0);
         reg.add_component(player, std::move(nePlayer));
         reg.add_component(player, std::move(nePos));
+        if (clients.size() == 0)
+            start_threads();
         clients[_remote_point]._id = (size_t) player;
         clients[_remote_point].isClientConnected = false;
         clients[_remote_point]._timer =
@@ -261,6 +262,8 @@ udp_server::udp_server(std::size_t port)
     reg.register_component<Direction>();
     reg.register_component<SpawnGrace>();
     reg.register_component<Player>();
+    reg.register_component<Damages>();
+    reg.register_component<Health>();
     reg.add_system<Position>(synchronize);
     reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);
