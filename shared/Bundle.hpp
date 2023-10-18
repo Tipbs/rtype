@@ -32,54 +32,64 @@ struct Weapon {
         sprite = Sprite("./gui/ressources/Sprites/r-typesheet42.gif");
     };
 };
-
 #endif SERVER
 
+
+#ifndef SERVER
 struct Player {
-	int color_id = -1;
+    int color_id = -1;
     int id = -1;
     double count = 1;
     bool IsShooting = false;
-	#ifndef SERVER
+    float current_charge = 0.;
     Weapon weapon = Weapon(1, 5);
-    #endif
 
-    Player(size_t id) : id(id) {}
-    Player(int x, size_t id) : id(id), count(x) {}
-	Player(double x): count(x) {
+    Player(double x) : count(x)
+    {
+        current_charge = 0.;
         id = -1;
         IsShooting = false;
-        #ifndef SERVER
-			weapon = Weapon(1, 5);
-        #endif
-    }
-	Player(int color_i): color_id(color_i) {
+        weapon = Weapon(1, 5);
+    };
+
+    Player(int color_i) : color_id(color_i)
+    {
+        current_charge = 0.;
         id = -1;
         count = 1;
         IsShooting = false;
-        #ifndef SERVER
         weapon = Weapon(1, 5);
-        #endif
-    }
-	Player(double x, int color_i): color_id(color_i), count(x) {
-        id = -1;
-        IsShooting = false;
-        #ifndef SERVER
-        weapon = Weapon(1, 5);
-        #endif
-    }
-	Player(int color_i, double x): color_id(color_i), count(x) {
-        id = -1;
-        IsShooting = false;
-        #ifndef SERVER
-        weapon = Weapon(1, 5);
-        #endif
-    }
-};
+    };
 
+    Player(int color_i, size_t id) : color_id(color_i), id(id)
+    {
+        current_charge = 0.;
+        count = 1;
+        IsShooting = false;
+        weapon = Weapon(1, 5);
+    };
+
+    Player(double x, int color_i) : color_id(color_i), count(x)
+    {
+        current_charge = 0.;
+        id = -1;
+        IsShooting = false;
+        weapon = Weapon(1, 5);
+    };
+
+    Player(int color_i, double x) : color_id(color_i), count(x)
+    {
+        current_charge = 0.;
+        id = -1;
+        IsShooting = false;
+        weapon = Weapon(1, 5);
+    };
+};
+#endif SERVER
 
 size_t create_player(Registry &reg, bool i);
 size_t create_player(Registry &reg, int id, Position &pos);
 #ifndef SERVER
 void create_ammo(Registry &reg, Position pos, Weapon original_weapon);
+void create_ammo(Registry &reg, Position pos, float damage_mult);
 #endif

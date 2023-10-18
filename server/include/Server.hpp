@@ -30,16 +30,25 @@ void throw_exception(std::exception const &e, boost::source_location const &)
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
 
-
 #include "../../shared/NetEnt.hpp"
 #include "../../shared/Registry.hpp"
 #include "../../shared/Systems.hpp"
 #include "../../shared/UserCmd.hpp"
 #include "../../shared/Utils.hpp"
 
-struct Message {
-    int type;
+namespace boost {
+#ifdef BOOST_NO_EXCEPTIONS
+void throw_exception(std::exception const &e)
+{
+    throw e; // or whatever
 };
+
+void throw_exception(std::exception const &e, boost::source_location const &)
+{
+    throw e; // or whatever
+};
+#endif
+} // namespace boost
 
 struct Clients {
     std::size_t _id;

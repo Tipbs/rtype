@@ -121,24 +121,25 @@ void handle_shoot_inputs(
         if (!(anima && posi && sizo))
             continue;
         if (anim[ind]->id == ind) {
-            if (IsKeyDown(KEY_SPACE))
+            if (IsKeyDown(KEY_SPACE)) {
                 anim[ind]->IsShooting = true;
-            if (IsKeyReleased(KEY_SPACE))
+                anim[ind]->current_charge +=
+                    (anim[ind]->current_charge >= 3) ? 0 : 5 * GetFrameTime();
+            }
+            if (IsKeyReleased(KEY_SPACE)) {
                 anim[ind]->IsShooting = false;
-
-            if (anim[ind]->IsShooting) {
-                std::cout << "Player id " << anim[ind]->color_id
-                          << " just shoot with a " << anim[ind]->weapon.type
-                          << " typed weapon, with an attack speed of "
-                          << anim[ind]->weapon.attack_speed << std::endl;
-
                 create_ammo(
                     r,
                     Position(
-                        pos[ind]->pos_X + siz[ind]->size_X,
-                        pos[ind]->pos_Y + (siz[ind]->size_Y / 2.) - 15),
-                    anim[ind]->weapon);
+                        pos[ind]->pos_X + (float) sizo->size_X,
+                        pos[ind]->pos_Y + (float) sizo->size_Y / 2),
+                    anim[ind]->current_charge);
+                anim[ind]->current_charge = 1.;
             }
+
+            // if (anim[ind]->IsShooting) {
+            //     Animation de charge du tir
+            // }
         }
     }
 }
@@ -198,7 +199,6 @@ void make_infinite_background(
     }
 }
 
-
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
     sparse_array<Player> &players)
@@ -208,14 +208,14 @@ void updateWithSnapshots(
     r.netEnts.mutex.lock();
     for (auto it = net_ents.begin(); it != net_ents.end(); ++it) {
         auto net = *it;
-        auto finded = std::find_if(players.begin(), players.end(), [&](std::optional<Player> &player) {
-			if (player)
-                return player.value().id == net.id;
-            return false;
-        });
-        if (finded != players.end()) {
+        auto finded = std::find_if(
+            players.begin(), players.end(), [&](std::optional<Player> &player) {
+                if (player)
+                    return player.value().id == net.id;
+                return false;
+            });
+        if (finded != players.end())
             continue;
-        }
         auto pos = Position(net.pos.x, net.pos.y);
         create_player(r, net.id, pos);
         // create entity with info from net ent
@@ -228,10 +228,9 @@ void updateWithSnapshots(
         std::cout << "moved x: " << pos->pos_X << std::endl;
         auto const &player = players[i];
         if (pos && player) {
-            auto finded = std::find_if(net_ents.begin(), net_ents.end(), [&] (NetEnt &ent) {
-                std::cout << "ent x = " << ent.pos.x << std::endl;
-                return ent.id == player.value().id;
-			});
+            auto finded = std::find_if(
+                net_ents.begin(), net_ents.end(),
+                [&](NetEnt &ent) { return ent.id == player.value().id; });
             if (finded == net_ents.end())
                 continue;
             pos.value().pos_X = finded->pos.x;
