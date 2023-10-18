@@ -8,7 +8,7 @@ aux_source_directory(./shared SHARED_SRC_DIR)
 
 project(R-Type)
 
-if (${CMAKE_CXX_COMPILER_ID} MATCHES "MSVC")
+if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 	add_definitions("/EHsc")
 endif()
 
