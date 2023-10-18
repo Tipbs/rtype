@@ -215,6 +215,7 @@ void updateWithSnapshots(
         });
         if (finded != players.end()) {
             continue;
+        }
         auto pos = Position(net.pos.x, net.pos.y);
         create_player(r, net.id, pos);
         // create entity with info from net ent
