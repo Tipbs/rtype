@@ -32,7 +32,7 @@ struct Weapon {
         sprite = Sprite("./gui/ressources/Sprites/r-typesheet42.gif");
     };
 };
-#endif SERVER
+#endif
 
 
 #ifndef SERVER
@@ -85,7 +85,7 @@ struct Player {
         weapon = Weapon(1, 5);
     };
 };
-#endif SERVER
+#endif
 
 size_t create_player(Registry &reg, bool i);
 size_t create_player(Registry &reg, int id, Position &pos);
