@@ -9,6 +9,7 @@
 #include <chrono>
 #include "indexed_zipper.hpp"
 #include "zipper.hpp"
+#include <syncstream>
 
 #ifdef SERVER
 	std::mutex mutex;
@@ -40,9 +41,9 @@ sparse_array<Speed> &speed,
 sparse_array<Direction> &dir)
 {
     for (auto &&[pos, spe, diro]: zipper(positions, speed, dir)) {
-        std::cout << "y = " << pos->pos_Y << "  x = " << pos->pos_X << std::endl;
+        std::osyncstream(std::cout) << "y = " << pos->pos_Y << "  x = " << pos->pos_X << std::endl;
         double magnitude = std::sqrt(
-            (diro->dir_X * 
+            (diro->dir_X *
             diro->dir_X) + 
             (diro->dir_Y * 
             diro->dir_Y));
@@ -55,6 +56,7 @@ sparse_array<Direction> &dir)
                 (spe->speed * 
                 (diro->dir_Y / magnitude)) * 
                 GetFrameTime();
+            std::osyncstream(std::osyncstream(std::cout)) << "frameTime: " << GetFrameTime() << "\n";
         }
     }
 }
@@ -65,9 +67,9 @@ sparse_array<Damages> &dama,
 size_t i1, size_t i2)
 {
     healt[i1]->health -= dama[i2]->damages;
-    std::cout << "User " << i1 << " has taken " << dama[i2]->damages << " damages. He now have " << healt[i1]->health << " HP." << std::endl;
+    std::osyncstream(std::cout) << "User " << i1 << " has taken " << dama[i2]->damages << " damages. He now have " << healt[i1]->health << " HP." << std::endl;
     healt[i2]->health -= dama[i1]->damages;
-    std::cout << "User " << i2 << " has taken " << dama[i1]->damages << " damages. He now have " << healt[i2]->health << " HP." << std::endl;
+    std::osyncstream(std::cout) << "User " << i2 << " has taken " << dama[i1]->damages << " damages. He now have " << healt[i2]->health << " HP." << std::endl;
     if (healt[i1]->health <= 0)
         r.kill_entity(r.entity_from_index(i1));
     if (healt[i2]->health <= 0)

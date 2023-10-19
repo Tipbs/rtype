@@ -9,6 +9,7 @@
 #include "../../shared/Bundle.hpp"
 #include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
+#include <syncstream>
 
 void display(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
@@ -225,7 +226,7 @@ void updateWithSnapshots(
     }
     for (size_t i = 0; i < positions.size(); ++i) {
         auto &pos = positions[i];
-        std::cout << "moved x: " << pos->pos_X << std::endl;
+        std::osyncstream(std::cout) << "moved x: " << pos->pos_X << std::endl;
         auto const &player = players[i];
         if (pos && player) {
             auto finded = std::find_if(

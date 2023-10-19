@@ -14,6 +14,8 @@
 #include <boost/bind/bind.hpp>
 #include "../../shared/Component.hpp"
 #include "../../shared/Bundle.hpp"
+#include <syncstream>
+#include "ServerBundle.hpp"
 
 using boost::asio::ip::udp;
 std::binary_semaphore MainToThread {0};
@@ -30,11 +32,11 @@ void udp_server::handle_check(const boost::system::error_code &error)
 {
     if (!error) {
         auto now = boost::posix_time::microsec_clock::universal_time();
-        std::cout << "check\n";
+        std::osyncstream(std::cout) << "check\n";
         for (auto it = clients.begin(); it != clients.end();) {
             if ((now - it->second._timer).total_seconds() > 5) {
-                std::cout << "Client " << it->first << " disconnected\n";
-                std::cout << "Killed entity " << it->second._id << std::endl;
+                std::osyncstream(std::cout) << "Client " << it->first << " disconnected\n";
+                std::osyncstream(std::cout) << "Killed entity " << it->second._id << std::endl;
                 reg.kill_entity(reg.entity_from_index(it->second._id));
                 it = clients.erase(it);
             } else {
@@ -67,6 +69,7 @@ void udp_server::multiple_broadcast(
         for (const auto &client_endpoint : tmp) {
             if (client_endpoint.second.isClientConnected == false)
                 continue;
+            std::osyncstream(std::cout) << "netEnt x pos: " << netent[0].pos.x << "\n";
             _socket.async_send_to(
                 boost::asio::buffer(
                     serializedData.c_str(), serializedData.size()),
@@ -77,7 +80,7 @@ void udp_server::multiple_broadcast(
                     boost::asio::placeholders::bytes_transferred));
         }
     } catch (boost::archive::archive_exception &e) {
-        std::cout << "Archive Error: " << e.what() << std::endl;
+        std::osyncstream(std::cout) << "Archive Error: " << e.what() << std::endl;
     }
 }
 
@@ -121,7 +124,7 @@ void udp_server::deserialize(const std::size_t bytes_transferred)
         boost::archive::binary_iarchive archive(iss);
         UserCmd tmp;
         archive >> tmp;
-        // std::cout << "je suis le cmd moved x: " << tmp.moved.x << std::endl;
+        std::osyncstream(std::cout) << "je suis le cmd moved x: " << tmp.moved.x << std::endl;
         cmd_mutex.lock();
         cmd[clients[_remote_point]._id].push_back(tmp);
         cmd_mutex.unlock();
@@ -158,11 +161,7 @@ void udp_server::wait_for_connexion(std::size_t bytes_transferred)
     if (bytes_transferred != 1 && clients.size() == 0)
         return;
     if (bytes_transferred == 1 && clients.count(_remote_point) == 0) {
-        Entity player = reg.spawn_entity();
-        Player nePlayer((size_t) player);
-        Position nePos(0, 0);
-        reg.add_component(player, std::move(nePlayer));
-        reg.add_component(player, std::move(nePos));
+        size_t player = create_player_server(reg, Position(0, 0));
         if (clients.size() == 0)
             start_threads();
         clients[_remote_point]._id = (size_t) player;
@@ -187,7 +186,7 @@ void udp_server::handle_receive(
     std::size_t bytes_transferred) // Callback to the receive function
 {
     if (!error || error == boost::asio::error::message_size) {
-        std::cout << "Received " << bytes_transferred << "bytes" << std::endl;
+        std::osyncstream(std::cout) << "Received " << bytes_transferred << "bytes" << std::endl;
         if (clients.count(_remote_point) == 0) {
             wait_for_connexion(bytes_transferred);
             start_receive();
@@ -284,9 +283,9 @@ udp_server::~udp_server()
 
 int helper()
 {
-    std::cout << "USAGE\n";
-    std::cout << "\t./server <port>\n";
-    std::cout << " port\tport number of the server\n";
+    std::osyncstream(std::cout) << "USAGE\n";
+    std::osyncstream(std::cout) << "\t./server <port>\n";
+    std::osyncstream(std::cout) << " port\tport number of the server\n";
     return 0;
 }
 
