@@ -39,23 +39,21 @@ sparse_array<Position> &positions,
 sparse_array<Speed> &speed, 
 sparse_array<Direction> &dir)
 {
-    for (auto &&[ind, pos, spe, diro]: indexed_zipper(positions, speed, dir)) {
-        if (!(pos && spe && diro))
-            continue;
+    for (auto &&[pos, spe, diro]: zipper(positions, speed, dir)) {
         std::cout << "y = " << pos->pos_Y << "  x = " << pos->pos_X << std::endl;
         double magnitude = std::sqrt(
-            (dir[ind].value().dir_X * 
-            dir[ind].value().dir_X) + 
-            (dir[ind].value().dir_Y * 
-            dir[ind].value().dir_Y));
+            (diro->dir_X * 
+            diro->dir_X) + 
+            (diro->dir_Y * 
+            diro->dir_Y));
         if (magnitude > 0.1) { //Added a magnitude threshold to avoid going straight to INT_MIN and INT_MAX when having a really low direction move
-            positions[ind].value().pos_X += 
-                (speed[ind].value().speed * 
-                (dir[ind].value().dir_X / magnitude)) * 
+            pos->pos_X += 
+                (spe->speed * 
+                (diro->dir_X / magnitude)) * 
                 GetFrameTime();
-            positions[ind].value().pos_Y += 
-                (speed[ind].value().speed * 
-                (dir[ind].value().dir_Y / magnitude)) * 
+            pos->pos_Y += 
+                (spe->speed * 
+                (diro->dir_Y / magnitude)) * 
                 GetFrameTime();
         }
     }
