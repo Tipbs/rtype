@@ -48,10 +48,14 @@ sparse_array<Direction> &dir)
             (diro->dir_Y * 
             diro->dir_Y));
         if (magnitude > 0.1) { //Added a magnitude threshold to avoid going straight to INT_MIN and INT_MAX when having a really low direction move
+            std::cout << "pos x " << pos->pos_X << std::endl;
+            std::cout << "dir " << diro->dir_X << std::endl;
+            std::cout << "speed " << spe->speed << std::endl;
             pos->pos_X += 
                 (spe->speed * 
                 (diro->dir_X / magnitude)) * 
                 GetFrameTime();
+            std::cout << "new pos x " << pos->pos_X << "\n\n";
             pos->pos_Y += 
                 (spe->speed * 
                 (diro->dir_Y / magnitude)) * 

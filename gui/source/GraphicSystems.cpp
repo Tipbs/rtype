@@ -67,7 +67,7 @@ void handle_dir_inputs(
             continue;
         const double AnimationPad = 0.02;
         double heigh = 1;
-        if (anim[ind]->id == ind) {
+        if (ind == 1) {
             heigh = anim[ind]->count;
             Vector2 Moves = {0, 0};
 
@@ -81,7 +81,7 @@ void handle_dir_inputs(
                         : (heigh == 1) ? 1
                                        : heigh - AnimationPad;
             } else if (IsKeyDown(KEY_UP)) {
-                Moves.y -= rand(); // 1;
+                Moves.y -= 1; // 1;
                 heigh = (heigh >= 2) ? 2 : heigh + (5 * AnimationPad);
             } else if (IsKeyDown(KEY_DOWN)) {
                 Moves.y += 1;
@@ -90,8 +90,10 @@ void handle_dir_inputs(
 
             if (dir[1]) { // 1 is the entity num representing the player seen
                           // here
-                dir[1].value().dir_X = Moves.x;
-                dir[1].value().dir_Y = Moves.y;
+                std::cout << "moves x = " << Moves.x << std::endl;
+                std::cout << "moves y = " << Moves.y << std::endl;
+                dir[1]->dir_X = Moves.x;
+                dir[1]->dir_Y = Moves.y;
                 r.currentCmd.mutex.lock();
                 r.currentCmd.cmd.moved.x += Moves.x;
                 r.currentCmd.cmd.moved.y += Moves.y;
@@ -100,16 +102,15 @@ void handle_dir_inputs(
                     anim[ind]->color_id =
                         anim[ind]->color_id == 4 ? 0 : anim[ind]->color_id + 1;
                 }
-
-                if (dir[ind]) { // 1 is the entity num representing the player
-                                // seen here
-                    dir[ind].value().dir_X = Moves.x;
-                    dir[ind].value().dir_Y = Moves.y;
-                }
-
-                if (anim[ind])
-                    anim[ind]->count = heigh;
             }
+            if (dir[ind]) { // 1 is the entity num representing the player
+                            // seen here
+                dir[ind].value().dir_X = Moves.x;
+                dir[ind].value().dir_Y = Moves.y;
+            }
+
+            if (anim[ind])
+                anim[ind]->count = heigh;
         }
     }
 }
@@ -121,7 +122,7 @@ void handle_shoot_inputs(
     for (auto &&[ind, anima, posi, sizo] : indexed_zipper(anim, pos, siz)) {
         if (!(anima && posi && sizo))
             continue;
-        if (anim[ind]->id == ind) {
+        if (ind == 1) {
             if (IsKeyDown(KEY_SPACE)) {
                 anim[ind]->IsShooting = true;
                 anim[ind]->current_charge +=
