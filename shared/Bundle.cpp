@@ -5,10 +5,10 @@
 #include "Component.hpp"
 #include "random"
 
-size_t create_player(Registry &reg, int id, Position &pos)
+size_t create_player(Registry &reg, size_t id, Position &pos)
 {
     Entity const new_entity = reg.spawn_entity();
-    Player player(id);
+    Player player(1, id);
     Size Size(83, 43);
     std::string path = "./gui/ressources/Sprites/r-typesheet42.gif";
     Speed speedo(300);

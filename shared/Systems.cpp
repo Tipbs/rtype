@@ -41,7 +41,7 @@ sparse_array<Speed> &speed,
 sparse_array<Direction> &dir)
 {
     for (auto &&[pos, spe, diro]: zipper(positions, speed, dir)) {
-        std::osyncstream(std::cout) << "y = " << pos->pos_Y << "  x = " << pos->pos_X << std::endl;
+        //std::osyncstream(std::cout) << "y = " << pos->pos_Y << "  x = " << pos->pos_X << std::endl;
         double magnitude = std::sqrt(
             (diro->dir_X *
             diro->dir_X) + 

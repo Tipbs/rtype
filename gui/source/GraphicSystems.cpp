@@ -212,13 +212,15 @@ void updateWithSnapshots(
         auto finded = std::find_if(
             players.begin(), players.end(), [&](std::optional<Player> &player) {
                 if (player)
-                    return player.value().id == net.id;
+                    return player->id == net.id;
                 return false;
             });
         if (finded != players.end())
             continue;
+        std::cout << "id: " << net.id << std::endl;
         auto pos = Position(net.pos.x, net.pos.y);
         create_player(r, net.id, pos);
+        std::cout << "Creating player\n";
         // create entity with info from net ent
         it = net_ents.erase(it);
         if (it == net_ents.end())
@@ -226,7 +228,7 @@ void updateWithSnapshots(
     }
     for (size_t i = 0; i < positions.size(); ++i) {
         auto &pos = positions[i];
-        std::osyncstream(std::cout) << "moved x: " << pos->pos_X << std::endl;
+        //std::osyncstream(std::cout) << "moved x: " << pos->pos_X << std::endl;
         auto const &player = players[i];
         if (pos && player) {
             auto finded = std::find_if(

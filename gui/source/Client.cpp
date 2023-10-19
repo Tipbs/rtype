@@ -28,7 +28,7 @@ void udp_client::send()
 {
     std::ostringstream oss;
     boost::archive::binary_oarchive archive(oss);
-    // std::osyncstream(std::cout) << "coucou je suis hardstuck\n";
+    // std::cout << "coucou je suis hardstuck\n";
     _reg.currentCmd.mutex.lock();
     auto copyCmd = _reg.currentCmd.cmd;
     _reg.currentCmd.cmd.reset();
@@ -104,8 +104,8 @@ void udp_client::send_user()
 void udp_client::net_get_id(
     const boost::system::error_code &error, std::size_t bytes_transferred)
 {
-    std::osyncstream(std::cout) << "Received mais erreur net_get_id ;)" << bytes_transferred
-              << "\n";
+    //std::osyncstream(std::cout) << "Received mais erreur net_get_id ;)" << bytes_transferred
+    //          << "\n";
     if (!error) {
         std::osyncstream(std::cout) << "net_get_id: Received " << bytes_transferred << " bytes"
                   << std::endl;
