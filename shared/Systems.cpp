@@ -18,7 +18,7 @@
 	{
 		std::scoped_lock lock(mutex);
 		const auto now = std::chrono::high_resolution_clock::now();
-		return std::chrono::duration<double>(time_since_last_tick - now).count();
+		return std::chrono::duration<double>(now - time_since_last_tick).count();
 	}
 
     void ResetFrameTime()
@@ -56,7 +56,6 @@ sparse_array<Direction> &dir)
                 (spe->speed * 
                 (diro->dir_Y / magnitude)) * 
                 GetFrameTime();
-            std::osyncstream(std::osyncstream(std::cout)) << "frameTime: " << GetFrameTime() << "\n";
         }
     }
 }
@@ -74,9 +73,8 @@ size_t i1, size_t i2)
         r.kill_entity(r.entity_from_index(i1));
     if (healt[i2]->health <= 0)
         r.kill_entity(r.entity_from_index(i2));
-        
-
 }
+
 void colision(Registry &r,
 sparse_array<Position> &positions, 
 sparse_array<Size> &size, 
