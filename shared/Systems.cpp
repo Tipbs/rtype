@@ -57,6 +57,10 @@ sparse_array<Direction> &dir)
                 (diro->dir_Y / magnitude)) * 
                 GetFrameTime();
         }
+        #ifdef SERVER
+        diro->dir_X = 0;
+        diro->dir_Y = 0;
+        #endif
     }
 }
 

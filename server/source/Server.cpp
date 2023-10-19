@@ -216,13 +216,13 @@ void udp_server::start_receive() // Receive function
             boost::asio::placeholders::bytes_transferred));
 }
 
-void synchronize(Registry &reg, sparse_array<Position> &positions)
+void synchronize(Registry &reg, sparse_array<Direction> &directions)
 {
     for (auto &player : reg.user_cmds) {
-        auto &pos = positions[player.first];
+        auto &dir = directions[player.first];
         for (auto &cmds : player.second) {
-            pos->pos_X += cmds.moved.x;
-            pos->pos_Y += cmds.moved.y;
+            dir->dir_X += cmds.moved.x;
+            dir->dir_Y += cmds.moved.y;
         }
     }
 }
@@ -263,7 +263,7 @@ udp_server::udp_server(std::size_t port)
     reg.register_component<Player>();
     reg.register_component<Damages>();
     reg.register_component<Health>();
-    reg.add_system<Position>(synchronize);
+    reg.add_system<Direction>(synchronize);
     reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);
     reg.add_system<Position>(extract);
