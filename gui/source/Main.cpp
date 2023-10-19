@@ -43,7 +43,7 @@ int main()
     Size neSize(83, 43);
     std::string nepath = "./gui/ressources/Sprites/r-typesheet42.gif";
     Speed speedo(300);
-    Direction diro(50, 0);
+    Direction diro(0, 0);
     SpawnGrace gra(std::chrono::seconds(5));
     Sprite nesprite(nepath.c_str(), 83, 43, 5, 5);
 
