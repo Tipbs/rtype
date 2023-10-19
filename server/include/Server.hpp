@@ -1,22 +1,3 @@
-#define _WIN32_WINNT 0x0501
-namespace boost {
-#ifdef BOOST_NO_EXCEPTIONS
-//void throw_exception(const std::exception &e)
-//{
-//    throw e; // or whatever
-//};
-
-void throw_exception(std::exception const &e)
-{
-    throw e; // or whatever
-};
-
-void throw_exception(std::exception const &e, boost::source_location const &)
-{
-    throw e; // or whatever
-};
-#endif
-} // namespace boost
 #include <chrono>
 #include <cstdint>
 #include <map>
@@ -35,20 +16,6 @@ void throw_exception(std::exception const &e, boost::source_location const &)
 #include "../../shared/Systems.hpp"
 #include "../../shared/UserCmd.hpp"
 #include "../../shared/Utils.hpp"
-
-namespace boost {
-#ifdef BOOST_NO_EXCEPTIONS
-void throw_exception(std::exception const &e)
-{
-    throw e; // or whatever
-};
-
-void throw_exception(std::exception const &e, boost::source_location const &)
-{
-    throw e; // or whatever
-};
-#endif
-} // namespace boost
 
 struct Clients {
     std::size_t _id;

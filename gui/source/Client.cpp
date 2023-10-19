@@ -13,20 +13,6 @@
 #include <boost/bind.hpp>
 #include "../../shared/NetEnt.hpp"
 
-namespace boost {
-#ifdef BOOST_NO_EXCEPTIONS
-void throw_exception(std::exception const &e)
-{
-    throw e; // or whatever
-};
-
-void throw_exception(std::exception const &e, boost::source_location const &)
-{
-    throw e; // or whatever
-};
-#endif
-} // namespace boost
-
 using boost::asio::ip::udp;
 std::binary_semaphore MainToThread {0};
 std::binary_semaphore ThreadToMain {0};
