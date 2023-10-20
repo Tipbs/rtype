@@ -90,8 +90,6 @@ void handle_dir_inputs(
 
             if (dir[1]) { // 1 is the entity num representing the player seen
                           // here
-                std::cout << "moves x = " << Moves.x << std::endl;
-                std::cout << "moves y = " << Moves.y << std::endl;
                 dir[1]->dir_X = Moves.x;
                 dir[1]->dir_Y = Moves.y;
                 r.currentCmd.mutex.lock();
