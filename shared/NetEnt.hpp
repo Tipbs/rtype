@@ -14,6 +14,7 @@ public:
 	EntityType type;
     Utils::Vec2 pos;
     uint8_t states;
+    double speed;
 
     NetEnt &operator=(const NetEnt &) = default;
 

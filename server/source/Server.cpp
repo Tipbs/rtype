@@ -218,27 +218,31 @@ void udp_server::start_receive() // Receive function
             boost::asio::placeholders::bytes_transferred));
 }
 
-void synchronize(Registry &reg, sparse_array<Direction> &directions)
+void synchronize(Registry &reg, sparse_array<Direction> &directions, sparse_array<Speed> &spe)
 {
     for (auto &player : reg.user_cmds) {
         auto &dir = directions[player.first];
+        auto &spee = spe[player.first];
         for (auto &cmds : player.second) {
+            spee->speed = cmds.speed;
             dir->dir_X += cmds.moved.x;
             dir->dir_Y += cmds.moved.y;
         }
     }
 }
 
-void extract(Registry &reg, sparse_array<Position> &positions)
+void extract(Registry &reg, sparse_array<Position> &positions, sparse_array<Speed> &speeds)
 {
     for (size_t ind = 0; ind < positions.size(); ind++) {
         auto &pos = positions[ind];
-        if (!pos)
+        auto &spe = speeds[ind];
+        if (!(pos && spe))
             continue;
         NetEnt tmp;
         tmp.id = ind;
         tmp.pos.x = pos->pos_X;
         tmp.pos.y = pos->pos_Y;
+        tmp.speed = spe->speed;
         reg._netent.push_back(tmp);
     }
 }
@@ -265,10 +269,10 @@ udp_server::udp_server(std::size_t port)
     reg.register_component<Player>();
     reg.register_component<Damages>();
     reg.register_component<Health>();
-    reg.add_system<Direction>(synchronize);
+    reg.add_system<Direction, Speed>(synchronize);
     reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);
-    reg.add_system<Position>(extract);
+    reg.add_system<Position, Speed>(extract);
 
     _port = port;
 

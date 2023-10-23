@@ -60,9 +60,9 @@ void display(
 
 void handle_dir_inputs(
     Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &anim,
-    sparse_array<Sprite> &sprite)
+    sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds)
 {
-    for (auto &&[ind, diro, anima, sprit] : indexed_zipper(dir, anim, sprite)) {
+    for (auto &&[ind, diro, anima, sprit, spe] : indexed_zipper(dir, anim, sprite, speeds)) {
         if (!(diro && anima && sprit))
             continue;
         const double AnimationPad = 0.02;
@@ -70,11 +70,14 @@ void handle_dir_inputs(
         if (ind == 1) {
             heigh = anim[ind]->count;
             Vector2 Moves = {0, 0};
+            double speed = 300; 
 
             if (IsKeyDown(KEY_RIGHT))
                 Moves.x += 1;
             if (IsKeyDown(KEY_LEFT))
                 Moves.x -= 1;
+            if (IsKeyDown(KEY_LEFT_SHIFT))
+                speed /= 2;
 
             if (IsKeyDown(KEY_DOWN) == IsKeyDown(KEY_UP)) {
                 heigh = (heigh < 1)    ? heigh + AnimationPad
@@ -92,9 +95,11 @@ void handle_dir_inputs(
                           // here
                 dir[1]->dir_X = Moves.x;
                 dir[1]->dir_Y = Moves.y;
+                speeds[1]->speed = speed;
                 r.currentCmd.mutex.lock();
                 r.currentCmd.cmd.moved.x += Moves.x;
                 r.currentCmd.cmd.moved.y += Moves.y;
+                r.currentCmd.cmd.speed = speed;
                 r.currentCmd.mutex.unlock();
                 if (IsKeyPressed(KEY_C)) {
                     anim[ind]->color_id =
@@ -201,7 +206,7 @@ void make_infinite_background(
 
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
-    sparse_array<Player> &players)
+    sparse_array<Player> &players, sparse_array<Speed> &speeds)
 {
     auto &net_ents = r.netEnts.ents;
 
@@ -227,6 +232,7 @@ void updateWithSnapshots(
     }
     for (size_t i = 0; i < positions.size(); ++i) {
         auto &pos = positions[i];
+        auto &spe = speeds[i];
         // std::osyncstream(std::cout) << "moved x: " << pos->pos_X <<
         // std::endl;
         auto const &player = players[i];
@@ -238,6 +244,7 @@ void updateWithSnapshots(
                 continue;
             pos.value().pos_X = finded->pos.x;
             pos.value().pos_Y = finded->pos.y;
+            spe->speed = finded->speed;
         } // pour le moment il n'y a pas l'ajout de nouvelles entit�s
     }
     net_ents.clear();
