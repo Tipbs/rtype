@@ -185,7 +185,7 @@ void udp_server::handle_receive(
 {
     if (!error || error == boost::asio::error::message_size) {
         std::osyncstream(std::cout) << "Received " << bytes_transferred << "bytes" << std::endl;
-        if (clients.count(_remote_point) == 0) {
+        if (clients.count(_remote_point) == 0 && clients.size() < 4) {
             wait_for_connexion(bytes_transferred);
             start_receive();
             return;
