@@ -41,6 +41,7 @@ int main()
     reg.register_component<Player>();
     reg.register_component<Current_Player>();
     reg.register_component<InputField>();
+    reg.register_component<MenuFields>();
     reg.register_component<Rectangle>();
 
     reg.add_component(background, std::move(bgPos));
@@ -52,6 +53,10 @@ int main()
     Entity const textField = reg.spawn_entity();
     reg.emplace_component<InputField>(textField, "");
     reg.emplace_component<Rectangle>(textField, ScreenWidth / 2.0f - 200, 180, 400, 50);
+
+    Entity const menuFields = reg.spawn_entity();
+    reg.emplace_component<MenuFields>(menuFields);
+    reg.emplace_component<Rectangle>(menuFields, ScreenWidth / 2.0f - 200, 180, 400, 50);
 
     create_player(reg, true);
     create_player(reg, true);
@@ -66,10 +71,11 @@ int main()
 
     reg.add_system<Position, Size, SpawnGrace>(colision);
     reg.add_system<Position, Speed, Direction>(move);
-    reg.add_system<Position, Size, Sprite, Player, Rectangle, InputField>(display);
+    reg.add_system<Position, Size, Sprite, Player, Rectangle, InputField, MenuFields>(display);
     reg.add_system<Direction, Player, Sprite>(handle_dir_inputs);
     reg.add_system<Player, Position, Size>(handle_shoot_inputs);
     reg.add_system<InputField, Rectangle>(hadle_text_inputs); 
+    reg.add_system<MenuFields, Rectangle>(hadle_menu_inputs);
     reg.add_system<Position, Size>(make_infinite_background);
     while (!WindowShouldClose())
         reg.run_systems();

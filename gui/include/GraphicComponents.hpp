@@ -115,3 +115,9 @@ struct InputField {
     int letterCount = 0;
     bool mouseOnText = false;
 };
+
+struct MenuFields {
+    std::size_t nb_fields = 4;
+    std::size_t actual_field = 0;
+    bool mouseOnText = false;
+};
