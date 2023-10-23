@@ -1,6 +1,5 @@
 #pragma once
 
-#include <raylib.h>
 #include "../../shared/Component.hpp"
 
 struct Sprite {

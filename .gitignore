@@ -42,3 +42,8 @@ CMakePresets.json
 compile_commands.json
 .cache/
 /.vs
+CMakePresets.json
+CMakeUserPresets.json
+/Debug
+*.pdb
+Release

@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <boost/serialization/serialization.hpp>
+#include <mutex>
 #include "Utils.hpp"
 
 class UserCmd {
@@ -23,4 +24,9 @@ public:
         ar &attackState;
         ar &moved;
     };
+};
+
+struct ThreadUserCmd {
+    UserCmd cmd;
+    std::mutex mutex;
 };
