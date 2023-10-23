@@ -10,7 +10,6 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
-
 #include "../../shared/NetEnt.hpp"
 #include "../../shared/Registry.hpp"
 #include "../../shared/Systems.hpp"

@@ -4,6 +4,7 @@
 #include <istream>
 #include <map>
 #include <semaphore>
+#include <syncstream>
 #include <boost/archive/archive_exception.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
@@ -12,9 +13,8 @@
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/bind/bind.hpp>
-#include "../../shared/Component.hpp"
 #include "../../shared/Bundle.hpp"
-#include <syncstream>
+#include "../../shared/Component.hpp"
 #include "ServerBundle.hpp"
 
 using boost::asio::ip::udp;
@@ -35,8 +35,10 @@ void udp_server::handle_check(const boost::system::error_code &error)
         std::osyncstream(std::cout) << "check\n";
         for (auto it = clients.begin(); it != clients.end();) {
             if ((now - it->second._timer).total_seconds() > 5) {
-                std::osyncstream(std::cout) << "Client " << it->first << " disconnected\n";
-                std::osyncstream(std::cout) << "Killed entity " << it->second._id << std::endl;
+                std::osyncstream(std::cout)
+                    << "Client " << it->first << " disconnected\n";
+                std::osyncstream(std::cout)
+                    << "Killed entity " << it->second._id << std::endl;
                 reg.kill_entity(reg.entity_from_index(it->second._id));
                 it = clients.erase(it);
             } else {
@@ -79,7 +81,8 @@ void udp_server::multiple_broadcast(
                     boost::asio::placeholders::bytes_transferred));
         }
     } catch (boost::archive::archive_exception &e) {
-        std::osyncstream(std::cout) << "Archive Error: " << e.what() << std::endl;
+        std::osyncstream(std::cout)
+            << "Archive Error: " << e.what() << std::endl;
     }
 }
 
@@ -184,7 +187,8 @@ void udp_server::handle_receive(
     std::size_t bytes_transferred) // Callback to the receive function
 {
     if (!error || error == boost::asio::error::message_size) {
-        std::osyncstream(std::cout) << "Received " << bytes_transferred << "bytes" << std::endl;
+        std::osyncstream(std::cout)
+            << "Received " << bytes_transferred << "bytes" << std::endl;
         if (clients.count(_remote_point) == 0 && clients.size() < 4) {
             wait_for_connexion(bytes_transferred);
             start_receive();

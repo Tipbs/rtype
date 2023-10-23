@@ -2,10 +2,10 @@
 
 #include "../../shared/Registry.hpp"
 
-size_t create_player_server(Registry& reg, Position pos)
+size_t create_player_server(Registry &reg, Position pos)
 {
     Entity const new_entity = reg.spawn_entity();
-    Player player((size_t)new_entity);
+    Player player((size_t) new_entity);
     Size Size(83, 43);
     Speed speedo(300);
     Direction diro(0, 0);
