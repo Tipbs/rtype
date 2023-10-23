@@ -69,7 +69,7 @@ inline zipper_iterator<Containers...>::zipper_iterator(
 {
     _current = it_tuple;
     _max = max;
-    _idx = 0;
+    _idx = idx;
     for (; _idx < _max && all_set(_seq); _idx++)
         ;
 }
@@ -112,7 +112,7 @@ inline void zipper_iterator<Containers...>::incr_all(std::index_sequence<Is...>)
     if (_idx >= _max)
         return;
     _idx++;
-    for (; all_set(_seq) && _idx < _max; _idx++)
+    for (; _idx < _max && all_set(_seq); _idx++)
         ;
 }
 

@@ -1,7 +1,7 @@
 #pragma once
+#include "../../shared/Bundle.hpp"
 #include "../../shared/Sparse_array.hpp"
 #include "../../shared/Systems.hpp"
-#include "Bundle.hpp"
 #include "GraphicComponents.hpp"
 
 void updateWithSnapshots(

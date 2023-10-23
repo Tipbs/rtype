@@ -1,7 +1,9 @@
 #include "GraphicSystems.hpp"
 #include <cstddef>
 #include <cstdlib>
+#include <syncstream>
 #include <raylib.h>
+#include "../../shared/Bundle.hpp"
 #include "../../shared/indexed_zipper.hpp"
 #include "../../shared/Registry.hpp"
 #include "../../shared/Sparse_array.hpp"
@@ -65,7 +67,7 @@ void handle_dir_inputs(
             continue;
         const double AnimationPad = 0.02;
         double heigh = 1;
-        if (anim[ind]->id == ind) {
+        if (ind == 1) {
             heigh = anim[ind]->count;
             Vector2 Moves = {0, 0};
 
@@ -79,7 +81,7 @@ void handle_dir_inputs(
                         : (heigh == 1) ? 1
                                        : heigh - AnimationPad;
             } else if (IsKeyDown(KEY_UP)) {
-                Moves.y -= rand(); // 1;
+                Moves.y -= 1; // 1;
                 heigh = (heigh >= 2) ? 2 : heigh + (5 * AnimationPad);
             } else if (IsKeyDown(KEY_DOWN)) {
                 Moves.y += 1;
@@ -88,8 +90,8 @@ void handle_dir_inputs(
 
             if (dir[1]) { // 1 is the entity num representing the player seen
                           // here
-                dir[1].value().dir_X = Moves.x;
-                dir[1].value().dir_Y = Moves.y;
+                dir[1]->dir_X = Moves.x;
+                dir[1]->dir_Y = Moves.y;
                 r.currentCmd.mutex.lock();
                 r.currentCmd.cmd.moved.x += Moves.x;
                 r.currentCmd.cmd.moved.y += Moves.y;
@@ -98,16 +100,15 @@ void handle_dir_inputs(
                     anim[ind]->color_id =
                         anim[ind]->color_id == 4 ? 0 : anim[ind]->color_id + 1;
                 }
-
-                if (dir[ind]) { // 1 is the entity num representing the player
-                                // seen here
-                    dir[ind].value().dir_X = Moves.x;
-                    dir[ind].value().dir_Y = Moves.y;
-                }
-
-                if (anim[ind])
-                    anim[ind]->count = heigh;
             }
+            if (dir[ind]) { // 1 is the entity num representing the player
+                            // seen here
+                dir[ind].value().dir_X = Moves.x;
+                dir[ind].value().dir_Y = Moves.y;
+            }
+
+            if (anim[ind])
+                anim[ind]->count = heigh;
         }
     }
 }
@@ -119,7 +120,7 @@ void handle_shoot_inputs(
     for (auto &&[ind, anima, posi, sizo] : indexed_zipper(anim, pos, siz)) {
         if (!(anima && posi && sizo))
             continue;
-        if (anim[ind]->id == ind) {
+        if (ind == 1) {
             if (IsKeyDown(KEY_SPACE)) {
                 anim[ind]->IsShooting = true;
                 anim[ind]->current_charge +=
@@ -198,27 +199,6 @@ void make_infinite_background(
     }
 }
 
-// temporary bundle
-void create_player(Registry &reg, int id, Position &pos)
-{
-    Entity const new_entity = reg.spawn_entity();
-    Player player(id);
-    Size Size(83, 43);
-    std::string path = "./gui/ressources/Sprites/r-typesheet42.gif";
-    Speed speedo(300);
-    Direction diro(0, 0);
-    SpawnGrace gra(std::chrono::seconds(1));
-    Sprite sprite(path.c_str(), 83, 43, 5, 5);
-
-    reg.add_component(new_entity, std::move(pos));
-    reg.add_component(new_entity, std::move(Size));
-    reg.add_component(new_entity, std::move(sprite));
-    reg.add_component(new_entity, std::move(speedo));
-    reg.add_component(new_entity, std::move(diro));
-    reg.add_component(new_entity, std::move(gra));
-    reg.add_component(new_entity, std::move(player));
-}
-
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
     sparse_array<Player> &players)
@@ -231,13 +211,15 @@ void updateWithSnapshots(
         auto finded = std::find_if(
             players.begin(), players.end(), [&](std::optional<Player> &player) {
                 if (player)
-                    return player.value().id == net.id;
+                    return player->id == net.id;
                 return false;
             });
         if (finded != players.end())
             continue;
+        std::cout << "id: " << net.id << std::endl;
         auto pos = Position(net.pos.x, net.pos.y);
         create_player(r, net.id, pos);
+        std::cout << "Creating player\n";
         // create entity with info from net ent
         it = net_ents.erase(it);
         if (it == net_ents.end())
@@ -245,7 +227,8 @@ void updateWithSnapshots(
     }
     for (size_t i = 0; i < positions.size(); ++i) {
         auto &pos = positions[i];
-        std::cout << "moved x: " << pos->pos_X << std::endl;
+        // std::osyncstream(std::cout) << "moved x: " << pos->pos_X <<
+        // std::endl;
         auto const &player = players[i];
         if (pos && player) {
             auto finded = std::find_if(

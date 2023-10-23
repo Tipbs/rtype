@@ -9,6 +9,7 @@
 #include <chrono>
 #include "indexed_zipper.hpp"
 #include "zipper.hpp"
+#include <syncstream>
 
 #ifdef SERVER
 	std::mutex mutex;
@@ -17,7 +18,7 @@
 	{
 		std::scoped_lock lock(mutex);
 		const auto now = std::chrono::high_resolution_clock::now();
-		return std::chrono::duration<double>(time_since_last_tick - now).count();
+		return std::chrono::duration<double>(now - time_since_last_tick).count();
 	}
 
     void ResetFrameTime()
@@ -39,24 +40,27 @@ sparse_array<Position> &positions,
 sparse_array<Speed> &speed, 
 sparse_array<Direction> &dir)
 {
-    for (auto &&[ind, pos, spe, diro]: indexed_zipper(positions, speed, dir)) {
-        if (!(pos && spe && diro))
-            continue;
+    for (auto &&[pos, spe, diro]: zipper(positions, speed, dir)) {
+        //std::osyncstream(std::cout) << "y = " << pos->pos_Y << "  x = " << pos->pos_X << std::endl;
         double magnitude = std::sqrt(
-            (dir[ind].value().dir_X * 
-            dir[ind].value().dir_X) + 
-            (dir[ind].value().dir_Y * 
-            dir[ind].value().dir_Y));
+            (diro->dir_X *
+            diro->dir_X) + 
+            (diro->dir_Y * 
+            diro->dir_Y));
         if (magnitude > 0.1) { //Added a magnitude threshold to avoid going straight to INT_MIN and INT_MAX when having a really low direction move
-            positions[ind].value().pos_X += 
-                (speed[ind].value().speed * 
-                (dir[ind].value().dir_X / magnitude)) * 
+            pos->pos_X += 
+                (spe->speed * 
+                (diro->dir_X / magnitude)) * 
                 GetFrameTime();
-            positions[ind].value().pos_Y += 
-                (speed[ind].value().speed * 
-                (dir[ind].value().dir_Y / magnitude)) * 
+            pos->pos_Y += 
+                (spe->speed * 
+                (diro->dir_Y / magnitude)) * 
                 GetFrameTime();
         }
+        #ifdef SERVER
+        diro->dir_X = 0;
+        diro->dir_Y = 0;
+        #endif
     }
 }
 
@@ -66,16 +70,15 @@ sparse_array<Damages> &dama,
 size_t i1, size_t i2)
 {
     healt[i1]->health -= dama[i2]->damages;
-    std::cout << "User " << i1 << " has taken " << dama[i2]->damages << " damages. He now have " << healt[i1]->health << " HP." << std::endl;
+    std::osyncstream(std::cout) << "User " << i1 << " has taken " << dama[i2]->damages << " damages. He now have " << healt[i1]->health << " HP." << std::endl;
     healt[i2]->health -= dama[i1]->damages;
-    std::cout << "User " << i2 << " has taken " << dama[i1]->damages << " damages. He now have " << healt[i2]->health << " HP." << std::endl;
+    std::osyncstream(std::cout) << "User " << i2 << " has taken " << dama[i1]->damages << " damages. He now have " << healt[i2]->health << " HP." << std::endl;
     if (healt[i1]->health <= 0)
         r.kill_entity(r.entity_from_index(i1));
     if (healt[i2]->health <= 0)
         r.kill_entity(r.entity_from_index(i2));
-        
-
 }
+
 void colision(Registry &r,
 sparse_array<Position> &positions, 
 sparse_array<Size> &size, 
@@ -87,10 +90,10 @@ sparse_array<Health> &helth)
     for (auto &&[ind, pos, siz, dama, halth]: indexed_zipper(positions, size, dam, helth)) {
         if (!(pos && siz && dama && halth))
             continue;
-        if (grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time + grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).timer >= time)
+        if (grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time + grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).time >= time)
                 continue;
         for (size_t ind2 = ind + 1; ind2 < positions.size(); ind2++) {
-            if (grace[ind2].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time + grace[ind2].value_or(SpawnGrace(std::chrono::seconds(0))).timer >= time)
+            if (grace[ind2].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time + grace[ind2].value_or(SpawnGrace(std::chrono::seconds(0))).time >= time)
                 continue;
             if (positions[ind].value().pos_X > positions[ind2].value().pos_X + size[ind2].value().size_X)
                 continue;

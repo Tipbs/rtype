@@ -116,7 +116,7 @@ indexed_zipper_iterator<Containers...>::incr_all(std::index_sequence<Is...>)
         return;
     _idx++;
     _zipper_idx++;
-    for (; all_set(_seq) && _idx < _max; _idx++)
+    for (; _idx < _max && all_set(_seq); _idx++)
         ;
 }
 
