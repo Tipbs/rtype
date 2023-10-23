@@ -12,6 +12,7 @@
 #include <boost/asio/ip/udp.hpp>
 #include <boost/bind.hpp>
 #include "../../shared/NetEnt.hpp"
+#include <syncstream>
 
 using boost::asio::ip::udp;
 std::binary_semaphore MainToThread {0};
@@ -32,10 +33,10 @@ void udp_client::send()
     auto copyCmd = _reg.currentCmd.cmd;
     _reg.currentCmd.cmd.reset();
     _reg.currentCmd.mutex.unlock();
-    // std::cout << "eeqsdqsd\n";
+    // std::osyncstream(std::cout) << "eeqsdqsd\n";
     archive << copyCmd;
     std::string serializedData = oss.str();
-    // std::cout << "Sending " << serializedData.size() << "bytes from " <<
+    // std::osyncstream(std::cout) << "Sending " << serializedData.size() << "bytes from " <<
     // serializedData.data() << std::endl;
     _socket.async_send_to(
         boost::asio::buffer(serializedData.c_str(), serializedData.size()),
@@ -48,9 +49,9 @@ void udp_client::send()
 void udp_client::handle_receive(
     const boost::system::error_code &error, std::size_t bytes_transferred)
 {
-    // std::cout << "Received mais erreur\n";
+    // std::osyncstream(std::cout) << "Received mais erreur\n";
     if (!error) {
-        // std::cout << "Received " << bytes_transferred << " bytes" <<
+        // std::osyncstream(std::cout) << "Received " << bytes_transferred << " bytes" <<
         // std::endl;
         try {
             std::string seralizedData(_recv_buffer.data(), bytes_transferred);
@@ -63,7 +64,7 @@ void udp_client::handle_receive(
                 _reg.netEnts.ents.begin(), tmp.begin(), tmp.end());
             _reg.netEnts.mutex.unlock();
         } catch (std::exception &err) {
-            std::cout << "Error in handle_receive: " << err.what()
+            std::osyncstream(std::cout) << "Error in handle_receive: " << err.what()
                       << " (probably normal)\n";
         }
     }
@@ -103,10 +104,10 @@ void udp_client::send_user()
 void udp_client::net_get_id(
     const boost::system::error_code &error, std::size_t bytes_transferred)
 {
-    std::cout << "Received mais erreur net_get_id ;)" << bytes_transferred
-              << "\n";
+    //std::osyncstream(std::cout) << "Received mais erreur net_get_id ;)" << bytes_transferred
+    //          << "\n";
     if (!error) {
-        std::cout << "net_get_id: Received " << bytes_transferred << " bytes"
+        std::osyncstream(std::cout) << "net_get_id: Received " << bytes_transferred << " bytes"
                   << std::endl;
         try {
             std::string seralizedData(_recv_buffer.data(), bytes_transferred);
@@ -120,7 +121,7 @@ void udp_client::net_get_id(
             throw err;
         }
     } else {
-        std::cout << "Erreur dans net_get_id: " << error.message() << std::endl;
+        std::osyncstream(std::cout) << "Erreur dans net_get_id: " << error.message() << std::endl;
     }
 }
 
@@ -142,11 +143,11 @@ void udp_client::fetch_player_id()
             throw std::runtime_error("Failed to get player id from server");
         }
         _socket.send_to(boost::asio::buffer({'\0'}, 1), _remote_point);
-        std::cout << "looping " << std::endl;
+        std::osyncstream(std::cout) << "looping " << std::endl;
         _svc.run();
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-    std::cout << "player id: " << _player_id << "\n";
+    std::osyncstream(std::cout) << "player id: " << _player_id << "\n";
 }
 
 udp_client::udp_client(
