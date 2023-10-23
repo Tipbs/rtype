@@ -1,9 +1,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include <iostream>
-#include "Registry.hpp"
-#include "zipper.hpp"
-#include "Sparse_array.hpp"
-#include "Systems.hpp"
+#include "../../shared/Registry.hpp"
+#include "../../shared/zipper.hpp"
+#include "../../shared/Sparse_array.hpp"
+#include "../../shared/Systems.hpp"
 
 
 void print_position(Registry &r, sparse_array<Position> positions)

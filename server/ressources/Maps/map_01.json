@@ -1,5 +1,5 @@
 {
-  entities: [
+  players: [
     {
       id: 0,
       type: 0
@@ -20,5 +20,8 @@
       type: 3,
       pos: {350, 700}
     },
-  ]
+  ],
+  enemies: {
+    count: 20,
+  }
 }

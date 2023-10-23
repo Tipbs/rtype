@@ -3,6 +3,7 @@
 #include <map>
 #include "Entity.hpp"
 #include "Registry.hpp"
+#include "../../shared/NetEnt.hpp"
 
 class Factory {
     public:
@@ -14,10 +15,10 @@ class Factory {
     private: 
         auto &_register_components();
         const Entity _create_player(int id, Utils::Vec2 pos, int type);
-        const Entity _create_enemie(int id, Utils::Vec2 pos, int type);
+        const Entity _create_enemie();
 
     private:
-        Registry &_reg;    
+        Registry &_reg;
 };
 
 template<typename ...Args>
