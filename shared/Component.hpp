@@ -53,4 +53,7 @@ struct SpawnGrace {
 		creation_time = GetTimePoint();
 	};
 };
-
+struct EnemyCount {
+    int leftToSpawn = 0;
+    int leftAlive = 0;
+};

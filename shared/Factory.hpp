@@ -15,7 +15,7 @@ class Factory {
     private: 
         auto &_register_components();
         const Entity _create_player(int id, Utils::Vec2 pos, int type);
-        const Entity _create_enemie();
+        const Entity _create_enemy();
 
     private:
         Registry &_reg;

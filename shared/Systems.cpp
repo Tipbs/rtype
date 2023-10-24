@@ -109,3 +109,22 @@ sparse_array<Health> &helth)
         }
     }
 }
+
+void spawn_enemy(Registry &r,
+    sparse_array<EnemyCount> &enemiesCount
+)
+{
+    for (auto &&[enemyCount]: zipper(enemiesCount)) {
+        if (enemyCount->leftToSpawn > 0) {
+            const Entity ent = r.spawn_entity();
+            float randomNumber = rand() % 100 + 1;
+            Utils::Vec2 pos = {900, randomNumber};
+
+            r.emplace_component<Position>(ent, pos);
+            r.emplace_component<Speed>(ent, 300);
+            r.emplace_component<Direction>(ent, 50, 0);
+            r.emplace_component<SpawnGrace>(ent, std::chrono::seconds(5));
+            // r.emplace_component<NetworkEntity>(ent, id);
+        }
+    }
+}
