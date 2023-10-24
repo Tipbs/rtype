@@ -92,11 +92,11 @@ void create_ammo(Registry &reg, Position pos, float damage_mult)
     Sprite sprite(
         path.c_str(), hitwidth, hitheight, 8,
         1); // width height are the visual box
+    Position posCopy(
+        pos.pos_X - (float) hitwidth / 2, pos.pos_Y - (float) hitheight / 2);
 
     reg.add_component(
-        new_entity, Position(
-                        pos.pos_X - (float) hitwidth / 2,
-                        pos.pos_Y - (float) hitheight / 2));
+        new_entity, std::move(posCopy));
     reg.add_component(new_entity, std::move(Size));
     reg.add_component(new_entity, std::move(sprite));
     reg.add_component(new_entity, std::move(speedo));

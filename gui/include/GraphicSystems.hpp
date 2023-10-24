@@ -20,6 +20,6 @@ void hadle_text_inputs(
     sparse_array<Rectangle> &rectangles);
 void handle_shoot_inputs(
     Registry &r, sparse_array<Player> &anim, sparse_array<Position> &pos,
-    sparse_array<Size> &siz);
+    sparse_array<Size> &siz, sparse_array<Current_Player> &current);
 void make_infinite_background(
     Registry &r, sparse_array<Position> &pos, sparse_array<Size> &siz);

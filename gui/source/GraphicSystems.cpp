@@ -104,33 +104,30 @@ void handle_dir_inputs(
 
 void handle_shoot_inputs(
     Registry &r, sparse_array<Player> &anim, sparse_array<Position> &pos,
-    sparse_array<Size> &siz)
+    sparse_array<Size> &siz, sparse_array<Current_Player> &current)
 {
-    for (auto &&[ind, anima, posi, sizo] : indexed_zipper(anim, pos, siz)) {
-        if (!(anima && posi && sizo))
-            continue;
-        if (ind == 1) {
-            if (IsKeyDown(KEY_SPACE)) {
-                anim[ind]->IsShooting = true;
-                anim[ind]->current_charge +=
-                    (anim[ind]->current_charge >= 3) ? 0 : 5 * GetFrameTime();
-            }
-            if (IsKeyReleased(KEY_SPACE)) {
-                anim[ind]->IsShooting = false;
-                create_ammo(
-                    r,
-                    Position(
-                        pos[ind]->pos_X + (float) sizo->size_X,
-                        pos[ind]->pos_Y + (float) sizo->size_Y / 2),
-                    anim[ind]->current_charge);
-                anim[ind]->current_charge = 1.;
-            }
-
-            // if (anim[ind]->IsShooting) {
-            //     Animation de charge du tir
-            // }
-        }
-    }
+ 
+    for (auto &&[anima, posi, sizo, _] : zipper(anim, pos, siz, current)) {
+		if (IsKeyDown(KEY_SPACE)) {
+			anima->IsShooting = true;
+			anima->current_charge +=
+				(anima->current_charge >= 3) ? 0 : 5 * GetFrameTime();
+		}
+		if (IsKeyReleased(KEY_SPACE)) {
+			anima->IsShooting = false;
+			create_ammo(
+				r,
+				Position(
+					posi->pos_X + (float) sizo->size_X,
+					posi->pos_Y + (float) sizo->size_Y / 2),
+				anima->current_charge);
+			anima->current_charge = 1.;
+		}
+		break;
+		// if (anim[ind]->IsShooting) {
+		//     Animation de charge du tir
+		// }
+	}
 }
 
 void hadle_text_inputs(
