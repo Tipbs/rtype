@@ -14,12 +14,16 @@
 #ifdef SERVER
 	std::mutex mutex;
 	static auto time_since_last_tick = std::chrono::high_resolution_clock::now(); // voir si raylib utilise m�me chose
-	float GetFrameTime()
-	{
-		std::scoped_lock lock(mutex);
-		const auto now = std::chrono::high_resolution_clock::now();
-		return std::chrono::duration<double>(now - time_since_last_tick).count();
-	}
+	//float GetFrameTime()
+	//{
+	//	std::scoped_lock lock(mutex);
+	//	const auto now = std::chrono::high_resolution_clock::now();
+	//	return std::chrono::duration<double>(now - time_since_last_tick).count();
+	//}
+        float GetFrameTime()
+        {
+            return 1;
+        }
 
     void ResetFrameTime()
 	{
@@ -42,21 +46,8 @@ sparse_array<Direction> &dir)
 {
     for (auto &&[pos, spe, diro]: zipper(positions, speed, dir)) {
         //std::osyncstream(std::cout) << "y = " << pos->pos_Y << "  x = " << pos->pos_X << std::endl;
-        double magnitude = std::sqrt(
-            (diro->dir_X *
-            diro->dir_X) + 
-            (diro->dir_Y * 
-            diro->dir_Y));
-        if (magnitude > 0.1) { //Added a magnitude threshold to avoid going straight to INT_MIN and INT_MAX when having a really low direction move
-            pos->pos_X += 
-                (spe->speed * 
-                (diro->dir_X / magnitude)) * 
-                GetFrameTime();
-            pos->pos_Y += 
-                (spe->speed * 
-                (diro->dir_Y / magnitude)) * 
-                GetFrameTime();
-        }
+		pos->pos_X += spe->speed * diro->dir_X * GetFrameTime();
+		pos->pos_Y += spe->speed * diro->dir_Y * GetFrameTime();
         #ifdef SERVER
         diro->dir_X = 0;
         diro->dir_Y = 0;
