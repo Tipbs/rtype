@@ -60,61 +60,46 @@ void display(
 
 void handle_dir_inputs(
     Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &anim,
-    sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds)
+    sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds, sparse_array<Current_Player> &currents)
 {
-    for (auto &&[ind, diro, anima, sprit, spe] : indexed_zipper(dir, anim, sprite, speeds)) {
-        if (!(diro && anima && sprit))
-            continue;
+    for (auto &&[diro, anima, sprit, spe, current] : zipper(dir, anim, sprite, speeds, currents)) {
         const double AnimationPad = 0.02;
         double heigh = 1;
-        if (ind == 1) {
-            heigh = anim[ind]->count;
-            Vector2 Moves = {0, 0};
-            double speed = 300; 
+		heigh = anima->count;
+		Vector2 Moves = {0, 0};
+		double speed = 300; 
 
-            if (IsKeyDown(KEY_RIGHT))
-                Moves.x += 1;
-            if (IsKeyDown(KEY_LEFT))
-                Moves.x -= 1;
-            if (IsKeyDown(KEY_LEFT_SHIFT))
-                speed /= 2;
+		if (IsKeyDown(KEY_RIGHT))
+			Moves.x += 1;
+		if (IsKeyDown(KEY_LEFT))
+			Moves.x -= 1;
+		if (IsKeyDown(KEY_LEFT_SHIFT))
+			speed /= 2;
 
-            if (IsKeyDown(KEY_DOWN) == IsKeyDown(KEY_UP)) {
-                heigh = (heigh < 1)    ? heigh + AnimationPad
-                        : (heigh == 1) ? 1
-                                       : heigh - AnimationPad;
-            } else if (IsKeyDown(KEY_UP)) {
-                Moves.y -= 1; // 1;
-                heigh = (heigh >= 2) ? 2 : heigh + (5 * AnimationPad);
-            } else if (IsKeyDown(KEY_DOWN)) {
-                Moves.y += 1;
-                heigh = (heigh <= 0) ? 0 : heigh - (5 * AnimationPad);
-            }
-
-            if (dir[1]) { // 1 is the entity num representing the player seen
-                          // here
-                dir[1]->dir_X = Moves.x;
-                dir[1]->dir_Y = Moves.y;
-                speeds[1]->speed = speed;
-                r.currentCmd.mutex.lock();
-                r.currentCmd.cmd.moved.x += Moves.x;
-                r.currentCmd.cmd.moved.y += Moves.y;
-                r.currentCmd.mutex.unlock();
-                if (IsKeyPressed(KEY_C)) {
-                    anim[ind]->color_id =
-                        anim[ind]->color_id == 4 ? 0 : anim[ind]->color_id + 1;
-                }
-            }
-            if (dir[ind]) { // 1 is the entity num representing the player
-                            // seen here
-                dir[ind].value().dir_X = Moves.x;
-                dir[ind].value().dir_Y = Moves.y;
-            }
-
-            if (anim[ind])
-                anim[ind]->count = heigh;
-        }
-    }
+		if (IsKeyDown(KEY_DOWN) == IsKeyDown(KEY_UP)) {
+			heigh = (heigh < 1)    ? heigh + AnimationPad
+					: (heigh == 1) ? 1
+								   : heigh - AnimationPad;
+		} else if (IsKeyDown(KEY_UP)) {
+			Moves.y -= 1; // 1;
+			heigh = (heigh >= 2) ? 2 : heigh + (5 * AnimationPad);
+		} else if (IsKeyDown(KEY_DOWN)) {
+			Moves.y += 1;
+			heigh = (heigh <= 0) ? 0 : heigh - (5 * AnimationPad);
+		}
+		diro->dir_X = Moves.x;
+		diro->dir_Y = Moves.y;
+		//speeds[1]->speed = speed;
+		r.currentCmd.mutex.lock();
+		r.currentCmd.cmd.moved.x += Moves.x * GetFrameTime();
+		r.currentCmd.cmd.moved.y += Moves.y * GetFrameTime();
+		r.currentCmd.mutex.unlock();
+		if (IsKeyPressed(KEY_C)) {
+			anima->color_id =
+				anima->color_id == 4 ? 0 : anima->color_id + 1;
+		}
+		anima->count = heigh;
+	}
 }
 
 void handle_shoot_inputs(
@@ -231,7 +216,6 @@ void updateWithSnapshots(
     }
     for (size_t i = 0; i < positions.size(); ++i) {
         auto &pos = positions[i];
-        auto &spe = speeds[i];
         // std::osyncstream(std::cout) << "moved x: " << pos->pos_X <<
         // std::endl;
         auto const &player = players[i];
@@ -249,7 +233,6 @@ void updateWithSnapshots(
             }
             pos.value().pos_X = finded->pos.x;
             pos.value().pos_Y = finded->pos.y;
-            spe->speed = finded->speed;
         } // pour le moment il n'y a pas l'ajout de nouvelles entit�s
     }
     net_ents.clear();
