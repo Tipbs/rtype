@@ -21,7 +21,9 @@ void display(
          indexed_zipper(positions, size, sprite)) {
         if (!(pos && siz && spri))
             continue;
-        if (sprite[ind]->width_max == 8 && sprite[ind]->height_max == 1) {
+        if (sprite[ind]->width_max == 8 && sprite[ind]->height_max == 5) {
+            sprite[ind]->sprite.y =
+                sprite[ind]->color_id * sprite[ind]->height_padding;
             sprite[ind]->sprite.x +=
                 (sprite[ind]->sprite.x / sprite[ind]->width_padding ==
                          sprite[ind]->width_max - 1
@@ -31,16 +33,10 @@ void display(
         if (anim[ind]) {
             sprite[ind]->sprite.y =
                 anim[ind]->color_id * sprite[ind]->height_padding;
-            if (anim[ind]->count >= 1.85)
-                sprite[ind]->sprite.x = 4 * sprite[ind]->width_padding;
-            else if (anim[ind]->count <= 0.15)
-                sprite[ind]->sprite.x = 0 * sprite[ind]->width_padding;
-            else if (anim[ind]->count <= 0.85)
+            if (anim[ind]->IsShooting)
                 sprite[ind]->sprite.x = 1 * sprite[ind]->width_padding;
-            else if (anim[ind]->count >= 1.15)
-                sprite[ind]->sprite.x = 3 * sprite[ind]->width_padding;
             else
-                sprite[ind]->sprite.x = 2 * sprite[ind]->width_padding;
+                sprite[ind]->sprite.x = 0 * sprite[ind]->width_padding;
         }
 
         Vector2 Rectpos = {
@@ -78,6 +74,8 @@ void handle_dir_inputs(
                 Moves.x -= 1;
             if (IsKeyDown(KEY_LEFT_SHIFT))
                 speed /= 2;
+            if (IsKeyDown(KEY_LEFT_CONTROL))
+                speed *= 3;
 
             if (IsKeyDown(KEY_DOWN) == IsKeyDown(KEY_UP)) {
                 heigh = (heigh < 1)    ? heigh + AnimationPad
@@ -138,7 +136,8 @@ void handle_shoot_inputs(
                     Position(
                         pos[ind]->pos_X + (float) sizo->size_X,
                         pos[ind]->pos_Y + (float) sizo->size_Y / 2),
-                    anim[ind]->current_charge);
+                        anim[ind]->current_charge,
+                        anim[ind]->color_id);
                 anim[ind]->current_charge = 1.;
             }
 
