@@ -39,7 +39,7 @@ int main(int ac, char **av)
     Size bgSize(ScreenWidth, ScreenHeight);
     std::string bgpath =
         "./gui/ressources/Backgrounds/Backtest.png"; // temp > 2 > 3 > 1
-    Speed bgspe(200);
+    Speed bgspe(50);
     Direction bgdir(-4, 0);
     Sprite bgsprite(bgpath.c_str(), 3 * ScreenWidth, ScreenHeight);
 
