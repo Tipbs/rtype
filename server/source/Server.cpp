@@ -261,6 +261,7 @@ udp_server::udp_server(std::size_t port)
     : _svc(), _socket(_svc, udp::endpoint(udp::v4(), port)), tick_timer(_svc),
       check_timer(_svc)
 {
+    Entity ent = reg.spawn_entity();
     reg.register_component<Size>();
     reg.register_component<Position>();
     reg.register_component<Speed>();
@@ -269,10 +270,13 @@ udp_server::udp_server(std::size_t port)
     reg.register_component<Player>();
     reg.register_component<Damages>();
     reg.register_component<Health>();
+    reg.register_component<EnemyCount>();
+    reg.emplace_component<EnemyCount>(ent, 20);
     reg.add_system<Direction, Speed>(synchronize);
     reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);
     reg.add_system<Position, Speed>(extract);
+    reg.add_system<EnemyCount>(spawn_enemy);
 
     _port = port;
 

@@ -3,6 +3,7 @@
 #include <string>
 #include <utility>
 #include <chrono>
+#include "Utils.hpp"
 
 #ifdef SERVER
 	float GetFrameTime();
@@ -22,6 +23,7 @@ struct Position {
 	double pos_X = 0;
 	double pos_Y = 0;
 	Position(double x, double y): pos_X(x), pos_Y(y) {};
+    Position(Utils::Vec2 vec): pos_X(vec.x), pos_Y(vec.y) {};
 };
 struct Damages {
 	int damages = 0;
@@ -56,4 +58,7 @@ struct SpawnGrace {
 struct EnemyCount {
     int leftToSpawn = 0;
     int leftAlive = 0;
+    float timeSinceLastSpawn = 0;
+    float spawnFrequency = 2;
+    EnemyCount(int enemiesNb, int spawnFrequency = 2): leftToSpawn(enemiesNb), spawnFrequency(spawnFrequency) {};
 };
