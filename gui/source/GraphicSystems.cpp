@@ -99,6 +99,7 @@ void handle_dir_inputs(
 				anima->color_id == 4 ? 0 : anima->color_id + 1;
 		}
 		anima->count = heigh;
+		break;
 	}
 }
 
