@@ -58,7 +58,8 @@ void handle_dir_inputs(
     Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &anim,
     sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds)
 {
-    for (auto &&[ind, diro, anima, sprit, spe] : indexed_zipper(dir, anim, sprite, speeds)) {
+    for (auto &&[ind, diro, anima, sprit, spe] :
+         indexed_zipper(dir, anim, sprite, speeds)) {
         if (!(diro && anima && sprit))
             continue;
         const double AnimationPad = 0.02;
@@ -66,7 +67,7 @@ void handle_dir_inputs(
         if (ind == 1) {
             heigh = anim[ind]->count;
             Vector2 Moves = {0, 0};
-            double speed = 300; 
+            double speed = 300;
 
             if (IsKeyDown(KEY_RIGHT))
                 Moves.x += 1;
@@ -136,8 +137,7 @@ void handle_shoot_inputs(
                     Position(
                         pos[ind]->pos_X + (float) sizo->size_X,
                         pos[ind]->pos_Y + (float) sizo->size_Y / 2),
-                        anim[ind]->current_charge,
-                        anim[ind]->color_id);
+                    anim[ind]->current_charge, anim[ind]->color_id);
                 anim[ind]->current_charge = 1.;
             }
 
