@@ -242,13 +242,6 @@ void updateWithSnapshots(
                 [&](NetEnt &ent) { return ent.id == player.value().id; });
             if (finded == net_ents.end())
                 continue;
-            if (current) {
-                std::cout << "x: "
-                          << std::abs(finded->pos.x - pos.value().pos_X)
-                          << " y: "
-                          << std::abs(finded->pos.y - pos.value().pos_Y)
-                          << "\n";
-            }
             if (current &&
                 std::abs(finded->pos.x - pos.value().pos_X) < 30.0 &&
                 std::abs(finded->pos.y - pos.value().pos_Y) < 30.0) {
