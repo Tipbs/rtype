@@ -113,7 +113,6 @@ void udp_server::handle_tick() // tick every seconds
         MainToThread.release();
         ThreadToMain.acquire();
         tick_timer.expires_from_now(boost::posix_time::millisec(50));
-        ResetFrameTime();
         tick_timer.wait();
     }
 }
@@ -222,7 +221,6 @@ void synchronize(Registry &reg, sparse_array<Direction> &directions, sparse_arra
 {
     for (auto &player : reg.user_cmds) {
         auto &dir = directions[player.first];
-        auto &spee = spe[player.first];
         for (auto &cmds : player.second) {
             dir->dir_X += cmds.moved.x;
             dir->dir_Y += cmds.moved.y;
@@ -241,7 +239,6 @@ void extract(Registry &reg, sparse_array<Position> &positions, sparse_array<Spee
         tmp.id = ind;
         tmp.pos.x = pos->pos_X;
         tmp.pos.y = pos->pos_Y;
-        tmp.speed = spe->speed;
         reg._netent.push_back(tmp);
     }
 }
