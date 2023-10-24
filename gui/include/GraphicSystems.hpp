@@ -13,7 +13,8 @@ void display(
     sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields);
 void handle_dir_inputs(
     Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &anim,
-    sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds);
+    sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds,
+    sparse_array<Current_Player> &currents);
 void hadle_text_inputs(
     Registry &r, sparse_array<InputField> &inputFields,
     sparse_array<Rectangle> &rectangles);
