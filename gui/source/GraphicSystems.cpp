@@ -66,33 +66,33 @@ void handle_dir_inputs(
         const double AnimationPad = 0.02;
         double heigh = 1;
 		heigh = anima->count;
-		Vector2 Moves = {0, 0};
-		double speed = 300; 
+		Vector2 moves = {0, 0};
+		double speedScale = 1; 
 
 		if (IsKeyDown(KEY_RIGHT))
-			Moves.x += 1;
+			moves.x += 1;
 		if (IsKeyDown(KEY_LEFT))
-			Moves.x -= 1;
+			moves.x -= 1;
 		if (IsKeyDown(KEY_LEFT_SHIFT))
-			speed /= 2;
+			speedScale /= 2;
 
 		if (IsKeyDown(KEY_DOWN) == IsKeyDown(KEY_UP)) {
 			heigh = (heigh < 1)    ? heigh + AnimationPad
 					: (heigh == 1) ? 1
 								   : heigh - AnimationPad;
 		} else if (IsKeyDown(KEY_UP)) {
-			Moves.y -= 1; // 1;
+			moves.y -= 1; // 1;
 			heigh = (heigh >= 2) ? 2 : heigh + (5 * AnimationPad);
 		} else if (IsKeyDown(KEY_DOWN)) {
-			Moves.y += 1;
+			moves.y += 1;
 			heigh = (heigh <= 0) ? 0 : heigh - (5 * AnimationPad);
 		}
-		diro->dir_X = Moves.x;
-		diro->dir_Y = Moves.y;
+		diro->dir_X = moves.x * speedScale;
+		diro->dir_Y = moves.y * speedScale;
 		//speeds[1]->speed = speed;
 		r.currentCmd.mutex.lock();
-		r.currentCmd.cmd.moved.x += Moves.x * GetFrameTime();
-		r.currentCmd.cmd.moved.y += Moves.y * GetFrameTime();
+		r.currentCmd.cmd.moved.x += moves.x * GetFrameTime() * speedScale;
+		r.currentCmd.cmd.moved.y += moves.y * GetFrameTime() * speedScale;
 		r.currentCmd.mutex.unlock();
 		if (IsKeyPressed(KEY_C)) {
 			anima->color_id =
