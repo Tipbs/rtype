@@ -52,6 +52,7 @@ int main(int ac, char **av)
     Direction diro(0, 0);
     SpawnGrace gra(std::chrono::seconds(5));
     Sprite nesprite(nepath.c_str(), 83, 43, 5, 5);
+    Current_Player current_p;
 
     reg.register_component<Size>();
     reg.register_component<Position>();
@@ -79,6 +80,7 @@ int main(int ac, char **av)
     reg.add_component(new_entity, std::move(diro));
     reg.add_component(new_entity, std::move(gra));
     reg.add_component(new_entity, std::move(player));
+    reg.add_component(new_entity, std::move(current_p));
 
     reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);
@@ -88,7 +90,7 @@ int main(int ac, char **av)
     reg.add_system<Player, Position, Size>(handle_shoot_inputs);
     //    reg.add_system<InputField, Rectangle>(hadle_text_inputs);
     reg.add_system<Position, Size>(make_infinite_background);
-    reg.add_system<Position, Player, Speed>(updateWithSnapshots);
+    reg.add_system<Position, Player, Speed, Current_Player>(updateWithSnapshots);
 
     while (!WindowShouldClose()) {
         reg.run_systems();

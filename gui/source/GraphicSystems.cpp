@@ -99,7 +99,6 @@ void handle_dir_inputs(
                 r.currentCmd.mutex.lock();
                 r.currentCmd.cmd.moved.x += Moves.x;
                 r.currentCmd.cmd.moved.y += Moves.y;
-                r.currentCmd.cmd.speed = speed;
                 r.currentCmd.mutex.unlock();
                 if (IsKeyPressed(KEY_C)) {
                     anim[ind]->color_id =
@@ -206,7 +205,7 @@ void make_infinite_background(
 
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
-    sparse_array<Player> &players, sparse_array<Speed> &speeds)
+    sparse_array<Player> &players, sparse_array<Speed> &speeds, sparse_array<Current_Player> &currents)
 {
     auto &net_ents = r.netEnts.ents;
 
@@ -236,12 +235,25 @@ void updateWithSnapshots(
         // std::osyncstream(std::cout) << "moved x: " << pos->pos_X <<
         // std::endl;
         auto const &player = players[i];
+        auto const &current = currents[i];
         if (pos && player) {
             auto finded = std::find_if(
                 net_ents.begin(), net_ents.end(),
                 [&](NetEnt &ent) { return ent.id == player.value().id; });
             if (finded == net_ents.end())
                 continue;
+            if (current) {
+                std::cout << "x: "
+                          << std::abs(finded->pos.x - pos.value().pos_X)
+                          << " y: "
+                          << std::abs(finded->pos.y - pos.value().pos_Y)
+                          << "\n";
+            }
+            if (current &&
+                std::abs(finded->pos.x - pos.value().pos_X) < 30.0 &&
+                std::abs(finded->pos.y - pos.value().pos_Y) < 30.0) {
+                continue;
+            }
             pos.value().pos_X = finded->pos.x;
             pos.value().pos_Y = finded->pos.y;
             spe->speed = finded->speed;

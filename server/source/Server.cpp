@@ -224,7 +224,6 @@ void synchronize(Registry &reg, sparse_array<Direction> &directions, sparse_arra
         auto &dir = directions[player.first];
         auto &spee = spe[player.first];
         for (auto &cmds : player.second) {
-            spee->speed = cmds.speed;
             dir->dir_X += cmds.moved.x;
             dir->dir_Y += cmds.moved.y;
         }
