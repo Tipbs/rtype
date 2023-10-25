@@ -9,6 +9,7 @@ struct Sprite {
     double width_padding;
     double height_max;
     double width_max;
+    int color_id = 0;
 
     Sprite(
         char *path, int width, int height, double width_multiplier,

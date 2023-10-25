@@ -77,7 +77,7 @@ void create_ammo(Registry &reg, Position pos, Weapon original_weapon)
     reg.add_component(new_entity, std::move(speedo));
     reg.add_component(new_entity, std::move(diro));
 }
-void create_ammo(Registry &reg, Position pos, float damage_mult)
+void create_ammo(Registry &reg, Position pos, float damage_mult, int color_id)
 {
     Entity const new_entity = reg.spawn_entity();
     int hitwidth = 120 * (damage_mult / 2);
@@ -90,10 +90,10 @@ void create_ammo(Registry &reg, Position pos, float damage_mult)
     Health healt(1);
     Direction diro = Direction(1, 0); // std::pow(-1, rand()) * rand()
     Sprite sprite(
-        path.c_str(), hitwidth, hitheight, 8,
-        1); // width height are the visual box
+        path.c_str(), hitwidth, hitheight, 8, 5); // width height are the visual box
     Position posCopy(
         pos.pos_X - (float) hitwidth / 2, pos.pos_Y - (float) hitheight / 2);
+    sprite.color_id = color_id;
 
     reg.add_component(
         new_entity, std::move(posCopy));

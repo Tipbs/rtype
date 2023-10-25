@@ -21,7 +21,9 @@ void display(
          indexed_zipper(positions, size, sprite)) {
         if (!(pos && siz && spri))
             continue;
-        if (sprite[ind]->width_max == 8 && sprite[ind]->height_max == 1) {
+        if (sprite[ind]->width_max == 8 && sprite[ind]->height_max == 5) {
+            sprite[ind]->sprite.y =
+                sprite[ind]->color_id * sprite[ind]->height_padding;
             sprite[ind]->sprite.x +=
                 (sprite[ind]->sprite.x / sprite[ind]->width_padding ==
                          sprite[ind]->width_max - 1
@@ -31,16 +33,10 @@ void display(
         if (anim[ind]) {
             sprite[ind]->sprite.y =
                 anim[ind]->color_id * sprite[ind]->height_padding;
-            if (anim[ind]->count >= 1.85)
-                sprite[ind]->sprite.x = 4 * sprite[ind]->width_padding;
-            else if (anim[ind]->count <= 0.15)
-                sprite[ind]->sprite.x = 0 * sprite[ind]->width_padding;
-            else if (anim[ind]->count <= 0.85)
+            if (anim[ind]->IsShooting)
                 sprite[ind]->sprite.x = 1 * sprite[ind]->width_padding;
-            else if (anim[ind]->count >= 1.15)
-                sprite[ind]->sprite.x = 3 * sprite[ind]->width_padding;
             else
-                sprite[ind]->sprite.x = 2 * sprite[ind]->width_padding;
+                sprite[ind]->sprite.x = 0 * sprite[ind]->width_padding;
         }
 
         Vector2 Rectpos = {
@@ -107,7 +103,6 @@ void handle_shoot_inputs(
     Registry &r, sparse_array<Player> &anim, sparse_array<Position> &pos,
     sparse_array<Size> &siz, sparse_array<Current_Player> &current)
 {
- 
     for (auto &&[anima, posi, sizo, _] : zipper(anim, pos, siz, current)) {
 		if (IsKeyDown(KEY_SPACE)) {
 			anima->IsShooting = true;
@@ -120,14 +115,12 @@ void handle_shoot_inputs(
 				r,
 				Position(
 					posi->pos_X + (float) sizo->size_X,
-					posi->pos_Y + (float) sizo->size_Y / 2),
+					posi->pos_Y + (float) sizo->size_Y / 2,
+          anima->current_charge, anima->color_id);),
 				anima->current_charge);
 			anima->current_charge = 1.;
 		}
 		break;
-		// if (anim[ind]->IsShooting) {
-		//     Animation de charge du tir
-		// }
 	}
 }
 

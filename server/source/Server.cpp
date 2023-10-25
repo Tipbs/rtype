@@ -217,7 +217,9 @@ void udp_server::start_receive() // Receive function
             boost::asio::placeholders::bytes_transferred));
 }
 
-void synchronize(Registry &reg, sparse_array<Direction> &directions, sparse_array<Speed> &spe)
+void synchronize(
+    Registry &reg, sparse_array<Direction> &directions,
+    sparse_array<Speed> &spe)
 {
     for (auto &player : reg.user_cmds) {
         auto &dir = directions[player.first];
@@ -228,7 +230,9 @@ void synchronize(Registry &reg, sparse_array<Direction> &directions, sparse_arra
     }
 }
 
-void extract(Registry &reg, sparse_array<Position> &positions, sparse_array<Speed> &speeds)
+void extract(
+    Registry &reg, sparse_array<Position> &positions,
+    sparse_array<Speed> &speeds)
 {
     for (size_t ind = 0; ind < positions.size(); ind++) {
         auto &pos = positions[ind];
