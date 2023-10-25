@@ -111,13 +111,13 @@ void handle_shoot_inputs(
         }
         if (IsKeyReleased(KEY_SPACE)) {
             anima->IsShooting = false;
-                        create_ammo(
-				r,
-				Position(
-					posi->pos_X + (float) sizo->size_X,
-					posi->pos_Y + (float) sizo->size_Y / 2),
-				  anima->current_charge, anima->color_id);
-			anima->current_charge = 1.;
+            create_ammo(
+                r,
+                Position(
+                    posi->pos_X + (float) sizo->size_X,
+                    posi->pos_Y + (float) sizo->size_Y / 2),
+                anima->current_charge, anima->color_id);
+            anima->current_charge = 1.;
         }
         break;
     }
@@ -129,32 +129,31 @@ void hadle_text_inputs(
 {
     for (auto &&[inputField, rectangle] : zipper(inputFields, rectangles)) {
         if (CheckCollisionPointRec(GetMousePosition(), rectangle.value())) {
-                        SetMouseCursor(MOUSE_CURSOR_IBEAM);
-                        int key = GetCharPressed();
-                        int letterCount = 0;
+            SetMouseCursor(MOUSE_CURSOR_IBEAM);
+            int key = GetCharPressed();
+            int letterCount = 0;
 
-                        // Check if more characters have been pressed on the
-                        // same frame
-                        while (key > 0) {
-                            if ((key >= 32) && (key <= 125) &&
-                                (letterCount < 16)) {
-                                inputField->field[letterCount] = (char) key;
-                                inputField->field[letterCount + 1] =
-                                    '\0'; // Add null terminator at the end of
-                                          // the string.
-                                letterCount++;
-                            }
-                            key = GetCharPressed(); // Check next character in
-                                                    // the queue
-                        }
-                        if (IsKeyPressed(KEY_BACKSPACE)) {
-                            letterCount--;
-                            if (letterCount < 0)
-                                letterCount = 0;
-                            inputField->field[letterCount] = '\0';
-                        }
+            // Check if more characters have been pressed on the
+            // same frame
+            while (key > 0) {
+                if ((key >= 32) && (key <= 125) && (letterCount < 16)) {
+                    inputField->field[letterCount] = (char) key;
+                    inputField->field[letterCount + 1] =
+                        '\0'; // Add null terminator at the end of
+                              // the string.
+                    letterCount++;
+                }
+                key = GetCharPressed(); // Check next character in
+                                        // the queue
+            }
+            if (IsKeyPressed(KEY_BACKSPACE)) {
+                letterCount--;
+                if (letterCount < 0)
+                    letterCount = 0;
+                inputField->field[letterCount] = '\0';
+            }
         } else {
-                        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
         }
     }
 }
@@ -166,7 +165,7 @@ void make_infinite_background(
 
         // BG going to the Left
         if (pos[0]->pos_X < -2 * siz[0]->size_X)
-                        pos[0]->pos_X += 2 * siz[0]->size_X;
+            pos[0]->pos_X += 2 * siz[0]->size_X;
 
         // BG going Upwards
         // if (pos[0]->pos_Y < -siz[0]->size_Y)
@@ -199,7 +198,7 @@ void updateWithSnapshots(
                 return false;
             });
         if (finded != players.end())
-                        continue;
+            continue;
         std::cout << "id: " << net.id << std::endl;
         auto pos = Position(net.pos.x, net.pos.y);
         create_player(r, net.id, pos);
@@ -207,7 +206,7 @@ void updateWithSnapshots(
         // create entity with info from net ent
         it = net_ents.erase(it);
         if (it == net_ents.end())
-                        break;
+            break;
     }
     for (size_t i = 0; i < positions.size(); ++i) {
         auto &pos = positions[i];
@@ -216,21 +215,17 @@ void updateWithSnapshots(
         auto const &player = players[i];
         auto const &current = currents[i];
         if (pos && player) {
-                        auto finded = std::find_if(
-                            net_ents.begin(), net_ents.end(), [&](NetEnt &ent) {
-                                return ent.id == player.value().id;
-                            });
-                        if (finded == net_ents.end())
-                            continue;
-                        if (current &&
-                            std::abs(finded->pos.x - pos.value().pos_X) <
-                                30.0 &&
-                            std::abs(finded->pos.y - pos.value().pos_Y) <
-                                30.0) {
-                            continue;
-                        }
-                        pos.value().pos_X = finded->pos.x;
-                        pos.value().pos_Y = finded->pos.y;
+            auto finded = std::find_if(
+                net_ents.begin(), net_ents.end(),
+                [&](NetEnt &ent) { return ent.id == player.value().id; });
+            if (finded == net_ents.end())
+                continue;
+            if (current && std::abs(finded->pos.x - pos.value().pos_X) < 30.0 &&
+                std::abs(finded->pos.y - pos.value().pos_Y) < 30.0) {
+                continue;
+            }
+            pos.value().pos_X = finded->pos.x;
+            pos.value().pos_Y = finded->pos.y;
         } // pour le moment il n'y a pas l'ajout de nouvelles entit�s
     }
     net_ents.clear();

@@ -1,44 +1,16 @@
-#include <cmath>
-#include <cstddef>
-#include <cstdlib>
-#include <iostream>
-#include <ostream>
 #include "Component.hpp"
 #include "Systems.hpp"
-#include "Registry.hpp"
-#include <chrono>
 #include "indexed_zipper.hpp"
 #include "zipper.hpp"
 #include <syncstream>
 
-#ifdef SERVER
-	std::mutex mutex;
-	static auto time_since_last_tick = std::chrono::high_resolution_clock::now(); // voir si raylib utilise m�me chose
-	//float GetFrameTime()
-	//{
-	//	std::scoped_lock lock(mutex);
-	//	const auto now = std::chrono::high_resolution_clock::now();
-	//	return std::chrono::duration<double>(now - time_since_last_tick).count();
-	//}
-        float GetFrameTime()
-        {
-            return 1;
-        }
 
-    void ResetFrameTime()
-	{
-		std::scoped_lock lock(mutex);
-		time_since_last_tick = std::chrono::high_resolution_clock::now();
-	}
-#else
-	#include <raylib.h>
-#endif // !SERVER
-
-std::chrono::steady_clock::time_point GetTimePoint()
-{
-	return std::chrono::steady_clock::now();
-}
-
+/**
+ * @brief Add a new component with its erase and insert function.
+ *
+ * @tparam  Component   The Component to insert.
+ * @return  The sparse_array of Component newly created.
+ */
 void move(Registry &r, 
 sparse_array<Position> &positions,
 sparse_array<Speed> &speed, 
