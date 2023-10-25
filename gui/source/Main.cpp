@@ -10,13 +10,6 @@
 #include "GraphicSystems.hpp"
 #include "raylib.h"
 
-void logging_system(Registry &r, sparse_array<Position> const &positions)
-{
-    for (auto &pos : positions)
-        std::cout << "Position = { " << pos->pos_X << ", " << pos->pos_Y << " }"
-                  << std::endl;
-}
-
 int main(int ac, char **av)
 {
     const int ScreenWidth = 1280;
@@ -57,6 +50,7 @@ int main(int ac, char **av)
     reg.register_component<Current_Player>();
     reg.register_component<InputField>();
     reg.register_component<Rectangle>();
+    reg.register_component<NetworkedEntity>();
     auto current_player = create_player(reg, net_client.get_player_id(), nePos);
     Current_Player current_p;
 
@@ -76,7 +70,7 @@ int main(int ac, char **av)
     reg.add_system<Player, Position, Size, Current_Player>(handle_shoot_inputs);
     //    reg.add_system<InputField, Rectangle>(hadle_text_inputs);
     reg.add_system<Position, Size>(make_infinite_background);
-    reg.add_system<Position, Player, Speed, Current_Player>(updateWithSnapshots);
+    reg.add_system<Position, NetworkedEntity, Speed, Current_Player, Size, Player>(updateWithSnapshots);
 
     while (!WindowShouldClose()) {
         reg.run_systems();

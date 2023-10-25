@@ -55,8 +55,8 @@ sparse_array<Direction> &dir
 		pos->pos_Y += spe->speed * diro->dir_Y * GetFrameTime();
         #ifdef SERVER
         if (players[index]) {
-        diro->dir_X = 0;
-        diro->dir_Y = 0;
+			diro->dir_X = 0;
+			diro->dir_Y = 0;
 		}
         #endif
     }

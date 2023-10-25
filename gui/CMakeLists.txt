@@ -19,7 +19,7 @@ add_executable(r-type_client
   ${GUI_INCLUDE_DIR}
   ${GUI_SRC_DIR}
   ${SHARED_SRC_DIR}
- )
+)
 
 #add_executable(unit_tests
 #  ${GUI_INCLUDE_DIR}
