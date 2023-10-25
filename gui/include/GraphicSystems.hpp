@@ -6,7 +6,9 @@
 
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
-    sparse_array<Player> &players, sparse_array<Speed> &speeds, sparse_array<Current_Player> &currents);
+    sparse_array<NetworkedEntity> &entities, sparse_array<Speed> &speeds,
+    sparse_array<Current_Player> &currents, sparse_array<Size> &sizes,
+    sparse_array<Player> &players);
 void display(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
     sparse_array<Sprite> &sprite, sparse_array<Player> &anim,

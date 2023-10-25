@@ -12,16 +12,25 @@ public:
     }
     void reset()
     {
-        attackState = 0;
+        attacking = false;
+        attackScale = 0;
         moved.x = 0;
         moved.y = 0;
     }
-    uint8_t attackState; // bitflag if we have multiple states ?
+
+    void setAttack(float scale)
+    {
+        attacking = true;
+        attackScale = scale;
+    }
+    uint8_t attacking;
+    float attackScale; // bitflag if we have multiple states ?
     Utils::Vec2 moved; // how much it moved in x, y directions
     // no idea if we must provide the id in the packet
     template<class Archive>
     void serialize(Archive &ar, const unsigned int version) {
-        ar &attackState;
+        ar &attacking;
+        ar &attackScale;
         ar &moved;
     };
 };

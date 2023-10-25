@@ -45,11 +45,6 @@ void display(
         DrawTextureRec(
             sprite[ind].value().spritesheet, sprite[ind].value().sprite,
             Rectpos, WHITE);
-
-        // for (auto &&[inputField, rectangle]: zipper(inputFields, rectangles))
-        // { DrawText(inputField->field.c_str(), (int)rectangle->x + 5,
-        // (int)rectangle->y + 8, 40, MAROON);
-        // }
     }
     EndDrawing();
 }
@@ -111,13 +106,16 @@ void handle_shoot_inputs(
         }
         if (IsKeyReleased(KEY_SPACE)) {
             anima->IsShooting = false;
-                        create_ammo(
-				r,
-				Position(
-					posi->pos_X + (float) sizo->size_X,
-					posi->pos_Y + (float) sizo->size_Y / 2),
-				  anima->current_charge, anima->color_id);
-			anima->current_charge = 1.;
+            create_ammo(
+                r,
+                Position(
+                    posi->pos_X + (float) sizo->size_X,
+                    posi->pos_Y + (float) sizo->size_Y / 2),
+                anima->current_charge, anima->color_id);
+            r.currentCmd.mutex.lock();
+            r.currentCmd.cmd.setAttack(anima->current_charge);
+            r.currentCmd.mutex.unlock();
+            anima->current_charge = 1.;
         }
         break;
     }
@@ -129,32 +127,31 @@ void hadle_text_inputs(
 {
     for (auto &&[inputField, rectangle] : zipper(inputFields, rectangles)) {
         if (CheckCollisionPointRec(GetMousePosition(), rectangle.value())) {
-                        SetMouseCursor(MOUSE_CURSOR_IBEAM);
-                        int key = GetCharPressed();
-                        int letterCount = 0;
+            SetMouseCursor(MOUSE_CURSOR_IBEAM);
+            int key = GetCharPressed();
+            int letterCount = 0;
 
-                        // Check if more characters have been pressed on the
-                        // same frame
-                        while (key > 0) {
-                            if ((key >= 32) && (key <= 125) &&
-                                (letterCount < 16)) {
-                                inputField->field[letterCount] = (char) key;
-                                inputField->field[letterCount + 1] =
-                                    '\0'; // Add null terminator at the end of
-                                          // the string.
-                                letterCount++;
-                            }
-                            key = GetCharPressed(); // Check next character in
-                                                    // the queue
-                        }
-                        if (IsKeyPressed(KEY_BACKSPACE)) {
-                            letterCount--;
-                            if (letterCount < 0)
-                                letterCount = 0;
-                            inputField->field[letterCount] = '\0';
-                        }
+            // Check if more characters have been pressed on the
+            // same frame
+            while (key > 0) {
+                if ((key >= 32) && (key <= 125) && (letterCount < 16)) {
+                    inputField->field[letterCount] = (char) key;
+                    inputField->field[letterCount + 1] =
+                        '\0'; // Add null terminator at the end of
+                              // the string.
+                    letterCount++;
+                }
+                key = GetCharPressed(); // Check next character in
+                                        // the queue
+            }
+            if (IsKeyPressed(KEY_BACKSPACE)) {
+                letterCount--;
+                if (letterCount < 0)
+                    letterCount = 0;
+                inputField->field[letterCount] = '\0';
+            }
         } else {
-                        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
         }
     }
 }
@@ -166,7 +163,7 @@ void make_infinite_background(
 
         // BG going to the Left
         if (pos[0]->pos_X < -2 * siz[0]->size_X)
-                        pos[0]->pos_X += 2 * siz[0]->size_X;
+            pos[0]->pos_X += 2 * siz[0]->size_X;
 
         // BG going Upwards
         // if (pos[0]->pos_Y < -siz[0]->size_Y)
@@ -184,8 +181,9 @@ void make_infinite_background(
 
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
-    sparse_array<Player> &players, sparse_array<Speed> &speeds,
-    sparse_array<Current_Player> &currents)
+    sparse_array<NetworkedEntity> &entities, sparse_array<Speed> &speeds,
+    sparse_array<Current_Player> &currents, sparse_array<Size> &sizes,
+    sparse_array<Player> &players)
 {
     auto &net_ents = r.netEnts.ents;
 
@@ -193,13 +191,13 @@ void updateWithSnapshots(
     for (auto it = net_ents.begin(); it != net_ents.end(); ++it) {
         auto net = *it;
         auto finded = std::find_if(
-            players.begin(), players.end(), [&](std::optional<Player> &player) {
-                if (player)
-                    return player->id == net.id;
+            entities.begin(), entities.end(), [&](std::optional<NetworkedEntity> &ent) {
+                if (ent)
+                    return ent->id == net.id;
                 return false;
             });
-        if (finded != players.end())
-                        continue;
+        if (finded != entities.end())
+            continue;
         std::cout << "id: " << net.id << std::endl;
         auto pos = Position(net.pos.x, net.pos.y);
         create_player(r, net.id, pos);
@@ -207,31 +205,39 @@ void updateWithSnapshots(
         // create entity with info from net ent
         it = net_ents.erase(it);
         if (it == net_ents.end())
-                        break;
+            break;
     }
     for (size_t i = 0; i < positions.size(); ++i) {
         auto &pos = positions[i];
         // std::osyncstream(std::cout) << "moved x: " << pos->pos_X <<
         // std::endl;
-        auto const &player = players[i];
+        auto const &entity = entities[i];
         auto const &current = currents[i];
-        if (pos && player) {
-                        auto finded = std::find_if(
-                            net_ents.begin(), net_ents.end(), [&](NetEnt &ent) {
-                                return ent.id == player.value().id;
-                            });
-                        if (finded == net_ents.end())
-                            continue;
-                        if (current &&
-                            std::abs(finded->pos.x - pos.value().pos_X) <
-                                30.0 &&
-                            std::abs(finded->pos.y - pos.value().pos_Y) <
-                                30.0) {
-                            continue;
-                        }
-                        pos.value().pos_X = finded->pos.x;
-                        pos.value().pos_Y = finded->pos.y;
-        } // pour le moment il n'y a pas l'ajout de nouvelles entit�s
+        auto const &size = sizes[i];
+        auto const &player = players[i];
+        if (pos && entity) {
+            auto finded = std::find_if(
+                net_ents.begin(), net_ents.end(),
+                [&](NetEnt &net_ent) { return net_ent.id == entity.value().id; });
+            if (finded == net_ents.end())
+                continue;
+            if (current && std::abs(finded->pos.x - pos.value().pos_X) < 30.0 &&
+                std::abs(finded->pos.y - pos.value().pos_Y) < 30.0) {
+                continue;
+            }
+            pos.value().pos_X = finded->pos.x;
+            pos.value().pos_Y = finded->pos.y;
+            if (!current && player && finded->attacking) {
+				create_ammo(
+					r,
+					Position(
+						pos->pos_X + (float) size->size_X,
+						pos->pos_Y + (float) size->size_Y / 2),
+					finded->attackState, player->color_id);
+                // pour le moment le tir ne marche qu'avec les players
+                // vu que create_ammo demande un color_id
+            }
+        }
     }
     net_ents.clear();
     r.netEnts.mutex.unlock();
