@@ -98,7 +98,7 @@ void handle_shoot_inputs(
     Registry &r, sparse_array<Player> &anim, sparse_array<Position> &pos,
     sparse_array<Size> &siz, sparse_array<Current_Player> &current)
 {
-    for (auto &&[anima, posi, sizo, _] : zipper(anim, pos, siz, current)) {
+    for (auto &&[index, anima, posi, sizo, _] : indexed_zipper(anim, pos, siz, current)) {
         if (IsKeyDown(KEY_SPACE)) {
             anima->IsShooting = true;
             anima->current_charge +=
@@ -113,9 +113,9 @@ void handle_shoot_inputs(
                     posi->pos_Y + (float) sizo->size_Y / 2),
                 anima->current_charge, anima->color_id);
             r.currentCmd.mutex.lock();
-            r.currentCmd.cmd.setAttack(anima->current_charge);
+            r.currentCmd.cmd.setAttack(anim[index]->current_charge);
             r.currentCmd.mutex.unlock();
-            anima->current_charge = 1.;
+            anim[index]->current_charge = 1.;
         }
         break;
     }
