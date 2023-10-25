@@ -89,5 +89,5 @@ struct Player {
 size_t create_player(Registry &reg, size_t id, Position &pos);
 #ifndef SERVER
 void create_ammo(Registry &reg, Position pos, Weapon original_weapon);
-void create_ammo(Registry &reg, Position pos, float damage_mult);
+void create_ammo(Registry &reg, Position pos, float damage_mult, int color_id);
 #endif

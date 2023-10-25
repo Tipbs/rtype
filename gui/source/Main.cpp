@@ -47,11 +47,11 @@ int main(int ac, char **av)
     Player player((size_t) new_entity % 5, net_client.get_player_id());
     Position nePos(0, 0);
     Size neSize(83, 43);
-    std::string nepath = "./gui/ressources/Sprites/r-typesheet42.gif";
+    std::string nepath = "./gui/ressources/Sprites/Testships.png";
     Speed speedo(300);
     Direction diro(0, 0);
     SpawnGrace gra(std::chrono::seconds(5));
-    Sprite nesprite(nepath.c_str(), 83, 43, 5, 5);
+    Sprite nesprite(nepath.c_str(), 83, 43, 2, 5);
 
     reg.register_component<Size>();
     reg.register_component<Position>();
