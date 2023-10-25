@@ -10,12 +10,12 @@ size_t create_player(Registry &reg, size_t id, Position &pos)
     Entity const new_entity = reg.spawn_entity();
     Player player(1, id);
     Size Size(83, 43);
-    std::string path = "./gui/ressources/Sprites/r-typesheet42.gif";
+    std::string path = "./gui/ressources/Sprites/Testships.png";
     Speed speedo(300);
     Direction diro(0, 0);
     SpawnGrace gra(std::chrono::seconds(1));
     #ifndef SERVER
-    Sprite sprite(path.c_str(), 83, 43, 5, 5);
+    Sprite sprite(path.c_str(), 83, 43, 2, 5);
     #endif
 
     reg.add_component(new_entity, std::move(pos));

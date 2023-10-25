@@ -56,47 +56,47 @@ void display(
 
 void handle_dir_inputs(
     Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &anim,
-    sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds, sparse_array<Current_Player> &currents)
+    sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds,
+    sparse_array<Current_Player> &currents)
 {
-    for (auto &&[diro, anima, sprit, spe, current] : zipper(dir, anim, sprite, speeds, currents)) {
+    for (auto &&[diro, anima, sprit, spe, current] :
+         zipper(dir, anim, sprite, speeds, currents)) {
         const double AnimationPad = 0.02;
         double heigh = 1;
-		heigh = anima->count;
-		Vector2 moves = {0, 0};
-		double speedScale = 1; 
+        heigh = anima->count;
+        Vector2 moves = {0, 0};
+        double speedScale = 1;
 
-		if (IsKeyDown(KEY_RIGHT))
-			moves.x += 1;
-		if (IsKeyDown(KEY_LEFT))
-			moves.x -= 1;
-		if (IsKeyDown(KEY_LEFT_SHIFT))
-			speedScale /= 2;
+        if (IsKeyDown(KEY_RIGHT))
+            moves.x += 1;
+        if (IsKeyDown(KEY_LEFT))
+            moves.x -= 1;
+        if (IsKeyDown(KEY_LEFT_SHIFT))
+            speedScale /= 2;
 
-		if (IsKeyDown(KEY_DOWN) == IsKeyDown(KEY_UP)) {
-			heigh = (heigh < 1)    ? heigh + AnimationPad
-					: (heigh == 1) ? 1
-								   : heigh - AnimationPad;
-		} else if (IsKeyDown(KEY_UP)) {
-			moves.y -= 1; // 1;
-			heigh = (heigh >= 2) ? 2 : heigh + (5 * AnimationPad);
-		} else if (IsKeyDown(KEY_DOWN)) {
-			moves.y += 1;
-			heigh = (heigh <= 0) ? 0 : heigh - (5 * AnimationPad);
-		}
-		diro->dir_X = moves.x * speedScale;
-		diro->dir_Y = moves.y * speedScale;
-		//speeds[1]->speed = speed;
-		r.currentCmd.mutex.lock();
-		r.currentCmd.cmd.moved.x += moves.x * GetFrameTime() * speedScale;
-		r.currentCmd.cmd.moved.y += moves.y * GetFrameTime() * speedScale;
-		r.currentCmd.mutex.unlock();
-		if (IsKeyPressed(KEY_C)) {
-			anima->color_id =
-				anima->color_id == 4 ? 0 : anima->color_id + 1;
-		}
-		anima->count = heigh;
-		break;
-	}
+        if (IsKeyDown(KEY_DOWN) == IsKeyDown(KEY_UP)) {
+            heigh = (heigh < 1)    ? heigh + AnimationPad
+                    : (heigh == 1) ? 1
+                                   : heigh - AnimationPad;
+        } else if (IsKeyDown(KEY_UP)) {
+            moves.y -= 1; // 1;
+            heigh = (heigh >= 2) ? 2 : heigh + (5 * AnimationPad);
+        } else if (IsKeyDown(KEY_DOWN)) {
+            moves.y += 1;
+            heigh = (heigh <= 0) ? 0 : heigh - (5 * AnimationPad);
+        }
+        diro->dir_X = moves.x * speedScale;
+        diro->dir_Y = moves.y * speedScale;
+        // speeds[1]->speed = speed;
+        r.currentCmd.mutex.lock();
+        r.currentCmd.cmd.moved.x += moves.x * GetFrameTime() * speedScale;
+        r.currentCmd.cmd.moved.y += moves.y * GetFrameTime() * speedScale;
+        r.currentCmd.mutex.unlock();
+        if (IsKeyPressed(KEY_C))
+            anima->color_id = anima->color_id == 4 ? 0 : anima->color_id + 1;
+        anima->count = heigh;
+        break;
+    }
 }
 
 void handle_shoot_inputs(
@@ -104,24 +104,23 @@ void handle_shoot_inputs(
     sparse_array<Size> &siz, sparse_array<Current_Player> &current)
 {
     for (auto &&[anima, posi, sizo, _] : zipper(anim, pos, siz, current)) {
-		if (IsKeyDown(KEY_SPACE)) {
-			anima->IsShooting = true;
-			anima->current_charge +=
-				(anima->current_charge >= 3) ? 0 : 5 * GetFrameTime();
-		}
-		if (IsKeyReleased(KEY_SPACE)) {
-			anima->IsShooting = false;
-			create_ammo(
+        if (IsKeyDown(KEY_SPACE)) {
+            anima->IsShooting = true;
+            anima->current_charge +=
+                (anima->current_charge >= 3) ? 0 : 5 * GetFrameTime();
+        }
+        if (IsKeyReleased(KEY_SPACE)) {
+            anima->IsShooting = false;
+                        create_ammo(
 				r,
 				Position(
 					posi->pos_X + (float) sizo->size_X,
-					posi->pos_Y + (float) sizo->size_Y / 2,
-          anima->current_charge, anima->color_id);),
-				anima->current_charge);
+					posi->pos_Y + (float) sizo->size_Y / 2),
+				  anima->current_charge, anima->color_id);
 			anima->current_charge = 1.;
-		}
-		break;
-	}
+        }
+        break;
+    }
 }
 
 void hadle_text_inputs(
@@ -130,28 +129,32 @@ void hadle_text_inputs(
 {
     for (auto &&[inputField, rectangle] : zipper(inputFields, rectangles)) {
         if (CheckCollisionPointRec(GetMousePosition(), rectangle.value())) {
-            SetMouseCursor(MOUSE_CURSOR_IBEAM);
-            int key = GetCharPressed();
-            int letterCount = 0;
+                        SetMouseCursor(MOUSE_CURSOR_IBEAM);
+                        int key = GetCharPressed();
+                        int letterCount = 0;
 
-            // Check if more characters have been pressed on the same frame
-            while (key > 0) {
-                if ((key >= 32) && (key <= 125) && (letterCount < 16)) {
-                    inputField->field[letterCount] = (char) key;
-                    inputField->field[letterCount + 1] =
-                        '\0'; // Add null terminator at the end of the string.
-                    letterCount++;
-                }
-                key = GetCharPressed(); // Check next character in the queue
-            }
-            if (IsKeyPressed(KEY_BACKSPACE)) {
-                letterCount--;
-                if (letterCount < 0)
-                    letterCount = 0;
-                inputField->field[letterCount] = '\0';
-            }
+                        // Check if more characters have been pressed on the
+                        // same frame
+                        while (key > 0) {
+                            if ((key >= 32) && (key <= 125) &&
+                                (letterCount < 16)) {
+                                inputField->field[letterCount] = (char) key;
+                                inputField->field[letterCount + 1] =
+                                    '\0'; // Add null terminator at the end of
+                                          // the string.
+                                letterCount++;
+                            }
+                            key = GetCharPressed(); // Check next character in
+                                                    // the queue
+                        }
+                        if (IsKeyPressed(KEY_BACKSPACE)) {
+                            letterCount--;
+                            if (letterCount < 0)
+                                letterCount = 0;
+                            inputField->field[letterCount] = '\0';
+                        }
         } else {
-            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+                        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
         }
     }
 }
@@ -163,7 +166,7 @@ void make_infinite_background(
 
         // BG going to the Left
         if (pos[0]->pos_X < -2 * siz[0]->size_X)
-            pos[0]->pos_X += 2 * siz[0]->size_X;
+                        pos[0]->pos_X += 2 * siz[0]->size_X;
 
         // BG going Upwards
         // if (pos[0]->pos_Y < -siz[0]->size_Y)
@@ -181,7 +184,8 @@ void make_infinite_background(
 
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
-    sparse_array<Player> &players, sparse_array<Speed> &speeds, sparse_array<Current_Player> &currents)
+    sparse_array<Player> &players, sparse_array<Speed> &speeds,
+    sparse_array<Current_Player> &currents)
 {
     auto &net_ents = r.netEnts.ents;
 
@@ -195,7 +199,7 @@ void updateWithSnapshots(
                 return false;
             });
         if (finded != players.end())
-            continue;
+                        continue;
         std::cout << "id: " << net.id << std::endl;
         auto pos = Position(net.pos.x, net.pos.y);
         create_player(r, net.id, pos);
@@ -203,7 +207,7 @@ void updateWithSnapshots(
         // create entity with info from net ent
         it = net_ents.erase(it);
         if (it == net_ents.end())
-            break;
+                        break;
     }
     for (size_t i = 0; i < positions.size(); ++i) {
         auto &pos = positions[i];
@@ -212,18 +216,21 @@ void updateWithSnapshots(
         auto const &player = players[i];
         auto const &current = currents[i];
         if (pos && player) {
-            auto finded = std::find_if(
-                net_ents.begin(), net_ents.end(),
-                [&](NetEnt &ent) { return ent.id == player.value().id; });
-            if (finded == net_ents.end())
-                continue;
-            if (current &&
-                std::abs(finded->pos.x - pos.value().pos_X) < 30.0 &&
-                std::abs(finded->pos.y - pos.value().pos_Y) < 30.0) {
-                continue;
-            }
-            pos.value().pos_X = finded->pos.x;
-            pos.value().pos_Y = finded->pos.y;
+                        auto finded = std::find_if(
+                            net_ents.begin(), net_ents.end(), [&](NetEnt &ent) {
+                                return ent.id == player.value().id;
+                            });
+                        if (finded == net_ents.end())
+                            continue;
+                        if (current &&
+                            std::abs(finded->pos.x - pos.value().pos_X) <
+                                30.0 &&
+                            std::abs(finded->pos.y - pos.value().pos_Y) <
+                                30.0) {
+                            continue;
+                        }
+                        pos.value().pos_X = finded->pos.x;
+                        pos.value().pos_Y = finded->pos.y;
         } // pour le moment il n'y a pas l'ajout de nouvelles entit�s
     }
     net_ents.clear();
