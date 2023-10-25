@@ -270,6 +270,7 @@ udp_server::udp_server(std::size_t port)
     reg.register_component<Damages>();
     reg.register_component<Health>();
     reg.add_system<Direction, Speed>(synchronize);
+    reg.add_system<SpawnGrace>(update_grace);
     reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);
     reg.add_system<Position, Speed>(extract);

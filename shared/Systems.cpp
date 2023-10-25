@@ -4,20 +4,12 @@
 #include "zipper.hpp"
 #include <syncstream>
 
-
-/**
- * @brief Add a new component with its erase and insert function.
- *
- * @tparam  Component   The Component to insert.
- * @return  The sparse_array of Component newly created.
- */
 void move(Registry &r, 
 sparse_array<Position> &positions,
 sparse_array<Speed> &speed, 
 sparse_array<Direction> &dir)
 {
     for (auto &&[pos, spe, diro]: zipper(positions, speed, dir)) {
-        //std::osyncstream(std::cout) << "y = " << pos->pos_Y << "  x = " << pos->pos_X << std::endl;
 		pos->pos_X += spe->speed * diro->dir_X * GetFrameTime();
 		pos->pos_Y += spe->speed * diro->dir_Y * GetFrameTime();
         #ifdef SERVER
@@ -42,6 +34,18 @@ size_t i1, size_t i2)
         r.kill_entity(r.entity_from_index(i2));
 }
 
+void update_grace(Registry &r,
+sparse_array<SpawnGrace> &graces)
+{
+    auto time = GetTimePoint();
+
+    for (auto &&[ind, grace]: indexed_zipper(graces)) {
+        if (grace->creation_time + grace->time >= time) {
+            r.remove_component<SpawnGrace>(ind);
+        }
+    }
+}
+
 void colision(Registry &r,
 sparse_array<Position> &positions, 
 sparse_array<Size> &size, 
@@ -49,22 +53,21 @@ sparse_array<SpawnGrace> &grace,
 sparse_array<Damages> &dam, 
 sparse_array<Health> &helth)
 {
-    auto time = GetTimePoint();
     for (auto &&[ind, pos, siz, dama, halth]: indexed_zipper(positions, size, dam, helth)) {
-        if (!(pos && siz && dama && halth))
+        if (grace[ind].has_value()) {
             continue;
-        if (grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time + grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).time >= time)
+        }
+        for (auto &&[ind2, pos2, siz2, dama2, halth2]: indexed_zipper(positions, size, dam, helth)) {
+            if (ind2 <= ind || grace[ind2].has_value()) {
                 continue;
-        for (size_t ind2 = ind + 1; ind2 < positions.size(); ind2++) {
-            if (grace[ind2].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time + grace[ind2].value_or(SpawnGrace(std::chrono::seconds(0))).time >= time)
+            }
+            if (pos->pos_X > pos2->pos_X + siz2->size_X)
                 continue;
-            if (positions[ind].value().pos_X > positions[ind2].value().pos_X + size[ind2].value().size_X)
+            else if (pos->pos_Y > pos2->pos_Y + siz2->size_Y)
                 continue;
-            else if (positions[ind].value().pos_Y > positions[ind2].value().pos_Y + size[ind2].value().size_Y)
+            else if (pos2->pos_X > pos->pos_X + siz->size_X)
                 continue;
-            else if (positions[ind2].value().pos_X > positions[ind].value().pos_X + size[ind].value().size_X)
-                continue;
-            else if (positions[ind2].value().pos_Y > positions[ind].value().pos_Y + size[ind].value().size_Y)
+            else if (pos2->pos_Y > pos->pos_Y + siz->size_Y)
                 continue;
             else {
                 damages(r, helth, dam, ind, ind2);

@@ -19,8 +19,6 @@ void display(
     BeginDrawing();
     for (auto &&[ind, pos, siz, spri] :
          indexed_zipper(positions, size, sprite)) {
-        if (!(pos && siz && spri))
-            continue;
         if (sprite[ind]->width_max == 8 && sprite[ind]->height_max == 5) {
             sprite[ind]->sprite.y =
                 sprite[ind]->color_id * sprite[ind]->height_padding;
@@ -45,13 +43,15 @@ void display(
         DrawTextureRec(
             sprite[ind].value().spritesheet, sprite[ind].value().sprite,
             Rectpos, WHITE);
-
-        // for (auto &&[inputField, rectangle]: zipper(inputFields, rectangles))
-        // { DrawText(inputField->field.c_str(), (int)rectangle->x + 5,
-        // (int)rectangle->y + 8, 40, MAROON);
-        // }
     }
     EndDrawing();
+}
+
+void do_animation(Registry &r,
+    sparse_array<Sprite> &sprites, sparse_array<Player> &animations
+)
+{
+
 }
 
 void handle_dir_inputs(

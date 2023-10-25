@@ -68,6 +68,7 @@ int main(int ac, char **av)
 
     reg.add_component(current_player, std::move(current_p));
 
+    reg.add_system<SpawnGrace>(update_grace);
     reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);
     reg.add_system<Position, Size, Sprite, Player, Rectangle, InputField>(
