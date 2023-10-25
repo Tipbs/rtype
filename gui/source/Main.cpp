@@ -43,16 +43,7 @@ int main(int ac, char **av)
     Direction bgdir(-4, 0);
     Sprite bgsprite(bgpath.c_str(), 3 * ScreenWidth, ScreenHeight);
 
-    Entity const new_entity = reg.spawn_entity();
-    Player player((size_t) new_entity % 5, net_client.get_player_id());
     Position nePos(0, 0);
-    Size neSize(83, 43);
-    std::string nepath = "./gui/ressources/Sprites/Testships.png";
-    Speed speedo(300);
-    Direction diro(0, 0);
-    SpawnGrace gra(std::chrono::seconds(5));
-    Sprite nesprite(nepath.c_str(), 83, 43, 5, 5);
-    Current_Player current_p;
 
     reg.register_component<Size>();
     reg.register_component<Position>();
@@ -66,6 +57,8 @@ int main(int ac, char **av)
     reg.register_component<Current_Player>();
     reg.register_component<InputField>();
     reg.register_component<Rectangle>();
+    auto current_player = create_player(reg, net_client.get_player_id(), nePos);
+    Current_Player current_p;
 
     reg.add_component(background, std::move(bgPos));
     reg.add_component(background, std::move(bgSize));
@@ -73,14 +66,7 @@ int main(int ac, char **av)
     reg.add_component(background, std::move(bgspe));
     reg.add_component(background, std::move(bgdir));
 
-    reg.add_component(new_entity, std::move(nePos));
-    reg.add_component(new_entity, std::move(neSize));
-    reg.add_component(new_entity, std::move(nesprite));
-    reg.add_component(new_entity, std::move(speedo));
-    reg.add_component(new_entity, std::move(diro));
-    reg.add_component(new_entity, std::move(gra));
-    reg.add_component(new_entity, std::move(player));
-    reg.add_component(new_entity, std::move(current_p));
+    reg.add_component(current_player, std::move(current_p));
 
     reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);
