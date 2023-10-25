@@ -56,96 +56,72 @@ void display(
 
 void handle_dir_inputs(
     Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &anim,
-    sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds)
+    sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds, sparse_array<Current_Player> &currents)
 {
-    for (auto &&[ind, diro, anima, sprit, spe] :
-         indexed_zipper(dir, anim, sprite, speeds)) {
-        if (!(diro && anima && sprit))
-            continue;
+    for (auto &&[diro, anima, sprit, spe, current] : zipper(dir, anim, sprite, speeds, currents)) {
         const double AnimationPad = 0.02;
         double heigh = 1;
-        if (ind == 1) {
-            heigh = anim[ind]->count;
-            Vector2 Moves = {0, 0};
-            double speed = 300;
+		heigh = anima->count;
+		Vector2 moves = {0, 0};
+		double speedScale = 1; 
 
-            if (IsKeyDown(KEY_RIGHT))
-                Moves.x += 1;
-            if (IsKeyDown(KEY_LEFT))
-                Moves.x -= 1;
-            if (IsKeyDown(KEY_LEFT_SHIFT))
-                speed /= 2;
-            if (IsKeyDown(KEY_LEFT_CONTROL))
-                speed *= 3;
+		if (IsKeyDown(KEY_RIGHT))
+			moves.x += 1;
+		if (IsKeyDown(KEY_LEFT))
+			moves.x -= 1;
+		if (IsKeyDown(KEY_LEFT_SHIFT))
+			speedScale /= 2;
 
-            if (IsKeyDown(KEY_DOWN) == IsKeyDown(KEY_UP)) {
-                heigh = (heigh < 1)    ? heigh + AnimationPad
-                        : (heigh == 1) ? 1
-                                       : heigh - AnimationPad;
-            } else if (IsKeyDown(KEY_UP)) {
-                Moves.y -= 1; // 1;
-                heigh = (heigh >= 2) ? 2 : heigh + (5 * AnimationPad);
-            } else if (IsKeyDown(KEY_DOWN)) {
-                Moves.y += 1;
-                heigh = (heigh <= 0) ? 0 : heigh - (5 * AnimationPad);
-            }
-
-            if (dir[1]) { // 1 is the entity num representing the player seen
-                          // here
-                dir[1]->dir_X = Moves.x;
-                dir[1]->dir_Y = Moves.y;
-                speeds[1]->speed = speed;
-                r.currentCmd.mutex.lock();
-                r.currentCmd.cmd.moved.x += Moves.x;
-                r.currentCmd.cmd.moved.y += Moves.y;
-                r.currentCmd.cmd.speed = speed;
-                r.currentCmd.mutex.unlock();
-                if (IsKeyPressed(KEY_C)) {
-                    anim[ind]->color_id =
-                        anim[ind]->color_id == 4 ? 0 : anim[ind]->color_id + 1;
-                }
-            }
-            if (dir[ind]) { // 1 is the entity num representing the player
-                            // seen here
-                dir[ind].value().dir_X = Moves.x;
-                dir[ind].value().dir_Y = Moves.y;
-            }
-
-            if (anim[ind])
-                anim[ind]->count = heigh;
-        }
-    }
+		if (IsKeyDown(KEY_DOWN) == IsKeyDown(KEY_UP)) {
+			heigh = (heigh < 1)    ? heigh + AnimationPad
+					: (heigh == 1) ? 1
+								   : heigh - AnimationPad;
+		} else if (IsKeyDown(KEY_UP)) {
+			moves.y -= 1; // 1;
+			heigh = (heigh >= 2) ? 2 : heigh + (5 * AnimationPad);
+		} else if (IsKeyDown(KEY_DOWN)) {
+			moves.y += 1;
+			heigh = (heigh <= 0) ? 0 : heigh - (5 * AnimationPad);
+		}
+		diro->dir_X = moves.x * speedScale;
+		diro->dir_Y = moves.y * speedScale;
+		//speeds[1]->speed = speed;
+		r.currentCmd.mutex.lock();
+		r.currentCmd.cmd.moved.x += moves.x * GetFrameTime() * speedScale;
+		r.currentCmd.cmd.moved.y += moves.y * GetFrameTime() * speedScale;
+		r.currentCmd.mutex.unlock();
+		if (IsKeyPressed(KEY_C)) {
+			anima->color_id =
+				anima->color_id == 4 ? 0 : anima->color_id + 1;
+		}
+		anima->count = heigh;
+		break;
+	}
 }
 
 void handle_shoot_inputs(
     Registry &r, sparse_array<Player> &anim, sparse_array<Position> &pos,
-    sparse_array<Size> &siz)
+    sparse_array<Size> &siz, sparse_array<Current_Player> &current)
 {
-    for (auto &&[ind, anima, posi, sizo] : indexed_zipper(anim, pos, siz)) {
-        if (!(anima && posi && sizo))
-            continue;
-        if (ind == 1) {
-            if (IsKeyDown(KEY_SPACE)) {
-                anim[ind]->IsShooting = true;
-                anim[ind]->current_charge +=
-                    (anim[ind]->current_charge >= 3) ? 0 : 5 * GetFrameTime();
-            }
-            if (IsKeyReleased(KEY_SPACE)) {
-                anim[ind]->IsShooting = false;
-                create_ammo(
-                    r,
-                    Position(
-                        pos[ind]->pos_X + (float) sizo->size_X,
-                        pos[ind]->pos_Y + (float) sizo->size_Y / 2),
-                    anim[ind]->current_charge, anim[ind]->color_id);
-                anim[ind]->current_charge = 1.;
-            }
-
-            // if (anim[ind]->IsShooting) {
-            //     Animation de charge du tir
-            // }
-        }
-    }
+    for (auto &&[anima, posi, sizo, _] : zipper(anim, pos, siz, current)) {
+		if (IsKeyDown(KEY_SPACE)) {
+			anima->IsShooting = true;
+			anima->current_charge +=
+				(anima->current_charge >= 3) ? 0 : 5 * GetFrameTime();
+		}
+		if (IsKeyReleased(KEY_SPACE)) {
+			anima->IsShooting = false;
+			create_ammo(
+				r,
+				Position(
+					posi->pos_X + (float) sizo->size_X,
+					posi->pos_Y + (float) sizo->size_Y / 2,
+          anima->current_charge, anima->color_id);),
+				anima->current_charge);
+			anima->current_charge = 1.;
+		}
+		break;
+	}
 }
 
 void hadle_text_inputs(
@@ -205,7 +181,7 @@ void make_infinite_background(
 
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
-    sparse_array<Player> &players, sparse_array<Speed> &speeds)
+    sparse_array<Player> &players, sparse_array<Speed> &speeds, sparse_array<Current_Player> &currents)
 {
     auto &net_ents = r.netEnts.ents;
 
@@ -231,19 +207,23 @@ void updateWithSnapshots(
     }
     for (size_t i = 0; i < positions.size(); ++i) {
         auto &pos = positions[i];
-        auto &spe = speeds[i];
         // std::osyncstream(std::cout) << "moved x: " << pos->pos_X <<
         // std::endl;
         auto const &player = players[i];
+        auto const &current = currents[i];
         if (pos && player) {
             auto finded = std::find_if(
                 net_ents.begin(), net_ents.end(),
                 [&](NetEnt &ent) { return ent.id == player.value().id; });
             if (finded == net_ents.end())
                 continue;
+            if (current &&
+                std::abs(finded->pos.x - pos.value().pos_X) < 30.0 &&
+                std::abs(finded->pos.y - pos.value().pos_Y) < 30.0) {
+                continue;
+            }
             pos.value().pos_X = finded->pos.x;
             pos.value().pos_Y = finded->pos.y;
-            spe->speed = finded->speed;
         } // pour le moment il n'y a pas l'ajout de nouvelles entit�s
     }
     net_ents.clear();

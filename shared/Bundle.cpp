@@ -90,14 +90,13 @@ void create_ammo(Registry &reg, Position pos, float damage_mult, int color_id)
     Health healt(1);
     Direction diro = Direction(1, 0); // std::pow(-1, rand()) * rand()
     Sprite sprite(
-        path.c_str(), hitwidth, hitheight, 8,
-        5); // width height are the visual box
+        path.c_str(), hitwidth, hitheight, 8, 5); // width height are the visual box
+    Position posCopy(
+        pos.pos_X - (float) hitwidth / 2, pos.pos_Y - (float) hitheight / 2);
     sprite.color_id = color_id;
 
     reg.add_component(
-        new_entity, Position(
-                        pos.pos_X - (float) hitwidth / 2,
-                        pos.pos_Y - (float) hitheight / 2));
+        new_entity, std::move(posCopy));
     reg.add_component(new_entity, std::move(Size));
     reg.add_component(new_entity, std::move(sprite));
     reg.add_component(new_entity, std::move(speedo));

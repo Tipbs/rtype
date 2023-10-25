@@ -39,7 +39,7 @@ int main(int ac, char **av)
     Size bgSize(ScreenWidth, ScreenHeight);
     std::string bgpath =
         "./gui/ressources/Backgrounds/Backtest.png"; // temp > 2 > 3 > 1
-    Speed bgspe(200);
+    Speed bgspe(50);
     Direction bgdir(-4, 0);
     Sprite bgsprite(bgpath.c_str(), 3 * ScreenWidth, ScreenHeight);
 
@@ -51,7 +51,8 @@ int main(int ac, char **av)
     Speed speedo(300);
     Direction diro(0, 0);
     SpawnGrace gra(std::chrono::seconds(5));
-    Sprite nesprite(nepath.c_str(), 83, 43, 2, 5);
+    Sprite nesprite(nepath.c_str(), 83, 43, 5, 5);
+    Current_Player current_p;
 
     reg.register_component<Size>();
     reg.register_component<Position>();
@@ -79,16 +80,17 @@ int main(int ac, char **av)
     reg.add_component(new_entity, std::move(diro));
     reg.add_component(new_entity, std::move(gra));
     reg.add_component(new_entity, std::move(player));
+    reg.add_component(new_entity, std::move(current_p));
 
     reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);
     reg.add_system<Position, Size, Sprite, Player, Rectangle, InputField>(
         display);
-    reg.add_system<Direction, Player, Sprite, Speed>(handle_dir_inputs);
-    reg.add_system<Player, Position, Size>(handle_shoot_inputs);
+    reg.add_system<Direction, Player, Sprite, Speed, Current_Player>(handle_dir_inputs);
+    reg.add_system<Player, Position, Size, Current_Player>(handle_shoot_inputs);
     //    reg.add_system<InputField, Rectangle>(hadle_text_inputs);
     reg.add_system<Position, Size>(make_infinite_background);
-    reg.add_system<Position, Player, Speed>(updateWithSnapshots);
+    reg.add_system<Position, Player, Speed, Current_Player>(updateWithSnapshots);
 
     while (!WindowShouldClose()) {
         reg.run_systems();
