@@ -3,57 +3,61 @@
 #include <chrono>
 #include <stdlib.h>     /* srand, rand */
 
-#ifndef CLIENT
+#ifndef SERVER
     #include "../gui/include/GraphicComponents.hpp"
 #endif
 
+#include "Bundle.hpp"
 
-inline auto &Factory::_register_components()
+inline auto Factory::_register_components()
 {
     return _reg.register_components<
-#ifndef CLIENT
-        Sprite,
-#endif
 #ifndef SERVER
+        Sprite,
         Ammo,
         Weapon,
 #endif
         Current_Player,
-        // NetworkEntity,
         Position,
         Damages,
         Size,
         Health,
         Speed,
         Direction,
-        SpawnGrace,
-        Animation
+        SpawnGrace
+        // Animation
     >();
+}
+
+Factory::Factory(Registry &reg) : _reg(reg)
+{
+    _register_components();
 }
 
 const Entity Factory::_create_player(int id, Utils::Vec2 pos, int type)
 {
-    const Entity ent = _reg.spawn_entity();
-
-    _reg.emplace_component<Current_Player>(ent, id);
-    _reg.emplace_component<Position>(ent, pos);
-    // _reg.emplace_component<NetworkEntity>(ent, id);
-    _reg.emplace_component<Speed>(ent, 300);
-    _reg.emplace_component<Direction>(ent, 50, 0);
-    _reg.emplace_component<SpawnGrace>(ent, std::chrono::seconds(5));
-    #ifndef CLIENT
-        switch (id) {
-            case (0):
-                _reg.emplace_component<Sprite>(ent, "./gui/ressources/Sprites/r-typesheet42.gif", 83, 43, 5, 5);
-            case (1):
-                _reg.emplace_component<Sprite>(ent, "./gui/ressources/Sprites/r-typesheet42.gif", 83, 43, 5, 5);
-            case (2):
-                _reg.emplace_component<Sprite>(ent, "./gui/ressources/Sprites/r-typesheet42.gif", 83, 43, 5, 5);
-            case (3):
-                _reg.emplace_component<Sprite>(ent, "./gui/ressources/Sprites/r-typesheet42.gif", 83, 43, 5, 5);
-        }
+    Entity const new_entity = _reg.spawn_entity();
+    Player player(1, id);
+    Size Size(83, 43);
+    std::string path = "./gui/ressources/Sprites/r-typesheet42.gif";
+    Speed speedo(300);
+    Direction diro(0, 0);
+    SpawnGrace gra(std::chrono::seconds(1));
+    #ifndef SERVER
+    Sprite sprite(path.c_str(), 83, 43, 5, 5);
     #endif
-    return ent;
+
+    _reg.add_component(new_entity, std::move(pos));
+    _reg.add_component(new_entity, std::move(Size));
+    #ifndef SERVER
+    _reg.add_component(new_entity, std::move(sprite));
+    #endif
+    _reg.add_component(new_entity, std::move(speedo));
+    _reg.add_component(new_entity, std::move(diro));
+    _reg.add_component(new_entity, std::move(gra));
+    _reg.add_component(new_entity, std::move(player));
+
+    return new_entity;
 }
 
 const Entity Factory::_create_enemy()
