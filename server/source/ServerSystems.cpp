@@ -52,3 +52,13 @@ void extract(
         }
     }
 }
+
+void resetPlayersDir(
+    Registry& r, sparse_array<Player>& players, sparse_array<Direction>& directions)
+{
+    for (auto &&[_, diro]: zipper(players, directions)) {
+        //std::osyncstream(std::cout) << "y = " << pos->pos_Y << "  x = " << pos->pos_X << std::endl;
+        diro->dir_X = 0;
+        diro->dir_Y = 0;
+    }
+}

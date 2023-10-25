@@ -242,8 +242,9 @@ udp_server::udp_server(std::size_t port)
     reg.register_component<NetworkedEntity>();
     reg.add_system<Direction, Speed, Position, Size, Player>(synchronize);
     reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
-    reg.add_system<Position, Speed, Direction, Player>(move);
+    reg.add_system<Position, Speed, Direction>(move);
     reg.add_system<Position, Speed, Player, NetworkedEntity>(extract);
+    reg.add_system<Player, Direction>(resetPlayersDir);
 
     _port = port;
 
