@@ -3,13 +3,14 @@
 #include <cstdlib>
 #include <iostream>
 #include <ostream>
+#include <chrono>
+#include <syncstream>
 #include "Component.hpp"
 #include "Systems.hpp"
 #include "Registry.hpp"
-#include <chrono>
 #include "indexed_zipper.hpp"
 #include "zipper.hpp"
-#include <syncstream>
+#include "Bundle.hpp"
 
 #ifdef SERVER
 	std::mutex mutex;
@@ -42,15 +43,21 @@ std::chrono::steady_clock::time_point GetTimePoint()
 void move(Registry &r, 
 sparse_array<Position> &positions,
 sparse_array<Speed> &speed, 
-sparse_array<Direction> &dir)
+sparse_array<Direction> &dir
+#ifdef SERVER
+, sparse_array<Player> &players
+#endif
+)
 {
-    for (auto &&[pos, spe, diro]: zipper(positions, speed, dir)) {
+    for (auto &&[index, pos, spe, diro]: indexed_zipper(positions, speed, dir)) {
         //std::osyncstream(std::cout) << "y = " << pos->pos_Y << "  x = " << pos->pos_X << std::endl;
 		pos->pos_X += spe->speed * diro->dir_X * GetFrameTime();
 		pos->pos_Y += spe->speed * diro->dir_Y * GetFrameTime();
         #ifdef SERVER
+        if (players[index]) {
         diro->dir_X = 0;
         diro->dir_Y = 0;
+		}
         #endif
     }
 }
