@@ -12,7 +12,7 @@ class NetEnt {
 public:
     int id;
 	EntityType type;
-    Utils::Vec2 pos;
+    Utils::Vec2 pos {};
 	uint8_t attacking = false;
 	float attackState;
 
