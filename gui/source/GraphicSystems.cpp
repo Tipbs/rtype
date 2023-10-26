@@ -179,6 +179,21 @@ void make_infinite_background(
     }
 }
 
+void killDeadEntities(Registry &r, sparse_array<NetworkedEntity> &entities)
+{
+    auto &net_ents = r.netEnts.ents;
+
+    for (auto&& [index, _] : indexed_zipper(entities)) {
+        auto finded = std::find_if(net_ents.begin(), net_ents.end(), [&](NetEnt& ent) {
+            return ent.id == entities[index]->id;
+            });
+        if (finded == net_ents.end()) {
+			r.kill_entity(index);
+            std::cout << "killing entity " << index << std::endl;
+        }
+    }
+}
+
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
     sparse_array<NetworkedEntity> &entities, sparse_array<Speed> &speeds,
@@ -189,7 +204,7 @@ void updateWithSnapshots(
 
     r.netEnts.mutex.lock();
     for (auto it = net_ents.begin(); it != net_ents.end(); ++it) {
-        auto net = *it;
+        auto &net = *it;
         auto finded = std::find_if(
             entities.begin(), entities.end(), [&](std::optional<NetworkedEntity> &ent) {
                 if (ent)
@@ -202,15 +217,12 @@ void updateWithSnapshots(
         auto pos = Position(net.pos.x, net.pos.y);
         create_player(r, net.id, pos);
         std::cout << "Creating player\n";
-        // create entity with info from net ent
         it = net_ents.erase(it);
         if (it == net_ents.end())
             break;
     }
     for (size_t i = 0; i < positions.size(); ++i) {
         auto &pos = positions[i];
-        // std::osyncstream(std::cout) << "moved x: " << pos->pos_X <<
-        // std::endl;
         auto const &entity = entities[i];
         auto const &current = currents[i];
         auto const &size = sizes[i];
@@ -234,8 +246,6 @@ void updateWithSnapshots(
 						pos->pos_X + (float) size->size_X,
 						pos->pos_Y + (float) size->size_Y / 2),
 					finded->attackState, player->color_id);
-                // pour le moment le tir ne marche qu'avec les players
-                // vu que create_ammo demande un color_id
             }
         }
     }
