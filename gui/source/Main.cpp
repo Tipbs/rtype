@@ -38,6 +38,11 @@ int main(int ac, char **av)
 
     Position nePos(0, 0);
 
+    Entity const hudholder = reg.spawn_entity();
+    HUD hud;
+    Position hudpos(0, 9. * ScreenHeight / 10);
+    Size hudsiz(ScreenWidth, ScreenHeight / 10);
+
     reg.register_component<Size>();
     reg.register_component<Position>();
     reg.register_component<Sprite>();
@@ -51,6 +56,7 @@ int main(int ac, char **av)
     reg.register_component<InputField>();
     reg.register_component<Rectangle>();
     reg.register_component<NetworkedEntity>();
+    reg.register_component<HUD>();
     auto current_player = create_player(reg, net_client.get_player_id(), nePos);
     Current_Player current_p;
 
@@ -60,15 +66,22 @@ int main(int ac, char **av)
     reg.add_component(background, std::move(bgspe));
     reg.add_component(background, std::move(bgdir));
 
+    reg.add_component(hudholder, std::move(hud));
+    reg.add_component(hudholder, std::move(hudpos));
+    reg.add_component(hudholder, std::move(hudsiz));
+
     reg.add_component(current_player, std::move(current_p));
+
+
 
     reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);
-    reg.add_system<Position, Size, Sprite, Player, Rectangle, InputField>(
+    reg.add_system<Position, Size, Sprite, Player, Rectangle, InputField, HUD>(
         display);
     reg.add_system<Direction, Player, Sprite, Speed, Current_Player>(
         handle_dir_inputs);
     reg.add_system<Player, Position, Size, Current_Player>(handle_shoot_inputs);
+    reg.add_system<Player, Current_Player, HUD>(updateHUD);
     //    reg.add_system<InputField, Rectangle>(hadle_text_inputs);
     reg.add_system<Position, Size>(make_infinite_background);
     reg.add_system<

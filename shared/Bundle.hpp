@@ -32,7 +32,7 @@ struct Weapon {
     #endif
 
     Weapon(int type, int ammo_per_sec){
-        type = type;
+        this->type = type;
         size = Size(1,1);
         attack_speed = 1. / ammo_per_sec;
         #ifndef SERVER

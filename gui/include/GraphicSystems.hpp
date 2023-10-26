@@ -12,7 +12,8 @@ void updateWithSnapshots(
 void display(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
     sparse_array<Sprite> &sprite, sparse_array<Player> &anim,
-    sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields);
+    sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields,
+    sparse_array<HUD> &hud);
 void handle_dir_inputs(
     Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &anim,
     sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds,
@@ -25,3 +26,7 @@ void handle_shoot_inputs(
     sparse_array<Size> &siz, sparse_array<Current_Player> &current);
 void make_infinite_background(
     Registry &r, sparse_array<Position> &pos, sparse_array<Size> &siz);
+void updateHUD(
+    Registry &r, sparse_array<Player> &anim,
+    sparse_array<Current_Player> &currents, 
+    sparse_array<HUD> &hud);

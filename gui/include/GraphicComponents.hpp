@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+#include <raylib.h>
 #include "../../shared/Component.hpp"
 
 struct Sprite {
@@ -112,4 +114,11 @@ struct Animation {
 
 struct InputField {
     std::string field;
+};
+
+struct HUD {
+	double charge = 0;
+	int score = 0;
+    int color_id = 0;
+	HUD() {charge = 0; score = 0; color_id = 0;};
 };

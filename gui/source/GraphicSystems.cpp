@@ -1,4 +1,5 @@
 #include "GraphicSystems.hpp"
+#include <algorithm>
 #include <cstddef>
 #include <cstdlib>
 #include <syncstream>
@@ -11,17 +12,28 @@
 #include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
 
+std::vector<Color>ColorById {
+    BLUE,
+    PURPLE,
+    RED,
+    YELLOW,
+    GREEN
+};
+
 void display(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
     sparse_array<Sprite> &sprite, sparse_array<Player> &anim,
-    sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields)
+    sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields,
+    sparse_array<HUD> &hud)
 {
     BeginDrawing();
     for (auto &&[ind, pos, siz, spri] :
          indexed_zipper(positions, size, sprite)) {
+        if (hud[ind])
+            continue;
         if (!(pos && siz && spri))
             continue;
-        if (sprite[ind]->width_max == 8 && sprite[ind]->height_max == 5) {
+        if (sprite[ind]->width_max == 8 && sprite[ind]->height_max == 5) { // Shoot images
             sprite[ind]->sprite.y =
                 sprite[ind]->color_id * sprite[ind]->height_padding;
             sprite[ind]->sprite.x +=
@@ -30,7 +42,7 @@ void display(
                      ? 0 // - sprite[ind]->width_padding)
                      : sprite[ind]->width_padding);
         }
-        if (anim[ind]) {
+        if (anim[ind]) { // Ships images
             sprite[ind]->sprite.y =
                 anim[ind]->color_id * sprite[ind]->height_padding;
             if (anim[ind]->IsShooting)
@@ -46,6 +58,30 @@ void display(
             sprite[ind].value().spritesheet, sprite[ind].value().sprite,
             Rectpos, WHITE);
     }
+    for (auto &&[i, hudy, posi, sizy] : indexed_zipper(hud, positions, size)) {
+        if (!(hudy && posi && sizy))
+            continue;
+        
+        int subWidth = sizy->size_X;
+        int subHeight = sizy->size_Y;
+        DrawRectangle(posi->pos_X, posi->pos_Y, subWidth, subHeight, BLACK);
+
+        DrawText("Charge : ", posi->pos_X, posi->pos_Y, 32, WHITE);
+        double current_charge = (hudy->charge <= 1) ? 0 : (hudy->charge >= 3) ? 1 : ((hudy->charge - 1.) / 2);
+        DrawRectangle(posi->pos_X + MeasureText("Charge : ", 32), posi->pos_Y, (subWidth / 2.) * current_charge, subHeight / 2, ColorById[hudy->color_id]);
+        DrawRectangleLines(posi->pos_X + MeasureText("Charge : ", 32), posi->pos_Y, subWidth / 2, subHeight / 2, WHITE);
+
+        DrawText("Score   : ", posi->pos_X, posi->pos_Y + (subHeight / 2.), 32, WHITE);
+        DrawText(std::to_string(hudy->score).c_str(), posi->pos_X + MeasureText("Score   : ", 32), posi->pos_Y + (subHeight / 2.), 32, WHITE);
+
+        int second_section = posi->pos_X + MeasureText("Charge : ", 32) + (subWidth / 2.);
+        DrawRectangle(second_section, posi->pos_Y, (subWidth - second_section) * current_charge, subHeight / 3, ColorById[(hudy->color_id + 1) % 5]);
+        DrawRectangleLines(second_section, posi->pos_Y, (subWidth - second_section), subHeight / 3, WHITE);
+        DrawRectangle(second_section, posi->pos_Y + (subHeight/3.), (subWidth - second_section) * current_charge, subHeight / 3, ColorById[(hudy->color_id + 2) % 5]);
+        DrawRectangleLines(second_section, posi->pos_Y + (subHeight/3.), (subWidth - second_section), subHeight / 3, WHITE);
+        DrawRectangle(second_section, posi->pos_Y + (2 * subHeight/3.), (subWidth - second_section) * current_charge, subHeight / 3, ColorById[(hudy->color_id + 3) % 5]);
+        DrawRectangleLines(second_section, posi->pos_Y + (2 * subHeight/3.), (subWidth - second_section), subHeight / 3, WHITE);
+        }
     EndDrawing();
 }
 
@@ -255,4 +291,18 @@ void updateWithSnapshots(
     }
     net_ents.clear();
     r.netEnts.mutex.unlock();
+}
+
+void updateHUD(
+    Registry &r, sparse_array<Player> &anim,
+    sparse_array<Current_Player> &currents, 
+    sparse_array<HUD> &hud)
+{
+    for (auto &&[play, _] : zipper(anim, currents)) {
+        for (auto &&[hudy] : zipper(hud)) {
+            hudy->charge = play->current_charge;
+            hudy->score += 1;
+            hudy->color_id = play->color_id;
+        }
+    }
 }
