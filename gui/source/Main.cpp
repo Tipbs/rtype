@@ -44,13 +44,14 @@ int main(int ac, char **av)
     reg.register_component<Speed>();
     reg.register_component<Direction>();
     reg.register_component<SpawnGrace>();
-    reg.register_component<Player>();
+    reg.register_component<Animation>();
     reg.register_component<Health>();
     reg.register_component<Damages>();
     reg.register_component<Current_Player>();
     reg.register_component<InputField>();
     reg.register_component<Rectangle>();
     reg.register_component<NetworkedEntity>();
+    reg.register_component<Player>();
     auto current_player = create_player(reg, net_client.get_player_id(), nePos);
     Current_Player current_p;
 

@@ -3,17 +3,23 @@
 #include <string>
 #include <utility>
 #include <chrono>
+#include "Entity.hpp"
 
 #ifdef SERVER
 	float GetFrameTime();
 	void ResetFrameTime();
 #else
+    #include "../gui/include/GraphicComponents.hpp"
 	#include <raylib.h>
 #endif // !SERVER
 
 std::chrono::steady_clock::time_point GetTimePoint();
 
 struct Current_Player {};
+
+struct Player {
+    int color_id = -1;
+};
 
 struct NetworkedEntity {
     int id;
@@ -61,5 +67,32 @@ struct SpawnGrace {
 	SpawnGrace(std::chrono::duration<float> timer): time(timer) {
 		creation_time = GetTimePoint();
 	};
+};
+
+struct Weapon {
+    int type = 1;
+    Size size = Size(1,1);
+    double attack_speed = 1.;
+    Entity owner_id = -1;
+    bool IsShooting = false;
+    float current_charge = 0.;
+    #ifndef SERVER
+    Sprite sprite = Sprite("./gui/ressources/Sprites/r-typesheet42.gif");
+    #endif
+
+    Weapon(Entity owner_id, int type, int ammo_per_sec): type(type), owner_id(owner_id) {
+        size = Size(1,1);
+        attack_speed = 1. / ammo_per_sec;
+        #ifndef SERVER
+        sprite = Sprite("./gui/ressources/Sprites/r-typesheet42.gif");
+        #endif
+    };
+};
+
+struct Animation {
+    double count = 1;
+
+    Animation(double count) : count(count) {};
+
 };
 

@@ -103,13 +103,6 @@ struct Sprite {
     };
 };
 
-struct Animation {
-    // Rectangle rect; //contains size as well
-    Sprite sprite;
-    Position *frames; // contains a list of position for each frames of an
-                      // animated picture.
-};
-
 struct InputField {
     std::string field;
 };

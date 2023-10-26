@@ -71,3 +71,11 @@ sparse_array<Health> &helth)
         }
     }
 }
+
+void update_weapon_position(Registry &r, sparse_array<Weapon> &weapons, sparse_array<Position> &positions)
+{
+    for (auto &&[weapon, position]: zipper(weapons, positions)) {
+        position->pos_X =  positions[static_cast<size_t>(weapon->owner_id)]->pos_X + 5;
+        position->pos_Y =  positions[static_cast<size_t>(weapon->owner_id)]->pos_Y + 5;
+    }
+}

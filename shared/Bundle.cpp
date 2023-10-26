@@ -8,7 +8,7 @@
 size_t create_player(Registry &reg, size_t id, Position pos)
 {
     Entity const new_entity = reg.spawn_entity();
-    Player player(1, id);
+    Animation animation(1);
     Size Size(83, 43);
     std::string path = "./gui/ressources/Sprites/Testships.png";
     Speed speedo(300);
@@ -26,7 +26,7 @@ size_t create_player(Registry &reg, size_t id, Position pos)
     reg.add_component(new_entity, std::move(speedo));
     reg.add_component(new_entity, std::move(diro));
     reg.add_component(new_entity, std::move(gra));
-    reg.add_component(new_entity, std::move(player));
+    reg.add_component(new_entity, std::move(animation));
     reg.emplace_component<NetworkedEntity>(new_entity, id);
 
     return (size_t) new_entity;
