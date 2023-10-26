@@ -98,7 +98,8 @@ void handle_shoot_inputs(
     Registry &r, sparse_array<Player> &anim, sparse_array<Position> &pos,
     sparse_array<Size> &siz, sparse_array<Current_Player> &current)
 {
-    for (auto &&[index, anima, posi, sizo, _] : indexed_zipper(anim, pos, siz, current)) {
+    for (auto &&[index, anima, posi, sizo, _] :
+         indexed_zipper(anim, pos, siz, current)) {
         if (IsKeyDown(KEY_SPACE)) {
             anima->IsShooting = true;
             anima->current_charge +=
@@ -183,12 +184,13 @@ void killDeadEntities(Registry &r, sparse_array<NetworkedEntity> &entities)
 {
     auto &net_ents = r.netEnts.ents;
 
-    for (auto&& [index, _] : indexed_zipper(entities)) {
-        auto finded = std::find_if(net_ents.begin(), net_ents.end(), [&](NetEnt& ent) {
-            return ent.id == entities[index]->id;
+    for (auto &&[index, _] : indexed_zipper(entities)) {
+        auto finded =
+            std::find_if(net_ents.begin(), net_ents.end(), [&](NetEnt &ent) {
+                return ent.id == entities[index]->id;
             });
         if (finded == net_ents.end()) {
-			r.kill_entity(index);
+            r.kill_entity(index);
             std::cout << "killing entity " << index << std::endl;
         }
     }
@@ -206,7 +208,8 @@ void updateWithSnapshots(
     for (auto it = net_ents.begin(); it != net_ents.end(); ++it) {
         auto &net = *it;
         auto finded = std::find_if(
-            entities.begin(), entities.end(), [&](std::optional<NetworkedEntity> &ent) {
+            entities.begin(), entities.end(),
+            [&](std::optional<NetworkedEntity> &ent) {
                 if (ent)
                     return ent->id == net.id;
                 return false;
@@ -229,8 +232,9 @@ void updateWithSnapshots(
         auto const &player = players[i];
         if (pos && entity) {
             auto finded = std::find_if(
-                net_ents.begin(), net_ents.end(),
-                [&](NetEnt &net_ent) { return net_ent.id == entity.value().id; });
+                net_ents.begin(), net_ents.end(), [&](NetEnt &net_ent) {
+                    return net_ent.id == entity.value().id;
+                });
             if (finded == net_ents.end())
                 continue;
             if (current && std::abs(finded->pos.x - pos.value().pos_X) < 30.0 &&
@@ -240,12 +244,12 @@ void updateWithSnapshots(
             pos.value().pos_X = finded->pos.x;
             pos.value().pos_Y = finded->pos.y;
             if (!current && player && finded->attacking) {
-				create_ammo(
-					r,
-					Position(
-						pos->pos_X + (float) size->size_X,
-						pos->pos_Y + (float) size->size_Y / 2),
-					finded->attackState, player->color_id);
+                create_ammo(
+                    r,
+                    Position(
+                        pos->pos_X + (float) size->size_X,
+                        pos->pos_Y + (float) size->size_Y / 2),
+                    finded->attackState, player->color_id);
             }
         }
     }
