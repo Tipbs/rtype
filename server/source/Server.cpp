@@ -156,14 +156,24 @@ void udp_server::send_playerId(
             boost::asio::placeholders::bytes_transferred));
 }
 
+bool areClientsReady(const std::map<boost::asio::ip::udp::endpoint, struct Clients> &clients)
+{
+    int i = 0;
+    for (auto &client: clients) {
+        if (client.second.isClientConnected == true)
+            i++;
+    }
+    if (i >= 2)
+        return true;
+    return false;
+}
+
 void udp_server::wait_for_connexion(std::size_t bytes_transferred)
 {
     if (bytes_transferred != 1 && clients.size() == 0)
         return;
     if (bytes_transferred == 1 && clients.count(_remote_point) == 0) {
         size_t player = create_player(reg, 0, Position(0, 0));
-        if (clients.size() == 0)
-            start_threads();
         clients[_remote_point]._id = (size_t) player;
         clients[_remote_point].isClientConnected = false;
         clients[_remote_point]._timer =
@@ -175,6 +185,10 @@ void udp_server::wait_for_connexion(std::size_t bytes_transferred)
         send_playerId(clients[_remote_point]._id, _remote_point);
     } else {
         clients[_remote_point].isClientConnected = true;
+        if (areClientsReady(clients) == true && reg.gameState == 0) {
+            reg.gameState = 1;
+            start_threads();
+        }
         clients[_remote_point]._timer =
             boost::posix_time::microsec_clock::universal_time();
         deserialize(bytes_transferred);
@@ -249,6 +263,7 @@ udp_server::udp_server(std::size_t port)
     _port = port;
 
     start_receive();
+    reg.gameState = 0;
     _svc.run();
 }
 

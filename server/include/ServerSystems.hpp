@@ -2,7 +2,7 @@
 
 #include "../../shared/Registry.hpp"
 #include "../../shared/Bundle.hpp"
-#include "../../shared/Zipper.hpp"
+#include "../../shared/zipper.hpp"
 
 void synchronize(
     Registry &reg, sparse_array<Direction> &directions,

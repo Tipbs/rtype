@@ -1,6 +1,6 @@
 #include "../../shared/Registry.hpp"
 #include "../../shared/Bundle.hpp"
-#include "../../shared/Zipper.hpp"
+#include "../../shared/zipper.hpp"
 
 void synchronize(
     Registry &reg, sparse_array<Direction> &directions,
@@ -35,6 +35,15 @@ void extract(
     Registry &reg, sparse_array<Position> &positions,
     sparse_array<Speed> &speeds, sparse_array<Player> &players, sparse_array<NetworkedEntity> &ents)
 {
+    if (reg.gameState != 1) {
+        NetEnt tmp;
+        if (reg.gameState == 2)
+            tmp.type = EntityType::Win;
+        if (reg.gameState == 3)
+            tmp.type = EntityType::Lose;
+        reg._netent.push_back(tmp);
+        return;
+    }
     for (size_t ind = 0; ind < positions.size(); ind++) {
         auto &pos = positions[ind];
         auto &spe = speeds[ind];
