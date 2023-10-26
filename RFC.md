@@ -36,8 +36,7 @@ We are a group of 3rd Year students at Epitech aiming to hone our skills in Netw
     The server communicates with its clients using multiple serialized structures.
     1. UserCmd
         - Sent by clients to provide user input commands for the game.
-        - The UserCmd structure contains all the data of a client's own player. It contains the relative position of the player in the vector "moved",
-a boolean attacking state "attacking", and a float containing the scale of the attack "attackState".
+        - The UserCmd structure contains all the data of a client's own player. It contains the relative position of the player in the vector "moved", a boolean attacking state "attacking", and a float containing the scale of the attack "attackState".
         - The clients must send the UserCmd structure every "tick" to update its players position in the server. It must also be serialized using the Boost.Serialization method.
         - The structure is provided in the "shared" folder located at the root of the project.
     2. NetEnt
