@@ -47,12 +47,10 @@ void display(
     EndDrawing();
 }
 
-void do_animation(Registry &r,
-    sparse_array<Sprite> &sprites, sparse_array<Player> &animations
-)
-{
-
-}
+void do_animation(
+    Registry &r, sparse_array<Sprite> &sprites,
+    sparse_array<Player> &animations)
+{}
 
 void handle_dir_inputs(
     Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &anim,
@@ -117,6 +115,9 @@ void handle_shoot_inputs(
                     posi->pos_X + (float) sizo->size_X,
                     posi->pos_Y + (float) sizo->size_Y / 2),
                 anima->current_charge, anima->color_id);
+            r.currentCmd.mutex.lock();
+            r.currentCmd.cmd.setAttack(anima->current_charge);
+            r.currentCmd.mutex.unlock();
             anima->current_charge = 1.;
         }
         break;
@@ -183,8 +184,9 @@ void make_infinite_background(
 
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
-    sparse_array<Player> &players, sparse_array<Speed> &speeds,
-    sparse_array<Current_Player> &currents)
+    sparse_array<NetworkedEntity> &entities, sparse_array<Speed> &speeds,
+    sparse_array<Current_Player> &currents, sparse_array<Size> &sizes,
+    sparse_array<Player> &players)
 {
     auto &net_ents = r.netEnts.ents;
 
@@ -192,12 +194,13 @@ void updateWithSnapshots(
     for (auto it = net_ents.begin(); it != net_ents.end(); ++it) {
         auto net = *it;
         auto finded = std::find_if(
-            players.begin(), players.end(), [&](std::optional<Player> &player) {
-                if (player)
-                    return player->id == net.id;
+            entities.begin(), entities.end(),
+            [&](std::optional<NetworkedEntity> &ent) {
+                if (ent)
+                    return ent->id == net.id;
                 return false;
             });
-        if (finded != players.end())
+        if (finded != entities.end())
             continue;
         std::cout << "id: " << net.id << std::endl;
         auto pos = Position(net.pos.x, net.pos.y);
@@ -212,12 +215,15 @@ void updateWithSnapshots(
         auto &pos = positions[i];
         // std::osyncstream(std::cout) << "moved x: " << pos->pos_X <<
         // std::endl;
-        auto const &player = players[i];
+        auto const &entity = entities[i];
         auto const &current = currents[i];
-        if (pos && player) {
+        auto const &size = sizes[i];
+        auto const &player = players[i];
+        if (pos && entity) {
             auto finded = std::find_if(
-                net_ents.begin(), net_ents.end(),
-                [&](NetEnt &ent) { return ent.id == player.value().id; });
+                net_ents.begin(), net_ents.end(), [&](NetEnt &net_ent) {
+                    return net_ent.id == entity.value().id;
+                });
             if (finded == net_ents.end())
                 continue;
             if (current && std::abs(finded->pos.x - pos.value().pos_X) < 30.0 &&
@@ -226,7 +232,17 @@ void updateWithSnapshots(
             }
             pos.value().pos_X = finded->pos.x;
             pos.value().pos_Y = finded->pos.y;
-        } // pour le moment il n'y a pas l'ajout de nouvelles entit�s
+            if (!current && player && finded->attacking) {
+                create_ammo(
+                    r,
+                    Position(
+                        pos->pos_X + (float) size->size_X,
+                        pos->pos_Y + (float) size->size_Y / 2),
+                    finded->attackState, player->color_id);
+                // pour le moment le tir ne marche qu'avec les players
+                // vu que create_ammo demande un color_id
+            }
+        }
     }
     net_ents.clear();
     r.netEnts.mutex.unlock();

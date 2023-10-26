@@ -51,8 +51,8 @@ void udp_client::handle_receive(
 {
     // std::osyncstream(std::cout) << "Received mais erreur\n";
     if (!error) {
-        // std::osyncstream(std::cout) << "Received " << bytes_transferred << "
-        // bytes" << std::endl;
+        std::osyncstream(std::cout)
+            << "Received " << bytes_transferred << "bytes" << std::endl;
         try {
             std::string seralizedData(_recv_buffer.data(), bytes_transferred);
             std::istringstream iss(seralizedData);
@@ -119,7 +119,7 @@ void udp_client::net_get_id(
             Utils::PlayerId tmp;
             archive >> tmp;
             _player_id = tmp.id;
-        } catch (const std::exception& err) {
+        } catch (const std::exception &err) {
             std::cerr << "serialization exception: " << err.what();
             throw err;
         }
