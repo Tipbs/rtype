@@ -23,7 +23,7 @@ static auto time_since_last_tick =
 //	std::scoped_lock lock(mutex);
 //	const auto now = std::chrono::high_resolution_clock::now();
 //	return std::chrono::duration<double>(now -
-//time_since_last_tick).count();
+// time_since_last_tick).count();
 // }
 float GetFrameTime() { return 1; }
 
@@ -58,6 +58,7 @@ void damages(
     Registry &r, sparse_array<Health> &healt, sparse_array<Damages> &dama,
     size_t i1, size_t i2)
 {
+    std::cout << "y a collision\n";
     healt[i1]->health -= dama[i2]->damages;
     healt[i2]->health -= dama[i1]->damages;
     std::osyncstream(std::cout)
@@ -80,34 +81,34 @@ void colision(
         if (!(pos && siz && dama && halth))
             continue;
         if (grace[ind]
-                    .value_or(SpawnGrace(std::chrono::seconds(0)))
-                    .creation_time +
-                grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).time >=
+			.value_or(SpawnGrace(std::chrono::seconds(0)))
+			.creation_time +
+			grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).time >=
             time)
             continue;
         for (size_t ind2 = ind + 1; ind2 < positions.size(); ind2++) {
             if (grace[ind2]
-                        .value_or(SpawnGrace(std::chrono::seconds(0)))
+                .value_or(SpawnGrace(std::chrono::seconds(0)))
                         .creation_time +
-                    grace[ind2]
-                        .value_or(SpawnGrace(std::chrono::seconds(0)))
-                        .time >=
+                grace[ind2]
+                    .value_or(SpawnGrace(std::chrono::seconds(0)))
+                    .time >=
                 time)
                 continue;
             if (positions[ind].value().pos_X >
-                positions[ind2].value().pos_X + size[ind2].value().size_X)
+                positions[ind2].value().pos_X + size[ind2].value().size_X / 2.)
                 continue;
             else if (
                 positions[ind].value().pos_Y >
-                positions[ind2].value().pos_Y + size[ind2].value().size_Y)
+                positions[ind2].value().pos_Y + size[ind2].value().size_Y / 2.)
                 continue;
             else if (
                 positions[ind2].value().pos_X >
-                positions[ind].value().pos_X + size[ind].value().size_X)
+                positions[ind].value().pos_X - size[ind].value().size_X / 2.)
                 continue;
             else if (
                 positions[ind2].value().pos_Y >
-                positions[ind].value().pos_Y + size[ind].value().size_Y)
+                positions[ind].value().pos_Y - size[ind].value().size_Y / 2.)
                 continue;
             else
                 damages(r, helth, dam, ind, ind2);
@@ -129,7 +130,10 @@ void enemyAlwaysShoot(
         if (now - shoot->last_shoot > shoot->delay) {
             shoot->last_shoot = now;
             create_ammo(
-                r, Position(pos->pos_X - (size->size_X / 2), pos->pos_Y + (size->size_Y / 2)),
+                r,
+                Position(
+                    pos->pos_X - (size->size_X / 2),
+                    pos->pos_Y + (size->size_Y / 2)),
                 Direction(-1, 0), 1.0, 3);
         }
     }

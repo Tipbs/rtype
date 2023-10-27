@@ -122,6 +122,7 @@ size_t create_zorg(Registry &reg, Position pos, size_t net_id = 0)
     reg.emplace_component<AlwaysShoot>(
         new_entity, std::chrono::milliseconds(750));
     reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
+    reg.emplace_component<Health>(new_entity, 1);
     //reg.emplace_component<NetworkedEntity>(new_entity, net_id);
 
     return (size_t) new_entity;

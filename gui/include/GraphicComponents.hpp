@@ -94,10 +94,7 @@ struct Sprite {
     Sprite(const char *path, double width_multiplier,
         double height_multiplier)
     {
-        std::cout << "je suis un sprite\n";
         Image sprit = LoadImage(path);
-        std::cout << "width: " << sprit.width << " height: " << sprit.height
-                  << "\n";
         ImageResizeNN(
             &sprit, sprit.width * width_multiplier, sprit.height * height_multiplier);
         spritesheet = LoadTextureFromImage(sprit);
@@ -109,7 +106,6 @@ struct Sprite {
         sprite.width = spritesheet.width;
         sprite.x = 0;
         sprite.y = 0;
-        std::cout << "aarzfqsdfqsdf\n";
     }
 
     Sprite(char *path) : spritesheet(LoadTextureFromImage(LoadImage(path)))

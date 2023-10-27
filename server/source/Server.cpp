@@ -240,6 +240,7 @@ udp_server::udp_server(std::size_t port)
     reg.register_component<Damages>();
     reg.register_component<Health>();
     reg.register_component<NetworkedEntity>();
+    reg.register_component<AlwaysShoot>();
     reg.add_system<Direction, Speed, Position, Size, Player>(synchronize);
     reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
     reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
