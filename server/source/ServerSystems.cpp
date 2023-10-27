@@ -36,6 +36,15 @@ void extract(
     sparse_array<Speed> &speeds, sparse_array<Player> &players,
     sparse_array<NetworkedEntity> &ents)
 {
+    if (reg.gameState != 1) {
+        NetEnt tmp;
+        if (reg.gameState == 2)
+            tmp.type = EntityType::Win;
+        if (reg.gameState == 3)
+            tmp.type = EntityType::Lose;
+        reg._netent.push_back(tmp);
+        return;
+    }
     for (size_t ind = 0; ind < positions.size(); ind++) {
         auto &pos = positions[ind];
         auto &spe = speeds[ind];

@@ -5,7 +5,9 @@
 #include "Utils.hpp"
 
 enum class EntityType {
-    Player
+    Player,
+    Win,
+    Lose
 };
 
 class NetEnt {

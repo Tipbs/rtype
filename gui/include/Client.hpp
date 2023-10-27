@@ -20,6 +20,11 @@
 #include "../../shared/Registry.hpp"
 #include "../../shared/UserCmd.hpp"
 
+enum gameState {
+    Playing,
+    notPlaying
+};
+
 class udp_client {
   public:
     udp_client(
@@ -49,6 +54,7 @@ class udp_client {
     boost::asio::io_context &_svc;
     boost::asio::deadline_timer timer;
 
+    gameState state;
     std::thread tick;
     std::thread sending;
     std::thread receive;

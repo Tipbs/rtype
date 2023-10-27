@@ -47,6 +47,7 @@ class Registry {
         ThreadUserCmd currentCmd;
 	#else
         std::map<std::size_t, std::vector<UserCmd>> user_cmds;
+        std::size_t gameState;
         std::vector<NetEnt> _netent;
     #endif // !SERVER
 
