@@ -16,12 +16,14 @@ size_t create_player(Registry &reg, size_t id, Position pos)
     SpawnGrace gra(std::chrono::seconds(1));
     #ifndef SERVER
     Sprite sprite(path.c_str(), 83, 43, 2, 5);
+    SoundComponent fxShoot("./gui/ressources/Audio/lazer.wav", SoundFx::PlayerFx);
     #endif
 
     reg.add_component(new_entity, std::move(pos));
     reg.add_component(new_entity, std::move(Size));
     #ifndef SERVER
     reg.add_component(new_entity, std::move(sprite));
+    reg.add_component(new_entity, std::move(fxShoot));
     #endif
     reg.add_component(new_entity, std::move(speedo));
     reg.add_component(new_entity, std::move(diro));
