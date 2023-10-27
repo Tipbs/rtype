@@ -163,7 +163,7 @@ bool areClientsReady(const std::map<boost::asio::ip::udp::endpoint, struct Clien
         if (client.second.isClientConnected == true)
             i++;
     }
-    if (i >= 2)
+    if (i >= 1)
         return true;
     return false;
 }
