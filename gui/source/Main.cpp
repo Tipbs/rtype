@@ -10,6 +10,11 @@
 #include "GraphicSystems.hpp"
 #include "raylib.h"
 
+void LoadGame(Registry &reg, udp_client &net_client)
+{
+
+}
+
 int main(int ac, char **av)
 {
     const int ScreenWidth = 1280;
@@ -25,6 +30,7 @@ int main(int ac, char **av)
     udp_client net_client(context, ip, port, reg);
     context.run();
     InitWindow(ScreenWidth, ScreenHeight, "R-Type");
+    InitAudioDevice();
     SetTargetFPS(60);
 
     Entity const background = reg.spawn_entity();
@@ -51,16 +57,21 @@ int main(int ac, char **av)
     reg.register_component<InputField>();
     reg.register_component<Rectangle>();
     reg.register_component<NetworkedEntity>();
+    reg.register_component<SoundComponent>();
+
     auto current_player = create_player(reg, net_client.get_player_id(), nePos);
     Current_Player current_p;
+    SoundComponent gameMusic("./gui/ressources/Audio/battle_ost.mp3", SoundFx::BattleMusic);
 
     reg.add_component(background, std::move(bgPos));
     reg.add_component(background, std::move(bgSize));
     reg.add_component(background, std::move(bgsprite));
     reg.add_component(background, std::move(bgspe));
     reg.add_component(background, std::move(bgdir));
+    reg.add_component(background, std::move(gameMusic));
 
     reg.add_component(current_player, std::move(current_p));
+
 
     reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);
@@ -68,12 +79,13 @@ int main(int ac, char **av)
         display);
     reg.add_system<Direction, Player, Sprite, Speed, Current_Player>(
         handle_dir_inputs);
-    reg.add_system<Player, Position, Size, Current_Player>(handle_shoot_inputs);
+    reg.add_system<Player, Position, Size, Current_Player, SoundComponent>(handle_shoot_inputs);
     //    reg.add_system<InputField, Rectangle>(hadle_text_inputs);
     reg.add_system<Position, Size>(make_infinite_background);
     reg.add_system<
         Position, NetworkedEntity, Speed, Current_Player, Size, Player>(
         updateWithSnapshots);
+    reg.add_system<SoundComponent>(handle_music);
 
     while (!WindowShouldClose()) {
         reg.run_systems();

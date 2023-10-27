@@ -1,6 +1,24 @@
 #pragma once
 
+#include <raylib.h>
 #include "../../shared/Component.hpp"
+
+enum SoundFx {
+    BattleMusic,
+    PlayerFx,
+    MobFx,
+    ButtonFx,
+};
+
+struct SoundComponent {
+    Sound sfx;
+    SoundFx type;
+
+    SoundComponent(std::string path, SoundFx _type) {
+        sfx = LoadSound(path.c_str());
+        type = _type;
+    }
+};
 
 struct Sprite {
     Texture2D spritesheet;

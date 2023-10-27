@@ -96,10 +96,10 @@ void handle_dir_inputs(
 
 void handle_shoot_inputs(
     Registry &r, sparse_array<Player> &anim, sparse_array<Position> &pos,
-    sparse_array<Size> &siz, sparse_array<Current_Player> &current)
+    sparse_array<Size> &siz, sparse_array<Current_Player> &current, sparse_array<SoundComponent> &sounds)
 {
-    for (auto &&[index, anima, posi, sizo, _] :
-         indexed_zipper(anim, pos, siz, current)) {
+    for (auto &&[index, anima, posi, sizo, _, sound] :
+         indexed_zipper(anim, pos, siz, current, sounds)) {
         if (IsKeyDown(KEY_SPACE)) {
             anima->IsShooting = true;
             anima->current_charge +=
@@ -117,6 +117,8 @@ void handle_shoot_inputs(
             r.currentCmd.cmd.setAttack(anim[index]->current_charge);
             r.currentCmd.mutex.unlock();
             anim[index]->current_charge = 1.;
+            if (sounds[index]->type == SoundFx::PlayerFx)
+                PlaySound(sounds[index]->sfx);
         }
         break;
     }
@@ -146,8 +148,7 @@ void hadle_text_inputs(
                                         // the queue
             }
             if (IsKeyPressed(KEY_BACKSPACE)) {
-                letterCount--;
-                if (letterCount < 0)
+                letterCount--; if (letterCount < 0)
                     letterCount = 0;
                 inputField->field[letterCount] = '\0';
             }
@@ -255,4 +256,16 @@ void updateWithSnapshots(
     }
     net_ents.clear();
     r.netEnts.mutex.unlock();
+}
+
+void handle_music(Registry &r, sparse_array<SoundComponent> &sounds)
+{
+    for (auto &&[index, sound] : indexed_zipper(sounds)) {
+        if (sound->type == SoundFx::BattleMusic) {
+            if (IsSoundPlaying(sound->sfx) == false) {
+                SetSoundVolume(sound->sfx, 0.3);
+                PlaySound(sound->sfx);
+            }
+        }
+    }
 }
