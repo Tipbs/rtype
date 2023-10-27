@@ -61,6 +61,11 @@ void udp_client::handle_receive(
             _reg.netEnts.mutex.lock();
             _reg.netEnts.ents.insert(
                 _reg.netEnts.ents.begin(), tmp.begin(), tmp.end());
+            if (_reg.netEnts.ents.size() == 1 &&
+                (_reg.netEnts.ents[0].type == EntityType::Win ||
+                 _reg.netEnts.ents[0].type == EntityType::Lose)) {
+                state = notPlaying;
+            }
             _reg.netEnts.mutex.unlock();
         } catch (std::exception &err) {
             std::osyncstream(std::cout)
@@ -118,6 +123,7 @@ void udp_client::net_get_id(
             Utils::PlayerId tmp;
             archive >> tmp;
             _player_id = tmp.id;
+            state = gameState::Playing;
         } catch (std::exception err) {
             std::cerr << "serialization exception: " << err.what();
             throw err;
