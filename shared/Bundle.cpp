@@ -15,20 +15,20 @@ Entity create_player(Registry &reg, size_t id, Position pos)
     Entity const new_entity = reg.spawn_entity();
     Animation animation(1);
     Size Size(83, 43);
-    std::string path = "./gui/ressources/Sprites/Testships.png";
+    // std::string path = "./gui/ressources/Sprites/Testships.png";
     Speed speedo(300);
     Direction diro(0, 0);
     SpawnGrace gra(std::chrono::seconds(1));
-    #ifndef SERVER
-    Sprite sprite(path.c_str(), 83, 43, 2, 5);
-    #endif
+    // #ifndef SERVER
+    // Sprite sprite(path.c_str());
+    // #endif
 
     reg.add_component(new_entity, std::move(player));
     reg.add_component(new_entity, std::move(pos));
     reg.add_component(new_entity, std::move(Size));
-    #ifndef SERVER
-    reg.add_component(new_entity, std::move(sprite));
-    #endif
+    // #ifndef SERVER
+    // reg.add_component(new_entity, std::move(sprite));
+    // #endif
     reg.add_component(new_entity, std::move(speedo));
     reg.add_component(new_entity, std::move(diro));
     reg.add_component(new_entity, std::move(gra));
@@ -54,7 +54,7 @@ Entity create_ammo(Registry &reg, Position pos, float damage_mult, int color_id)
         pos.pos_X - (float) hitwidth / 2, pos.pos_Y - (float) hitheight / 2);
     #ifndef SERVER
     Sprite sprite(
-        path.c_str(), hitwidth, hitheight, 8, 5); // width height are the visual box
+        path.c_str()); // width height are the visual box
 
     sprite.color_id = color_id;
     #endif
