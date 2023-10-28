@@ -11,22 +11,22 @@
 
 inline auto Factory::_register_components()
 {
-    return _reg.register_components<
-#ifndef SERVER
-        Sprite,
-        Ammo,
-        Weapon,
-#endif
-        Current_Player,
-        Position,
-        Damages,
-        Size,
-        Health,
-        Speed,
-        Direction,
-        SpawnGrace
-        // Animation
-    >();
+//     return _reg.register_components<
+// #ifndef SERVER
+//         Sprite,
+//         Ammo,
+//         Weapon,
+// #endif
+//         Current_Player,
+//         Position,
+//         Damages,
+//         Size,
+//         Health,
+//         Speed,
+//         Direction,
+//         SpawnGrace
+//         // Animation
+//     >();
 }
 
 Factory::Factory(Registry &reg) : _reg(reg)
@@ -37,7 +37,7 @@ Factory::Factory(Registry &reg) : _reg(reg)
 const Entity Factory::_create_player(int id, Utils::Vec2 pos, int type)
 {
     Entity const new_entity = _reg.spawn_entity();
-    Player player(1, id);
+    Player player(1);
     Size Size(83, 43);
     std::string path = "./gui/ressources/Sprites/r-typesheet42.gif";
     Speed speedo(300);
