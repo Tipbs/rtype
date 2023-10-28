@@ -79,3 +79,26 @@ void update_weapon_position(Registry &r, sparse_array<Weapon> &weapons, sparse_a
         position->pos_Y =  positions[static_cast<size_t>(weapon->owner_id)]->pos_Y + 5;
     }
 }
+
+void spawn_enemy(Registry &r,
+    sparse_array<EnemyCount> &enemiesCount
+)
+{
+    for (auto &&[enemyCount]: zipper(enemiesCount)) {
+        enemyCount->timeSinceLastSpawn += GetFrameTime();
+        if (enemyCount->leftToSpawn > 0 && enemyCount->timeSinceLastSpawn > enemyCount->spawnFrequency) {
+            std::cout << enemyCount->timeSinceLastSpawn << " enemies left : " << enemyCount->leftToSpawn << std::endl;
+            const Entity ent = r.spawn_entity();
+            float randomNumber = rand() % 1080;
+            Utils::Vec2 pos = {1000, randomNumber + 50};
+
+            r.emplace_component<Position>(ent, pos);
+            r.emplace_component<Speed>(ent, 300);
+            r.emplace_component<Direction>(ent, 50, 0);
+            r.emplace_component<SpawnGrace>(ent, std::chrono::seconds(5));
+            // r.emplace_component<NetworkEntity>(ent, id);
+            enemyCount->timeSinceLastSpawn = 0;
+            enemyCount->leftToSpawn--;
+        }
+    }
+}
