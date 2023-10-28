@@ -19,24 +19,6 @@ void display(
     BeginDrawing();
     for (auto &&[ind, pos, siz, spri] :
          indexed_zipper(positions, size, sprite)) {
-        if (sprite[ind]->width_max == 8 && sprite[ind]->height_max == 5) {
-            sprite[ind]->sprite.y =
-                sprite[ind]->color_id * sprite[ind]->height_padding;
-            sprite[ind]->sprite.x +=
-                (sprite[ind]->sprite.x / sprite[ind]->width_padding ==
-                         sprite[ind]->width_max - 1
-                     ? 0 // - sprite[ind]->width_padding)
-                     : sprite[ind]->width_padding);
-        }
-        if (anim[ind]) {
-            sprite[ind]->sprite.y =
-                anim[ind]->color_id * sprite[ind]->height_padding;
-            if (anim[ind]->IsShooting)
-                sprite[ind]->sprite.x = 1 * sprite[ind]->width_padding;
-            else
-                sprite[ind]->sprite.x = 0 * sprite[ind]->width_padding;
-        }
-
         Vector2 Rectpos = {
             (float) (positions[ind].value().pos_X),
             (float) positions[ind].value().pos_Y};
@@ -49,19 +31,42 @@ void display(
 
 void do_animation(
     Registry &r, sparse_array<Sprite> &sprites,
-    sparse_array<Player> &animations)
-{}
+    sparse_array<Animation> &animations,
+    sparse_array<Weapon> &weapons)
+{
+    for (auto &&[sprite, animation]: zipper(sprites, animations)) {
+        // if (sprite->width_max == 8 && sprite->height_max == 5) {
+        //     sprite->sprite.y =
+        //         sprite->color_id * sprite->height_padding;
+        //     sprite->sprite.x +=
+        //         (sprite->sprite.x / sprite->width_padding ==
+        //                  sprite->width_max - 1
+        //              ? 0 // - sprite->width_padding)
+        //              : sprite->width_padding);
+        // }
+
+        // if (animation) {
+        //     sprite->sprite.y =
+        //         animation->color_id * sprite->height_padding;
+        //     if (animation->IsShooting)
+        //         sprite->sprite.x = 1 * sprite->width_padding;
+        //     else
+        //         sprite->sprite.x = 0 * sprite->width_padding;
+        // }
+    }
+}
 
 void handle_dir_inputs(
-    Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &anim,
+    Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &players,
     sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds,
-    sparse_array<Current_Player> &currents)
+    sparse_array<Current_Player> &currents, sparse_array<Animation> &animations)
 {
-    for (auto &&[diro, anima, sprit, spe, current] :
-         zipper(dir, anim, sprite, speeds, currents)) {
+    std::cout << "test" << std::endl;
+    for (auto &&[diro, player, sprit, spe, current, animation] :
+         zipper(dir, players, sprite, speeds, currents, animations)) {
         const double AnimationPad = 0.02;
         double heigh = 1;
-        heigh = anima->count;
+        heigh = animation->count;
         Vector2 moves = {0, 0};
         double speedScale = 1;
 
@@ -91,34 +96,36 @@ void handle_dir_inputs(
         r.currentCmd.cmd.moved.y += moves.y * GetFrameTime() * speedScale;
         r.currentCmd.mutex.unlock();
         if (IsKeyPressed(KEY_C))
-            anima->color_id = anima->color_id == 4 ? 0 : anima->color_id + 1;
-        anima->count = heigh;
+            player->color_id = player->color_id == 4 ? 0 : player->color_id + 1;
+        animation->count = heigh;
         break;
     }
 }
 
 void handle_shoot_inputs(
-    Registry &r, sparse_array<Player> &anim, sparse_array<Position> &pos,
-    sparse_array<Size> &siz, sparse_array<Current_Player> &current)
+    Registry &r, sparse_array<Player> &players,
+    sparse_array<Size> &sizes, sparse_array<Weapon> &weapons,
+    sparse_array<Position> &positions)
 {
-    for (auto &&[anima, posi, sizo, _] : zipper(anim, pos, siz, current)) {
+    for (auto &&[weapon] : zipper(weapons)) {
+        size_t owner_id = static_cast<size_t>(weapon->owner_id);
         if (IsKeyDown(KEY_SPACE)) {
-            anima->IsShooting = true;
-            anima->current_charge +=
-                (anima->current_charge >= 3) ? 0 : 5 * GetFrameTime();
+            weapon->IsShooting = true;
+            weapon->current_charge +=
+                (weapon->current_charge >= 3) ? 0 : 5 * GetFrameTime();
         }
         if (IsKeyReleased(KEY_SPACE)) {
-            anima->IsShooting = false;
+            weapon->IsShooting = false;
             create_ammo(
                 r,
                 Position(
-                    posi->pos_X + (float) sizo->size_X,
-                    posi->pos_Y + (float) sizo->size_Y / 2),
-                anima->current_charge, anima->color_id);
+                    positions[owner_id]->pos_X + (float) sizes[owner_id]->size_X,
+                    positions[owner_id]->pos_Y + (float) sizes[owner_id]->size_Y / 2),
+                weapon->current_charge, players[owner_id]->color_id);
             r.currentCmd.mutex.lock();
-            r.currentCmd.cmd.setAttack(anima->current_charge);
+            r.currentCmd.cmd.setAttack(weapon->current_charge);
             r.currentCmd.mutex.unlock();
-            anima->current_charge = 1.;
+            weapon->current_charge = 1.;
         }
         break;
     }
@@ -247,3 +254,5 @@ void updateWithSnapshots(
     net_ents.clear();
     r.netEnts.mutex.unlock();
 }
+
+

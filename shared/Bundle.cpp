@@ -5,8 +5,13 @@
 #include "Component.hpp"
 #include "random"
 
-size_t create_player(Registry &reg, size_t id, Position pos)
+#ifndef SERVER
+#include "../gui/include/GraphicSystems.hpp"
+#endif
+
+Entity create_player(Registry &reg, size_t id, Position pos)
 {
+    Player player;
     Entity const new_entity = reg.spawn_entity();
     Animation animation(1);
     Size Size(83, 43);
@@ -18,6 +23,7 @@ size_t create_player(Registry &reg, size_t id, Position pos)
     Sprite sprite(path.c_str(), 83, 43, 2, 5);
     #endif
 
+    reg.add_component(new_entity, std::move(player));
     reg.add_component(new_entity, std::move(pos));
     reg.add_component(new_entity, std::move(Size));
     #ifndef SERVER
@@ -32,7 +38,7 @@ size_t create_player(Registry &reg, size_t id, Position pos)
     return (size_t) new_entity;
 }
 
-void create_ammo(Registry &reg, Position pos, float damage_mult, int color_id)
+Entity create_ammo(Registry &reg, Position pos, float damage_mult, int color_id)
 {
     Entity const new_entity = reg.spawn_entity();
     int hitwidth = 120 * (damage_mult / 2);
@@ -63,4 +69,5 @@ void create_ammo(Registry &reg, Position pos, float damage_mult, int color_id)
     reg.add_component(new_entity, std::move(diro));
     reg.add_component(new_entity, std::move(damag));
     reg.add_component(new_entity, std::move(healt));
+    return new_entity;
 }

@@ -161,7 +161,7 @@ void udp_server::wait_for_connexion(std::size_t bytes_transferred)
     if (bytes_transferred != 1 && clients.size() == 0)
         return;
     if (bytes_transferred == 1 && clients.count(_remote_point) == 0) {
-        size_t player = create_player(reg, 0, Position(0, 0));
+        Entity player = create_player(reg, 0, Position(0, 0));
         if (clients.size() == 0)
             start_threads();
         clients[_remote_point]._id = (size_t) player;
@@ -231,6 +231,8 @@ udp_server::udp_server(std::size_t port)
     : _svc(), _socket(_svc, udp::endpoint(udp::v4(), port)), tick_timer(_svc),
       check_timer(_svc)
 {
+    reg.register_component<Player>();
+    reg.register_component<Weapon>();
     reg.register_component<Size>();
     reg.register_component<Position>();
     reg.register_component<Speed>();

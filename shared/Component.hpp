@@ -9,7 +9,6 @@
 	float GetFrameTime();
 	void ResetFrameTime();
 #else
-    #include "../gui/include/GraphicComponents.hpp"
 	#include <raylib.h>
 #endif // !SERVER
 
@@ -30,7 +29,7 @@ struct NetworkedEntity {
 struct Position {
 	double pos_X = 0;
 	double pos_Y = 0;
-	Position(double x, double y): pos_X(x), pos_Y(y) {};
+	Position(double x = 0, double y = 0): pos_X(x), pos_Y(y) {};
 };
 
 struct Damages {
@@ -73,19 +72,13 @@ struct Weapon {
     int type = 1;
     Size size = Size(1,1);
     double attack_speed = 1.;
-    Entity owner_id = -1;
+    Entity owner_id;
     bool IsShooting = false;
     float current_charge = 0.;
-    #ifndef SERVER
-    Sprite sprite = Sprite("./gui/ressources/Sprites/r-typesheet42.gif");
-    #endif
 
-    Weapon(Entity owner_id, int type, int ammo_per_sec): type(type), owner_id(owner_id) {
+    Weapon(Entity owner_id, int type = 1, int ammo_per_sec = 1): type(type), owner_id(owner_id) {
         size = Size(1,1);
         attack_speed = 1. / ammo_per_sec;
-        #ifndef SERVER
-        sprite = Sprite("./gui/ressources/Sprites/r-typesheet42.gif");
-        #endif
     };
 };
 
@@ -93,6 +86,5 @@ struct Animation {
     double count = 1;
 
     Animation(double count) : count(count) {};
-
 };
 
