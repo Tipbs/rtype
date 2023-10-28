@@ -13,9 +13,15 @@ public:
     int id;
 	EntityType type;
     Utils::Vec2 pos;
-    uint8_t states;
-    double speed;
+	uint8_t attacking = false;
+	float attackState;
 
+    NetEnt()
+    {
+        id = 0;
+        type = EntityType::Player;
+        attackState = 0;
+    }
     NetEnt &operator=(const NetEnt &) = default;
 
     template<class Archive>
@@ -23,7 +29,8 @@ public:
         ar &id;
         ar &type;
         ar &pos;
-        ar &states;
+        ar &attacking;
+        ar &attackState;
     };
 };
 

@@ -71,6 +71,7 @@ TEST_CASE("zipper_iterator", "ECS")
     Entity const entity = reg.spawn_entity();
     Entity const entity2 = reg.spawn_entity();
 
+    reg.register_component<Player>();
     reg.register_component<Position>();
     reg.register_component<Damages>();
     reg.emplace_component<Position>(entity, 1, 2);

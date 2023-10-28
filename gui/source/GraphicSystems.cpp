@@ -19,133 +19,104 @@ void display(
     BeginDrawing();
     for (auto &&[ind, pos, siz, spri] :
          indexed_zipper(positions, size, sprite)) {
-        if (!(pos && siz && spri))
-            continue;
-        if (sprite[ind]->width_max == 8 && sprite[ind]->height_max == 1) {
-            sprite[ind]->sprite.x +=
-                (sprite[ind]->sprite.x / sprite[ind]->width_padding ==
-                         sprite[ind]->width_max - 1
-                     ? 0 // - sprite[ind]->width_padding)
-                     : sprite[ind]->width_padding);
-        }
-        if (anim[ind]) {
-            sprite[ind]->sprite.y =
-                anim[ind]->color_id * sprite[ind]->height_padding;
-            if (anim[ind]->count >= 1.85)
-                sprite[ind]->sprite.x = 4 * sprite[ind]->width_padding;
-            else if (anim[ind]->count <= 0.15)
-                sprite[ind]->sprite.x = 0 * sprite[ind]->width_padding;
-            else if (anim[ind]->count <= 0.85)
-                sprite[ind]->sprite.x = 1 * sprite[ind]->width_padding;
-            else if (anim[ind]->count >= 1.15)
-                sprite[ind]->sprite.x = 3 * sprite[ind]->width_padding;
-            else
-                sprite[ind]->sprite.x = 2 * sprite[ind]->width_padding;
-        }
-
         Vector2 Rectpos = {
             (float) (positions[ind].value().pos_X),
             (float) positions[ind].value().pos_Y};
         DrawTextureRec(
             sprite[ind].value().spritesheet, sprite[ind].value().sprite,
             Rectpos, WHITE);
-
-        // for (auto &&[inputField, rectangle]: zipper(inputFields, rectangles))
-        // { DrawText(inputField->field.c_str(), (int)rectangle->x + 5,
-        // (int)rectangle->y + 8, 40, MAROON);
-        // }
     }
     EndDrawing();
 }
 
-void handle_dir_inputs(
-    Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &anim,
-    sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds)
+void do_animation(
+    Registry &r, sparse_array<Sprite> &sprites,
+    sparse_array<Animation> &animations,
+    sparse_array<Weapon> &weapons)
 {
-    for (auto &&[ind, diro, anima, sprit, spe] : indexed_zipper(dir, anim, sprite, speeds)) {
-        if (!(diro && anima && sprit))
-            continue;
-        const double AnimationPad = 0.02;
-        double heigh = 1;
-        if (ind == 1) {
-            heigh = anim[ind]->count;
-            Vector2 Moves = {0, 0};
-            double speed = 300; 
+    for (auto &&[sprite, animation]: zipper(sprites, animations)) {
+        // if (sprite->width_max == 8 && sprite->height_max == 5) {
+        //     sprite->sprite.y =
+        //         sprite->color_id * sprite->height_padding;
+        //     sprite->sprite.x +=
+        //         (sprite->sprite.x / sprite->width_padding ==
+        //                  sprite->width_max - 1
+        //              ? 0 // - sprite->width_padding)
+        //              : sprite->width_padding);
+        // }
 
-            if (IsKeyDown(KEY_RIGHT))
-                Moves.x += 1;
-            if (IsKeyDown(KEY_LEFT))
-                Moves.x -= 1;
-            if (IsKeyDown(KEY_LEFT_SHIFT))
-                speed /= 2;
+        // if (animation) {
+        //     sprite->sprite.y =
+        //         animation->color_id * sprite->height_padding;
+        //     if (animation->IsShooting)
+        //         sprite->sprite.x = 1 * sprite->width_padding;
+        //     else
+        //         sprite->sprite.x = 0 * sprite->width_padding;
+        // }
+    }
+}
 
-            if (IsKeyDown(KEY_DOWN) == IsKeyDown(KEY_UP)) {
-                heigh = (heigh < 1)    ? heigh + AnimationPad
-                        : (heigh == 1) ? 1
-                                       : heigh - AnimationPad;
-            } else if (IsKeyDown(KEY_UP)) {
-                Moves.y -= 1; // 1;
-                heigh = (heigh >= 2) ? 2 : heigh + (5 * AnimationPad);
-            } else if (IsKeyDown(KEY_DOWN)) {
-                Moves.y += 1;
-                heigh = (heigh <= 0) ? 0 : heigh - (5 * AnimationPad);
-            }
+void handle_dir_inputs(
+    Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &players,
+    sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds,
+    sparse_array<Current_Player> &currents, sparse_array<Animation> &animations)
+{
+    for (auto &&[diro, player, sprit, spe, current, animation] :
+         zipper(dir, players, sprite, speeds, currents, animations)) {
+        Vector2 moves = {0, 0};
+        double speedScale = 1;
 
-            if (dir[1]) { // 1 is the entity num representing the player seen
-                          // here
-                dir[1]->dir_X = Moves.x;
-                dir[1]->dir_Y = Moves.y;
-                speeds[1]->speed = speed;
-                r.currentCmd.mutex.lock();
-                r.currentCmd.cmd.moved.x += Moves.x;
-                r.currentCmd.cmd.moved.y += Moves.y;
-                r.currentCmd.cmd.speed = speed;
-                r.currentCmd.mutex.unlock();
-                if (IsKeyPressed(KEY_C)) {
-                    anim[ind]->color_id =
-                        anim[ind]->color_id == 4 ? 0 : anim[ind]->color_id + 1;
-                }
-            }
-            if (dir[ind]) { // 1 is the entity num representing the player
-                            // seen here
-                dir[ind].value().dir_X = Moves.x;
-                dir[ind].value().dir_Y = Moves.y;
-            }
+        if (IsKeyDown(KEY_LEFT_SHIFT))
+            speedScale /= 2;
 
-            if (anim[ind])
-                anim[ind]->count = heigh;
+        if (IsKeyDown(KEY_RIGHT))
+            moves.x += 1;
+        else if (IsKeyDown(KEY_LEFT))
+            moves.x -= 1;
+        else if (IsKeyDown(KEY_UP)) {
+            moves.y -= 1;
+        } else if (IsKeyDown(KEY_DOWN)) {
+            moves.y += 1;
         }
+        diro->dir_X = moves.x * speedScale;
+        diro->dir_Y = moves.y * speedScale;
+        // speeds[1]->speed = speed;
+        r.currentCmd.mutex.lock();
+        r.currentCmd.cmd.moved.x += moves.x * GetFrameTime() * speedScale;
+        r.currentCmd.cmd.moved.y += moves.y * GetFrameTime() * speedScale;
+        r.currentCmd.mutex.unlock();
+        if (IsKeyPressed(KEY_C))
+            player->color_id = player->color_id == 4 ? 0 : player->color_id + 1;
+        break;
     }
 }
 
 void handle_shoot_inputs(
-    Registry &r, sparse_array<Player> &anim, sparse_array<Position> &pos,
-    sparse_array<Size> &siz)
+    Registry &r, sparse_array<Player> &players,
+    sparse_array<Size> &sizes, sparse_array<Weapon> &weapons,
+    sparse_array<Position> &positions)
 {
-    for (auto &&[ind, anima, posi, sizo] : indexed_zipper(anim, pos, siz)) {
-        if (!(anima && posi && sizo))
-            continue;
-        if (ind == 1) {
-            if (IsKeyDown(KEY_SPACE)) {
-                anim[ind]->IsShooting = true;
-                anim[ind]->current_charge +=
-                    (anim[ind]->current_charge >= 3) ? 0 : 5 * GetFrameTime();
-            }
-            if (IsKeyReleased(KEY_SPACE)) {
-                anim[ind]->IsShooting = false;
-                create_ammo(
-                    r,
-                    Position(
-                        pos[ind]->pos_X + (float) sizo->size_X,
-                        pos[ind]->pos_Y + (float) sizo->size_Y / 2),
-                    anim[ind]->current_charge);
-                anim[ind]->current_charge = 1.;
-            }
-
-            // if (anim[ind]->IsShooting) {
-            //     Animation de charge du tir
-            // }
+    for (auto &&[weapon] : zipper(weapons)) {
+        size_t owner_id = static_cast<size_t>(weapon->owner_id);
+        if (IsKeyDown(KEY_SPACE)) {
+            weapon->IsShooting = true;
+            weapon->current_charge +=
+                (weapon->current_charge >= 3) ? 0 : 5 * GetFrameTime();
         }
+        if (IsKeyReleased(KEY_SPACE)) {
+            weapon->IsShooting = false;
+            create_ammo(
+                r,
+                Position(
+                    positions[owner_id]->pos_X + (float) sizes[owner_id]->size_X,
+                    positions[owner_id]->pos_Y + (float) sizes[owner_id]->size_Y / 2),
+                weapon->current_charge, players[owner_id]->color_id);
+            r.currentCmd.mutex.lock();
+            r.currentCmd.cmd.setAttack(weapon->current_charge);
+            r.currentCmd.mutex.unlock();
+            weapon->current_charge = 1.;
+        }
+        break;
     }
 }
 
@@ -159,15 +130,18 @@ void hadle_text_inputs(
             int key = GetCharPressed();
             int letterCount = 0;
 
-            // Check if more characters have been pressed on the same frame
+            // Check if more characters have been pressed on the
+            // same frame
             while (key > 0) {
                 if ((key >= 32) && (key <= 125) && (letterCount < 16)) {
                     inputField->field[letterCount] = (char) key;
                     inputField->field[letterCount + 1] =
-                        '\0'; // Add null terminator at the end of the string.
+                        '\0'; // Add null terminator at the end of
+                              // the string.
                     letterCount++;
                 }
-                key = GetCharPressed(); // Check next character in the queue
+                key = GetCharPressed(); // Check next character in
+                                        // the queue
             }
             if (IsKeyPressed(KEY_BACKSPACE)) {
                 letterCount--;
@@ -206,7 +180,9 @@ void make_infinite_background(
 
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
-    sparse_array<Player> &players, sparse_array<Speed> &speeds)
+    sparse_array<NetworkedEntity> &entities, sparse_array<Speed> &speeds,
+    sparse_array<Current_Player> &currents, sparse_array<Size> &sizes,
+    sparse_array<Player> &players)
 {
     auto &net_ents = r.netEnts.ents;
 
@@ -214,12 +190,13 @@ void updateWithSnapshots(
     for (auto it = net_ents.begin(); it != net_ents.end(); ++it) {
         auto net = *it;
         auto finded = std::find_if(
-            players.begin(), players.end(), [&](std::optional<Player> &player) {
-                if (player)
-                    return player->id == net.id;
+            entities.begin(), entities.end(),
+            [&](std::optional<NetworkedEntity> &ent) {
+                if (ent)
+                    return ent->id == net.id;
                 return false;
             });
-        if (finded != players.end())
+        if (finded != entities.end())
             continue;
         std::cout << "id: " << net.id << std::endl;
         auto pos = Position(net.pos.x, net.pos.y);
@@ -232,21 +209,39 @@ void updateWithSnapshots(
     }
     for (size_t i = 0; i < positions.size(); ++i) {
         auto &pos = positions[i];
-        auto &spe = speeds[i];
         // std::osyncstream(std::cout) << "moved x: " << pos->pos_X <<
         // std::endl;
+        auto const &entity = entities[i];
+        auto const &current = currents[i];
+        auto const &size = sizes[i];
         auto const &player = players[i];
-        if (pos && player) {
+        if (pos && entity) {
             auto finded = std::find_if(
-                net_ents.begin(), net_ents.end(),
-                [&](NetEnt &ent) { return ent.id == player.value().id; });
+                net_ents.begin(), net_ents.end(), [&](NetEnt &net_ent) {
+                    return net_ent.id == entity.value().id;
+                });
             if (finded == net_ents.end())
                 continue;
+            if (current && std::abs(finded->pos.x - pos.value().pos_X) < 30.0 &&
+                std::abs(finded->pos.y - pos.value().pos_Y) < 30.0) {
+                continue;
+            }
             pos.value().pos_X = finded->pos.x;
             pos.value().pos_Y = finded->pos.y;
-            spe->speed = finded->speed;
-        } // pour le moment il n'y a pas l'ajout de nouvelles entit�s
+            if (!current && player && finded->attacking) {
+                create_ammo(
+                    r,
+                    Position(
+                        pos->pos_X + (float) size->size_X,
+                        pos->pos_Y + (float) size->size_Y / 2),
+                    finded->attackState, player->color_id);
+                // pour le moment le tir ne marche qu'avec les players
+                // vu que create_ammo demande un color_id
+            }
+        }
     }
     net_ents.clear();
     r.netEnts.mutex.unlock();
 }
+
+

@@ -1,39 +1,8 @@
-#include <cmath>
-#include <cstddef>
-#include <cstdlib>
-#include <iostream>
-#include <ostream>
 #include "Component.hpp"
 #include "Systems.hpp"
-#include "Registry.hpp"
-#include <chrono>
 #include "indexed_zipper.hpp"
 #include "zipper.hpp"
-#include <syncstream>
-
-#ifdef SERVER
-	std::mutex mutex;
-	static auto time_since_last_tick = std::chrono::high_resolution_clock::now(); // voir si raylib utilise m�me chose
-	float GetFrameTime()
-	{
-		std::scoped_lock lock(mutex);
-		const auto now = std::chrono::high_resolution_clock::now();
-		return std::chrono::duration<double>(now - time_since_last_tick).count();
-	}
-
-    void ResetFrameTime()
-	{
-		std::scoped_lock lock(mutex);
-		time_since_last_tick = std::chrono::high_resolution_clock::now();
-	}
-#else
-	#include <raylib.h>
-#endif // !SERVER
-
-std::chrono::steady_clock::time_point GetTimePoint()
-{
-	return std::chrono::steady_clock::now();
-}
+#include "Bundle.hpp"
 
 void move(Registry &r, 
 sparse_array<Position> &positions,
@@ -41,26 +10,8 @@ sparse_array<Speed> &speed,
 sparse_array<Direction> &dir)
 {
     for (auto &&[pos, spe, diro]: zipper(positions, speed, dir)) {
-        //std::osyncstream(std::cout) << "y = " << pos->pos_Y << "  x = " << pos->pos_X << std::endl;
-        double magnitude = std::sqrt(
-            (diro->dir_X *
-            diro->dir_X) + 
-            (diro->dir_Y * 
-            diro->dir_Y));
-        if (magnitude > 0.1) { //Added a magnitude threshold to avoid going straight to INT_MIN and INT_MAX when having a really low direction move
-            pos->pos_X += 
-                (spe->speed * 
-                (diro->dir_X / magnitude)) * 
-                GetFrameTime();
-            pos->pos_Y += 
-                (spe->speed * 
-                (diro->dir_Y / magnitude)) * 
-                GetFrameTime();
-        }
-        #ifdef SERVER
-        diro->dir_X = 0;
-        diro->dir_Y = 0;
-        #endif
+		pos->pos_X += spe->speed * diro->dir_X * GetFrameTime();
+		pos->pos_Y += spe->speed * diro->dir_Y * GetFrameTime();
     }
 }
 
@@ -70,13 +21,25 @@ sparse_array<Damages> &dama,
 size_t i1, size_t i2)
 {
     healt[i1]->health -= dama[i2]->damages;
-    std::osyncstream(std::cout) << "User " << i1 << " has taken " << dama[i2]->damages << " damages. He now have " << healt[i1]->health << " HP." << std::endl;
+    // std::osyncstream(std::cout) << "User " << i1 << " has taken " << dama[i2]->damages << " damages. He now have " << healt[i1]->health << " HP." << std::endl;
     healt[i2]->health -= dama[i1]->damages;
-    std::osyncstream(std::cout) << "User " << i2 << " has taken " << dama[i1]->damages << " damages. He now have " << healt[i2]->health << " HP." << std::endl;
+    // std::osyncstream(std::cout) << "User " << i2 << " has taken " << dama[i1]->damages << " damages. He now have " << healt[i2]->health << " HP." << std::endl;
     if (healt[i1]->health <= 0)
         r.kill_entity(r.entity_from_index(i1));
     if (healt[i2]->health <= 0)
         r.kill_entity(r.entity_from_index(i2));
+}
+
+void update_grace(Registry &r,
+sparse_array<SpawnGrace> &graces)
+{
+    auto time = GetTimePoint();
+
+    for (auto &&[ind, grace]: indexed_zipper(graces)) {
+        if (grace->creation_time + grace->time >= time) {
+            r.remove_component<SpawnGrace>(ind);
+        }
+    }
 }
 
 void colision(Registry &r,
@@ -86,27 +49,34 @@ sparse_array<SpawnGrace> &grace,
 sparse_array<Damages> &dam, 
 sparse_array<Health> &helth)
 {
-    auto time = GetTimePoint();
     for (auto &&[ind, pos, siz, dama, halth]: indexed_zipper(positions, size, dam, helth)) {
-        if (!(pos && siz && dama && halth))
+        if (grace[ind].has_value()) {
             continue;
-        if (grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time + grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).time >= time)
+        }
+        for (auto &&[ind2, pos2, siz2, dama2, halth2]: indexed_zipper(positions, size, dam, helth)) {
+            if (ind2 <= ind || grace[ind2].has_value()) {
                 continue;
-        for (size_t ind2 = ind + 1; ind2 < positions.size(); ind2++) {
-            if (grace[ind2].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time + grace[ind2].value_or(SpawnGrace(std::chrono::seconds(0))).time >= time)
+            }
+            if (pos->pos_X > pos2->pos_X + siz2->size_X)
                 continue;
-            if (positions[ind].value().pos_X > positions[ind2].value().pos_X + size[ind2].value().size_X)
+            else if (pos->pos_Y > pos2->pos_Y + siz2->size_Y)
                 continue;
-            else if (positions[ind].value().pos_Y > positions[ind2].value().pos_Y + size[ind2].value().size_Y)
+            else if (pos2->pos_X > pos->pos_X + siz->size_X)
                 continue;
-            else if (positions[ind2].value().pos_X > positions[ind].value().pos_X + size[ind].value().size_X)
-                continue;
-            else if (positions[ind2].value().pos_Y > positions[ind].value().pos_Y + size[ind].value().size_Y)
+            else if (pos2->pos_Y > pos->pos_Y + siz->size_Y)
                 continue;
             else {
                 damages(r, helth, dam, ind, ind2);
             }
         }
+    }
+}
+
+void update_weapon_position(Registry &r, sparse_array<Weapon> &weapons, sparse_array<Position> &positions)
+{
+    for (auto &&[weapon, position]: zipper(weapons, positions)) {
+        position->pos_X =  positions[static_cast<size_t>(weapon->owner_id)]->pos_X + 5;
+        position->pos_Y =  positions[static_cast<size_t>(weapon->owner_id)]->pos_Y + 5;
     }
 }
 

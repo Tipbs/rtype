@@ -15,7 +15,7 @@
 #include <boost/bind/bind.hpp>
 #include "../../shared/Bundle.hpp"
 #include "../../shared/Component.hpp"
-#include "ServerBundle.hpp"
+#include "ServerSystems.hpp"
 
 using boost::asio::ip::udp;
 std::binary_semaphore MainToThread {0};
@@ -113,7 +113,6 @@ void udp_server::handle_tick() // tick every seconds
         MainToThread.release();
         ThreadToMain.acquire();
         tick_timer.expires_from_now(boost::posix_time::millisec(50));
-        ResetFrameTime();
         tick_timer.wait();
     }
 }
@@ -162,7 +161,7 @@ void udp_server::wait_for_connexion(std::size_t bytes_transferred)
     if (bytes_transferred != 1 && clients.size() == 0)
         return;
     if (bytes_transferred == 1 && clients.count(_remote_point) == 0) {
-        size_t player = create_player_server(reg, Position(0, 0));
+        Entity player = create_player(reg, 0, Position(0, 0));
         if (clients.size() == 0)
             start_threads();
         clients[_remote_point]._id = (size_t) player;
@@ -218,35 +217,6 @@ void udp_server::start_receive() // Receive function
             boost::asio::placeholders::bytes_transferred));
 }
 
-void synchronize(Registry &reg, sparse_array<Direction> &directions, sparse_array<Speed> &spe)
-{
-    for (auto &player : reg.user_cmds) {
-        auto &dir = directions[player.first];
-        auto &spee = spe[player.first];
-        for (auto &cmds : player.second) {
-            spee->speed = cmds.speed;
-            dir->dir_X += cmds.moved.x;
-            dir->dir_Y += cmds.moved.y;
-        }
-    }
-}
-
-void extract(Registry &reg, sparse_array<Position> &positions, sparse_array<Speed> &speeds)
-{
-    for (size_t ind = 0; ind < positions.size(); ind++) {
-        auto &pos = positions[ind];
-        auto &spe = speeds[ind];
-        if (!(pos && spe))
-            continue;
-        NetEnt tmp;
-        tmp.id = ind;
-        tmp.pos.x = pos->pos_X;
-        tmp.pos.y = pos->pos_Y;
-        tmp.speed = spe->speed;
-        reg._netent.push_back(tmp);
-    }
-}
-
 void udp_server::start_threads()
 {
     tick = std::thread(&udp_server::handle_tick, this); // Timer thread
@@ -262,21 +232,24 @@ udp_server::udp_server(std::size_t port)
       check_timer(_svc)
 {
     Entity ent = reg.spawn_entity();
+    reg.register_component<Player>();
+    reg.register_component<Weapon>();
     reg.register_component<Size>();
     reg.register_component<Position>();
     reg.register_component<Speed>();
     reg.register_component<Direction>();
     reg.register_component<SpawnGrace>();
-    reg.register_component<Player>();
+    reg.register_component<Animation>();
     reg.register_component<Damages>();
     reg.register_component<Health>();
-    reg.register_component<EnemyCount>();
-    reg.emplace_component<EnemyCount>(ent, 20);
-    reg.add_system<Direction, Speed>(synchronize);
+    reg.register_component<NetworkedEntity>();
+  
+    reg.add_system<Direction, Speed, Position, Size, Weapon, Player>(synchronize);
+    reg.add_system<SpawnGrace>(update_grace);
     reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);
-    reg.add_system<Position, Speed>(extract);
-    reg.add_system<EnemyCount>(spawn_enemy);
+    reg.add_system<Position, Speed, Weapon, NetworkedEntity>(extract);
+    reg.add_system<Player, Direction>(resetPlayersDir);
 
     _port = port;
 
