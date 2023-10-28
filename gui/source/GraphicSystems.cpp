@@ -61,32 +61,22 @@ void handle_dir_inputs(
     sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds,
     sparse_array<Current_Player> &currents, sparse_array<Animation> &animations)
 {
-    std::cout << "test" << std::endl;
     for (auto &&[diro, player, sprit, spe, current, animation] :
          zipper(dir, players, sprite, speeds, currents, animations)) {
-        const double AnimationPad = 0.02;
-        double heigh = 1;
-        heigh = animation->count;
         Vector2 moves = {0, 0};
         double speedScale = 1;
 
-        if (IsKeyDown(KEY_RIGHT))
-            moves.x += 1;
-        if (IsKeyDown(KEY_LEFT))
-            moves.x -= 1;
         if (IsKeyDown(KEY_LEFT_SHIFT))
             speedScale /= 2;
 
-        if (IsKeyDown(KEY_DOWN) == IsKeyDown(KEY_UP)) {
-            heigh = (heigh < 1)    ? heigh + AnimationPad
-                    : (heigh == 1) ? 1
-                                   : heigh - AnimationPad;
-        } else if (IsKeyDown(KEY_UP)) {
-            moves.y -= 1; // 1;
-            heigh = (heigh >= 2) ? 2 : heigh + (5 * AnimationPad);
+        if (IsKeyDown(KEY_RIGHT))
+            moves.x += 1;
+        else if (IsKeyDown(KEY_LEFT))
+            moves.x -= 1;
+        else if (IsKeyDown(KEY_UP)) {
+            moves.y -= 1;
         } else if (IsKeyDown(KEY_DOWN)) {
             moves.y += 1;
-            heigh = (heigh <= 0) ? 0 : heigh - (5 * AnimationPad);
         }
         diro->dir_X = moves.x * speedScale;
         diro->dir_Y = moves.y * speedScale;
@@ -97,7 +87,6 @@ void handle_dir_inputs(
         r.currentCmd.mutex.unlock();
         if (IsKeyPressed(KEY_C))
             player->color_id = player->color_id == 4 ? 0 : player->color_id + 1;
-        animation->count = heigh;
         break;
     }
 }
