@@ -155,6 +155,22 @@ void hadle_text_inputs(
     }
 }
 
+void killDeadEntities(Registry &r, sparse_array<NetworkedEntity> &entities)
+{
+    auto &net_ents = r.netEnts.ents;
+
+    for (auto &&[index, _] : indexed_zipper(entities)) {
+        auto finded =
+            std::find_if(net_ents.begin(), net_ents.end(), [&](NetEnt &ent) {
+                return ent.id == entities[index]->id;
+            });
+        if (finded == net_ents.end()) {
+            r.kill_entity(index);
+            std::cout << "killing entity " << index << std::endl;
+        }
+    }
+}
+
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
     sparse_array<NetworkedEntity> &entities, sparse_array<Speed> &speeds,
@@ -166,7 +182,7 @@ void updateWithSnapshots(
 
     r.netEnts.mutex.lock();
     for (auto it = net_ents.begin(); it != net_ents.end(); ++it) {
-        auto net = *it;
+        auto &net = *it;
         auto finded = std::find_if(
             entities.begin(), entities.end(),
             [&](std::optional<NetworkedEntity> &ent) {
@@ -180,7 +196,6 @@ void updateWithSnapshots(
         auto pos = Position(net.pos.x, net.pos.y);
         factory.create_player(net.id, pos);
         std::cout << "Creating player\n";
-        // create entity with info from net ent
         it = net_ents.erase(it);
         if (it == net_ents.end())
             break;
