@@ -1,8 +1,8 @@
 #include "../../shared/Component.hpp"
 #include "../../shared/Factory.hpp"
+#include "../../shared/indexed_zipper.hpp"
 #include "../../shared/Registry.hpp"
 #include "../../shared/zipper.hpp"
-#include "../../shared/indexed_zipper.hpp"
 
 void synchronize(
     Registry &reg, sparse_array<Direction> &directions,
@@ -41,7 +41,7 @@ void extract(
     sparse_array<Speed> &speeds, sparse_array<Weapon> &weapons,
     sparse_array<NetworkedEntity> &ents)
 {
-    for (auto &&[ind, pos]: indexed_zipper(positions)) {
+    for (auto &&[ind, pos] : indexed_zipper(positions)) {
         auto &spe = speeds[ind];
         if (!(pos && spe && ents[ind]))
             continue;
