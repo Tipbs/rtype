@@ -14,14 +14,13 @@ void do_animation(
 void handle_dir_inputs(
     Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &players,
     sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds,
-    sparse_array<Current_Player> &currents, sparse_array<Animation> &animations);
+    sparse_array<Animation> &animations);
 void hadle_text_inputs(
     Registry &r, sparse_array<InputField> &inputFields,
     sparse_array<Rectangle> &rectangles);
 void handle_shoot_inputs(
-    Registry &r, sparse_array<Player> &players,
-    sparse_array<Size> &sizes, sparse_array<Weapon> &weapons,
-    sparse_array<Position> &positions);
+    Registry &r, sparse_array<Player> &players, sparse_array<Size> &sizes,
+    sparse_array<Weapon> &weapons, sparse_array<Position> &positions);
 void make_infinite_background(
     Registry &r, sparse_array<Position> &pos, sparse_array<Size> &siz);
 void updateWithSnapshots(

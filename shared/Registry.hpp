@@ -129,6 +129,13 @@ inline std::tuple<sparse_array<Component>&...> Registry::register_components()
 template<class Component>
 inline sparse_array<Component> &Registry::get_components()
 {
+    try {
+        std::any_cast<sparse_array<Component> &>(
+        _components_arrays[typeid(Component)]);
+    } catch (const std::bad_any_cast&) {
+        std::cerr << "Component " << typeid(Component).name() << " not register (parce que vous savez pas l'utiliser enfin bref)" << std::endl;
+        exit(EXIT_FAILURE);
+    }
     return std::any_cast<sparse_array<Component> &>(
         _components_arrays[std::type_index(typeid(Component))]);
 }
@@ -163,7 +170,7 @@ Registry::add_component(Entity const &to, Component &&c)
         _components_arrays[typeid(Component)]);
     } catch (const std::bad_any_cast&) {
         std::cerr << "Component " << typeid(Component).name() << " not register (parce que vous savez pas l'utiliser enfin bref)" << std::endl;
-        throw std::bad_typeid();
+        exit(EXIT_FAILURE);
     }
     auto &comp_array = std::any_cast<sparse_array<Component> &>(
         _components_arrays[typeid(Component)]);
@@ -189,7 +196,7 @@ Registry::emplace_component(Entity const &to, Params &&...p)
         _components_arrays[typeid(Component)]);
     } catch (const std::bad_any_cast&) {
         std::cerr << "Component " << typeid(Component).name() << " not register (parce que vous savez pas l'utiliser enfin bref)" << std::endl;
-        throw std::bad_typeid();
+        exit(EXIT_FAILURE);
     }
     auto &sparse_arr = std::any_cast<sparse_array<Component> &>(
         _components_arrays[typeid(Component)]);

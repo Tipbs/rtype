@@ -31,10 +31,9 @@ void display(
 
 void do_animation(
     Registry &r, sparse_array<Sprite> &sprites,
-    sparse_array<Animation> &animations,
-    sparse_array<Weapon> &weapons)
+    sparse_array<Animation> &animations, sparse_array<Weapon> &weapons)
 {
-    for (auto &&[sprite, animation]: zipper(sprites, animations)) {
+    for (auto &&[sprite, animation] : zipper(sprites, animations)) {
         // if (sprite->width_max == 8 && sprite->height_max == 5) {
         //     sprite->sprite.y =
         //         sprite->color_id * sprite->height_padding;
@@ -59,10 +58,11 @@ void do_animation(
 void handle_dir_inputs(
     Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &players,
     sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds,
-    sparse_array<Current_Player> &currents, sparse_array<Animation> &animations)
+    sparse_array<Animation> &animations)
 {
-    for (auto &&[diro, player, sprit, spe, current, animation] :
-         zipper(dir, players, sprite, speeds, currents, animations)) {
+    for (auto &&[diro, player, sprit, spe, animation] :
+         zipper(dir, players, sprite, speeds, animations)) {
+        std::cout << "test" << std::endl;
         Vector2 moves = {0, 0};
         double speedScale = 1;
 
@@ -73,11 +73,10 @@ void handle_dir_inputs(
             moves.x += 1;
         else if (IsKeyDown(KEY_LEFT))
             moves.x -= 1;
-        else if (IsKeyDown(KEY_UP)) {
+        else if (IsKeyDown(KEY_UP))
             moves.y -= 1;
-        } else if (IsKeyDown(KEY_DOWN)) {
+        else if (IsKeyDown(KEY_DOWN))
             moves.y += 1;
-        }
         diro->dir_X = moves.x * speedScale;
         diro->dir_Y = moves.y * speedScale;
         // speeds[1]->speed = speed;
@@ -92,9 +91,8 @@ void handle_dir_inputs(
 }
 
 void handle_shoot_inputs(
-    Registry &r, sparse_array<Player> &players,
-    sparse_array<Size> &sizes, sparse_array<Weapon> &weapons,
-    sparse_array<Position> &positions)
+    Registry &r, sparse_array<Player> &players, sparse_array<Size> &sizes,
+    sparse_array<Weapon> &weapons, sparse_array<Position> &positions)
 {
     for (auto &&[weapon] : zipper(weapons)) {
         size_t owner_id = static_cast<size_t>(weapon->owner_id);
@@ -108,8 +106,10 @@ void handle_shoot_inputs(
             create_ammo(
                 r,
                 Position(
-                    positions[owner_id]->pos_X + (float) sizes[owner_id]->size_X,
-                    positions[owner_id]->pos_Y + (float) sizes[owner_id]->size_Y / 2),
+                    positions[owner_id]->pos_X +
+                        (float) sizes[owner_id]->size_X,
+                    positions[owner_id]->pos_Y +
+                        (float) sizes[owner_id]->size_Y / 2),
                 weapon->current_charge, players[owner_id]->color_id);
             r.currentCmd.mutex.lock();
             r.currentCmd.cmd.setAttack(weapon->current_charge);
@@ -243,5 +243,3 @@ void updateWithSnapshots(
     net_ents.clear();
     r.netEnts.mutex.unlock();
 }
-
-

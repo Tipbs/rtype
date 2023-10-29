@@ -243,8 +243,9 @@ udp_server::udp_server(std::size_t port)
     reg.register_component<Damages>();
     reg.register_component<Health>();
     reg.register_component<NetworkedEntity>();
-  
-    reg.add_system<Direction, Speed, Position, Size, Weapon, Player>(synchronize);
+
+    reg.add_system<Direction, Speed, Position, Size, Weapon, Player>(
+        synchronize);
     reg.add_system<SpawnGrace>(update_grace);
     reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     reg.add_system<Position, Speed, Direction>(move);
