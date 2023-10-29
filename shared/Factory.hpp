@@ -16,10 +16,9 @@ class Factory {
         const Entity create_player(int id, Position pos);
         const Entity create_weapon(Entity owner);
         const Entity create_enemy();
-        
-    private: 
-        auto _register_components();
-        void _add_system();
+        const Entity create_ammo(Position pos, float damage_mult, int color_id);
+        void register_components();
+        void add_systems();
 
     private:
         Registry &_reg;

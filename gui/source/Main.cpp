@@ -3,7 +3,6 @@
 #include <cstdio>
 #include <iostream>
 #include <semaphore>
-#include "../../shared/Bundle.hpp"
 #include "../../shared/Parser.hpp"
 #include "../../shared/Registry.hpp"
 #include "Client.hpp"
@@ -29,10 +28,13 @@ int main(int ac, char **av)
     SetTargetFPS(60);
 
     Factory factory(reg);
+
+    factory.register_components();
     factory.create_background(ScreenWidth, ScreenHeight);
     Entity player =
         factory.create_player(net_client.get_player_id(), Position(0, 0));
     factory.create_weapon(player);
+    factory.add_systems();
 
     while (!WindowShouldClose()) {
         reg.run_systems();

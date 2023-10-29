@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <syncstream>
 #include <raylib.h>
-#include "../../shared/Bundle.hpp"
+#include "../../shared/Factory.hpp"
 #include "../../shared/indexed_zipper.hpp"
 #include "../../shared/Registry.hpp"
 #include "../../shared/Sparse_array.hpp"
@@ -62,7 +62,6 @@ void handle_dir_inputs(
 {
     for (auto &&[diro, player, sprit, spe, animation] :
          zipper(dir, players, sprite, speeds, animations)) {
-        std::cout << "test" << std::endl;
         Vector2 moves = {0, 0};
         double speedScale = 1;
 
@@ -71,11 +70,11 @@ void handle_dir_inputs(
 
         if (IsKeyDown(KEY_RIGHT))
             moves.x += 1;
-        else if (IsKeyDown(KEY_LEFT))
+        if (IsKeyDown(KEY_LEFT))
             moves.x -= 1;
-        else if (IsKeyDown(KEY_UP))
+        if (IsKeyDown(KEY_UP))
             moves.y -= 1;
-        else if (IsKeyDown(KEY_DOWN))
+        if (IsKeyDown(KEY_DOWN))
             moves.y += 1;
         diro->dir_X = moves.x * speedScale;
         diro->dir_Y = moves.y * speedScale;
@@ -94,6 +93,8 @@ void handle_shoot_inputs(
     Registry &r, sparse_array<Player> &players, sparse_array<Size> &sizes,
     sparse_array<Weapon> &weapons, sparse_array<Position> &positions)
 {
+    Factory factory(r);
+
     for (auto &&[weapon] : zipper(weapons)) {
         size_t owner_id = static_cast<size_t>(weapon->owner_id);
         if (IsKeyDown(KEY_SPACE)) {
@@ -103,8 +104,7 @@ void handle_shoot_inputs(
         }
         if (IsKeyReleased(KEY_SPACE)) {
             weapon->IsShooting = false;
-            create_ammo(
-                r,
+            factory.create_ammo(
                 Position(
                     positions[owner_id]->pos_X +
                         (float) sizes[owner_id]->size_X,
@@ -155,29 +155,6 @@ void hadle_text_inputs(
     }
 }
 
-void make_infinite_background(
-    Registry &r, sparse_array<Position> &pos, sparse_array<Size> &siz)
-{
-    if (pos[0] && siz[0]) {
-
-        // BG going to the Left
-        if (pos[0]->pos_X < -2 * siz[0]->size_X)
-            pos[0]->pos_X += 2 * siz[0]->size_X;
-
-        // BG going Upwards
-        // if (pos[0]->pos_Y < -siz[0]->size_Y)
-        //     pos[0]->pos_Y += siz[0]->size_Y;
-
-        // BG going to the Right
-        // if (pos[0]->pos_X > 0)
-        //     pos[0]->pos_X -= siz[0]->size_X;
-
-        // BG going Downwards
-        // if (pos[0]->pos_Y > 0)
-        //     pos[0]->pos_Y -= siz[0]->size_Y;
-    }
-}
-
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
     sparse_array<NetworkedEntity> &entities, sparse_array<Speed> &speeds,
@@ -185,6 +162,7 @@ void updateWithSnapshots(
     sparse_array<Player> &players)
 {
     auto &net_ents = r.netEnts.ents;
+    Factory factory(r);
 
     r.netEnts.mutex.lock();
     for (auto it = net_ents.begin(); it != net_ents.end(); ++it) {
@@ -200,7 +178,7 @@ void updateWithSnapshots(
             continue;
         std::cout << "id: " << net.id << std::endl;
         auto pos = Position(net.pos.x, net.pos.y);
-        create_player(r, net.id, pos);
+        factory.create_player(net.id, pos);
         std::cout << "Creating player\n";
         // create entity with info from net ent
         it = net_ents.erase(it);
@@ -209,8 +187,6 @@ void updateWithSnapshots(
     }
     for (size_t i = 0; i < positions.size(); ++i) {
         auto &pos = positions[i];
-        // std::osyncstream(std::cout) << "moved x: " << pos->pos_X <<
-        // std::endl;
         auto const &entity = entities[i];
         auto const &current = currents[i];
         auto const &size = sizes[i];
@@ -229,8 +205,7 @@ void updateWithSnapshots(
             pos.value().pos_X = finded->pos.x;
             pos.value().pos_Y = finded->pos.y;
             if (!current && player && finded->attacking) {
-                create_ammo(
-                    r,
+                factory.create_ammo(
                     Position(
                         pos->pos_X + (float) size->size_X,
                         pos->pos_Y + (float) size->size_Y / 2),

@@ -2,16 +2,24 @@
 #include "Systems.hpp"
 #include "indexed_zipper.hpp"
 #include "zipper.hpp"
-#include "Bundle.hpp"
 
 void move(Registry &r, 
 sparse_array<Position> &positions,
 sparse_array<Speed> &speed, 
 sparse_array<Direction> &dir)
 {
+
     for (auto &&[pos, spe, diro]: zipper(positions, speed, dir)) {
-		pos->pos_X += spe->speed * diro->dir_X * GetFrameTime();
-		pos->pos_Y += spe->speed * diro->dir_Y * GetFrameTime();
+        double x_offset = spe->speed * diro->dir_X;
+        double y_offset = spe->speed * diro->dir_Y;
+
+#ifdef SERVER
+		pos->pos_X += x_offset * GetFrameTime();
+		pos->pos_Y += y_offset * GetFrameTime();
+#else
+        pos->pos_X += x_offset;
+        pos->pos_Y += y_offset;
+ #endif
     }
 }
 

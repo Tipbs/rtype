@@ -1,6 +1,8 @@
-#include "../../shared/Bundle.hpp"
+#include "../../shared/Component.hpp"
+#include "../../shared/Factory.hpp"
 #include "../../shared/Registry.hpp"
 #include "../../shared/zipper.hpp"
+#include "../../shared/indexed_zipper.hpp"
 
 void synchronize(
     Registry &reg, sparse_array<Direction> &directions,
@@ -8,6 +10,8 @@ void synchronize(
     sparse_array<Size> &sizes, sparse_array<Weapon> &weapons,
     sparse_array<Player> &players)
 {
+    Factory factory(reg);
+
     for (auto &player_cmds : reg.user_cmds) {
         auto &dir = directions[player_cmds.first];
         const auto &posi = positions[player_cmds.first];
@@ -20,8 +24,7 @@ void synchronize(
             dir->dir_X += cmds.moved.x;
             dir->dir_Y += cmds.moved.y;
             if (cmds.attacking) {
-                create_ammo(
-                    reg,
+                factory.create_ammo(
                     Position(
                         posi->pos_X + (float) sizo->size_X,
                         posi->pos_Y + (float) sizo->size_Y / 2),
@@ -38,8 +41,7 @@ void extract(
     sparse_array<Speed> &speeds, sparse_array<Weapon> &weapons,
     sparse_array<NetworkedEntity> &ents)
 {
-    for (size_t ind = 0; ind < positions.size(); ind++) {
-        auto &pos = positions[ind];
+    for (auto &&[ind, pos]: indexed_zipper(positions)) {
         auto &spe = speeds[ind];
         if (!(pos && spe && ents[ind]))
             continue;
@@ -61,8 +63,6 @@ void resetPlayersDir(
     sparse_array<Direction> &directions)
 {
     for (auto &&[_, diro] : zipper(players, directions)) {
-        // std::osyncstream(std::cout) << "y = " << pos->pos_Y << "  x = " <<
-        // pos->pos_X << std::endl;
         diro->dir_X = 0;
         diro->dir_Y = 0;
     }

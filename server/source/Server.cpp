@@ -13,8 +13,8 @@
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/bind/bind.hpp>
-#include "../../shared/Bundle.hpp"
 #include "../../shared/Component.hpp"
+#include "../../shared/Factory.hpp"
 #include "ServerSystems.hpp"
 
 using boost::asio::ip::udp;
@@ -158,10 +158,12 @@ void udp_server::send_playerId(
 
 void udp_server::wait_for_connexion(std::size_t bytes_transferred)
 {
+    Factory factory(reg);
+
     if (bytes_transferred != 1 && clients.size() == 0)
         return;
     if (bytes_transferred == 1 && clients.count(_remote_point) == 0) {
-        Entity player = create_player(reg, 0, Position(0, 0));
+        Entity player = factory.create_player(0, Position(0, 0));
         if (clients.size() == 0)
             start_threads();
         clients[_remote_point]._id = (size_t) player;
@@ -231,26 +233,10 @@ udp_server::udp_server(std::size_t port)
     : _svc(), _socket(_svc, udp::endpoint(udp::v4(), port)), tick_timer(_svc),
       check_timer(_svc)
 {
-    Entity ent = reg.spawn_entity();
-    reg.register_component<Player>();
-    reg.register_component<Weapon>();
-    reg.register_component<Size>();
-    reg.register_component<Position>();
-    reg.register_component<Speed>();
-    reg.register_component<Direction>();
-    reg.register_component<SpawnGrace>();
-    reg.register_component<Animation>();
-    reg.register_component<Damages>();
-    reg.register_component<Health>();
-    reg.register_component<NetworkedEntity>();
+    Factory factory(reg);
 
-    reg.add_system<Direction, Speed, Position, Size, Weapon, Player>(
-        synchronize);
-    reg.add_system<SpawnGrace>(update_grace);
-    reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
-    reg.add_system<Position, Speed, Direction>(move);
-    reg.add_system<Position, Speed, Weapon, NetworkedEntity>(extract);
-    reg.add_system<Player, Direction>(resetPlayersDir);
+    factory.register_components();
+    factory.add_systems();
 
     _port = port;
 

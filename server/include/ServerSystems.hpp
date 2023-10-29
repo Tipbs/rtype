@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../shared/Bundle.hpp"
 #include "../../shared/Component.hpp"
 #include "../../shared/Registry.hpp"
 #include "../../shared/zipper.hpp"
