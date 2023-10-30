@@ -69,12 +69,16 @@ int main(int ac, char **av)
     reg.add_system<Position, Speed, Direction>(move);
     reg.add_system<Position, Size, Sprite, Player, Rectangle, InputField>(
         display);
-    reg.add_system<Direction, Player, Sprite, Speed, Current_Player>(handle_dir_inputs);
+    reg.add_system<Direction, Player, Sprite, Speed, Current_Player>(
+        handle_dir_inputs);
     reg.add_system<Player, Position, Size, Current_Player>(handle_shoot_inputs);
     //    reg.add_system<InputField, Rectangle>(hadle_text_inputs);
     reg.add_system<Position, Size>(make_infinite_background);
     reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
     reg.add_system<Position, NetworkedEntity, Speed, Current_Player, Size, Player>(updateWithSnapshots);
+    reg.add_system<
+        Position, NetworkedEntity, Speed, Current_Player, Size, Player>(
+        updateWithSnapshots);
 
     while (!WindowShouldClose()) {
         reg.run_systems();

@@ -1,6 +1,6 @@
 #include "ServerSystems.hpp"
-#include "../../shared/Registry.hpp"
 #include "../../shared/Bundle.hpp"
+#include "../../shared/Registry.hpp"
 
 void synchronize(
     Registry &reg, sparse_array<Direction> &directions,
@@ -18,22 +18,23 @@ void synchronize(
             dir->dir_X += cmds.moved.x;
             dir->dir_Y += cmds.moved.y;
             if (cmds.attacking) {
-				create_ammo(
-					reg,
-					Position(
-						posi->pos_X + (float) sizo->size_X,
-						posi->pos_Y + (float) sizo->size_Y / 2),
-					cmds.attackScale, player->color_id);
-				player->IsShooting = cmds.attacking;
-				player->current_charge = cmds.attackScale;
-			}
+                create_ammo(
+                    reg,
+                    Position(
+                        posi->pos_X + (float) sizo->size_X,
+                        posi->pos_Y + (float) sizo->size_Y / 2),
+                    cmds.attackScale, player->color_id);
+                player->IsShooting = cmds.attacking;
+                player->current_charge = cmds.attackScale;
+            }
         }
     }
 }
 
 void extract(
     Registry &reg, sparse_array<Position> &positions,
-    sparse_array<Speed> &speeds, sparse_array<Player> &players, sparse_array<NetworkedEntity> &ents)
+    sparse_array<Speed> &speeds, sparse_array<Player> &players,
+    sparse_array<NetworkedEntity> &ents)
 {
     for (size_t ind = 0; ind < positions.size(); ind++) {
         auto &pos = positions[ind];
@@ -46,18 +47,20 @@ void extract(
         tmp.pos.y = pos->pos_Y;
         auto &player = players[ind];
         if (player) {
-			tmp.attacking = player->IsShooting;
+            tmp.attacking = player->IsShooting;
             tmp.attackState = player->current_charge;
-			reg._netent.push_back(tmp);
+            reg._netent.push_back(tmp);
         }
     }
 }
 
 void resetPlayersDir(
-    Registry& r, sparse_array<Player>& players, sparse_array<Direction>& directions)
+    Registry &r, sparse_array<Player> &players,
+    sparse_array<Direction> &directions)
 {
-    for (auto &&[_, diro]: zipper(players, directions)) {
-        //std::osyncstream(std::cout) << "y = " << pos->pos_Y << "  x = " << pos->pos_X << std::endl;
+    for (auto &&[_, diro] : zipper(players, directions)) {
+        // std::osyncstream(std::cout) << "y = " << pos->pos_Y << "  x = " <<
+        // pos->pos_X << std::endl;
         diro->dir_X = 0;
         diro->dir_Y = 0;
     }
