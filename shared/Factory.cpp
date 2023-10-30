@@ -30,6 +30,7 @@ void Factory::register_components()
         SpawnGrace,
         NetworkedEntity,
         Animation,
+        Couleur,
         Backgrounds
     >();
 }
@@ -42,15 +43,17 @@ void Factory::add_systems()
 #ifndef SERVER
     _reg.add_system<Position, Size, Sprite, Player, Rectangle, InputField>(
         display);
-    _reg.add_system<Direction, Player, Sprite, Speed, Animation>(
+    _reg.add_system<Direction, Player, Sprite, Speed, Couleur>(
         handle_dir_inputs);
-    _reg.add_system<Animation, Size, Weapon, Position>(handle_shoot_inputs);
+    _reg.add_system<Couleur, Size, Weapon, Position>(handle_shoot_inputs);
     //    _reg.add_system<InputField, Rectangle>(hadle_text_inputs);
     _reg.add_system<
         Position, NetworkedEntity, Speed, Current_Player, Size, Player>(
         updateWithSnapshots);
-    _reg.add_system<Sprite, Animation, Weapon>(
+    _reg.add_system<Sprite, Couleur>(
         do_animation);
+    _reg.add_system<Sprite, Couleur, Weapon>(
+        do_ship_animation);
     _reg.add_system<Position, Size, Backgrounds>(
         make_infinite_background);
 #else
@@ -92,7 +95,8 @@ const Entity Factory::create_player(int id, Position pos)
     _reg.emplace_component<Speed>(new_entity, 5);
     _reg.emplace_component<Direction>(new_entity, 0, 0);
     _reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
-    _reg.emplace_component<Animation>(new_entity, 0);
+    _reg.emplace_component<Animation>(new_entity);
+    _reg.emplace_component<Couleur>(new_entity, 0);
     _reg.emplace_component<NetworkedEntity>(new_entity, id);
 
     return new_entity;
@@ -136,6 +140,7 @@ const Entity Factory::create_ammo(Position pos, float damage_mult, int color_id)
     _reg.emplace_component<Direction>(new_entity, 1, 0);
     _reg.emplace_component<Damages>(new_entity, damage_mult);
     _reg.emplace_component<Health>(new_entity, 1);
-    _reg.emplace_component<Animation>(new_entity, color_id);
+    _reg.emplace_component<Animation>(new_entity);
+    _reg.emplace_component<Couleur>(new_entity, color_id);
     return new_entity;
 }

@@ -31,12 +31,12 @@ void display(
 
 void do_animation(
     Registry &r, sparse_array<Sprite> &sprites,
-    sparse_array<Animation> &animations, sparse_array<Weapon> &weapons)
+    sparse_array<Couleur> &couleurs)
 {
-    for (auto &&[sprite, animation] : zipper(sprites, animations)) {
+    for (auto &&[sprite, colors] : zipper(sprites, couleurs)) {
         if (sprite->width_max == 8 && sprite->height_max == 5) { //Ammunition case
             sprite->sprite.y =
-                animation->color_id * sprite->height_padding;
+                colors->color_id * sprite->height_padding;
             sprite->sprite.x +=
                 (sprite->sprite.x / sprite->width_padding ==
                          sprite->width_max - 1
@@ -50,10 +50,15 @@ void do_animation(
                      : sprite->sprite.x + sprite->width_padding);
         }
     }
+}
 
+void do_ship_animation(
+    Registry &r, sparse_array<Sprite> &sprites,
+    sparse_array<Couleur> &couleurs, sparse_array<Weapon> &weapons)
+{
     for (auto &&[weapon] : zipper(weapons)) {
         sprites[(size_t)weapon->owner_id]->sprite.y =
-            animations[(size_t)weapon->owner_id]->color_id * sprites[(size_t)weapon->owner_id]->height_padding;
+            couleurs[(size_t)weapon->owner_id]->color_id * sprites[(size_t)weapon->owner_id]->height_padding;
         if (weapon->IsShooting)
             sprites[(size_t)weapon->owner_id]->sprite.x = 1 * sprites[(size_t)weapon->owner_id]->width_padding;
         else
@@ -75,10 +80,10 @@ void make_infinite_background(
 void handle_dir_inputs(
     Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &players,
     sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds,
-    sparse_array<Animation> &animations)
+    sparse_array<Couleur> &colors)
 {
-    for (auto &&[diro, player, sprit, spe, animation] :
-         zipper(dir, players, sprite, speeds, animations)) {
+    for (auto &&[diro, player, sprit, spe, color] :
+         zipper(dir, players, sprite, speeds, colors)) {
         Vector2 moves = {0, 0};
         double speedScale = 1;
 
@@ -101,13 +106,13 @@ void handle_dir_inputs(
         r.currentCmd.cmd.moved.y += moves.y * GetFrameTime() * speedScale;
         r.currentCmd.mutex.unlock();
         if (IsKeyPressed(KEY_C))
-            animation->color_id = animation->color_id == 4 ? 0 : animation->color_id + 1;
+            color->color_id = color->color_id == 4 ? 0 : color->color_id + 1;
         break;
     }
 }
 
 void handle_shoot_inputs(
-    Registry &r, sparse_array<Animation> &players, sparse_array<Size> &sizes,
+    Registry &r, sparse_array<Couleur> &colors, sparse_array<Size> &sizes,
     sparse_array<Weapon> &weapons, sparse_array<Position> &positions)
 {
     Factory factory(r);
@@ -127,7 +132,7 @@ void handle_shoot_inputs(
                         (float) sizes[owner_id]->size_X,
                     positions[owner_id]->pos_Y +
                         (float) sizes[owner_id]->size_Y / 2),
-                weapon->current_charge, players[owner_id]->color_id);
+                weapon->current_charge, colors[owner_id]->color_id);
             r.currentCmd.mutex.lock();
             r.currentCmd.cmd.setAttack(weapon->current_charge);
             r.currentCmd.mutex.unlock();

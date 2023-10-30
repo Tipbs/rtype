@@ -84,10 +84,14 @@ struct Weapon {
     };
 };
 
-struct Animation {
+struct Couleur {
     int color_id = 0;
 
-    Animation(int count) : color_id(count) {};
+    Couleur(int count) : color_id(count) {};
+};
+
+struct Animation {
+    Animation() {};
 };
 
 struct Backgrounds {
