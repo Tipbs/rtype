@@ -29,7 +29,8 @@ void Factory::register_components()
         Direction,
         SpawnGrace,
         NetworkedEntity,
-        Animation
+        Animation,
+        Backgrounds
     >();
 }
 
@@ -43,11 +44,15 @@ void Factory::add_systems()
         display);
     _reg.add_system<Direction, Player, Sprite, Speed, Animation>(
         handle_dir_inputs);
-    _reg.add_system<Player, Size, Weapon, Position>(handle_shoot_inputs);
+    _reg.add_system<Animation, Size, Weapon, Position>(handle_shoot_inputs);
     //    _reg.add_system<InputField, Rectangle>(hadle_text_inputs);
     _reg.add_system<
         Position, NetworkedEntity, Speed, Current_Player, Size, Player>(
         updateWithSnapshots);
+    _reg.add_system<Sprite, Animation, Weapon>(
+        do_animation);
+    _reg.add_system<Position, Size, Backgrounds>(
+        make_infinite_background);
 #else
 
 #endif
@@ -69,6 +74,7 @@ const Entity Factory::create_background(const int ScreenWidth, const int ScreenH
 #endif
     _reg.emplace_component<Speed>(background, 2);
     _reg.emplace_component<Direction>(background, -1, 0);
+    _reg.emplace_component<Backgrounds>(background);
     return background;
 }
 
@@ -81,12 +87,12 @@ const Entity Factory::create_player(int id, Position pos)
     _reg.emplace_component<Position>(new_entity, pos);
     _reg.emplace_component<Size>(new_entity, 83, 43);
 #ifndef SERVER
-    _reg.emplace_component<Sprite>(new_entity, path.c_str(), 83, 43, 5, 5);
+    _reg.emplace_component<Sprite>(new_entity, path.c_str(), 83, 43, 2, 5);
 #endif
     _reg.emplace_component<Speed>(new_entity, 5);
     _reg.emplace_component<Direction>(new_entity, 0, 0);
     _reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
-    _reg.emplace_component<Animation>(new_entity, 1);
+    _reg.emplace_component<Animation>(new_entity, 0);
     _reg.emplace_component<NetworkedEntity>(new_entity, id);
 
     return new_entity;
@@ -108,7 +114,7 @@ const Entity Factory::create_enemy()
     Utils::Vec2 pos = {900, randomNumber};
 
     _reg.emplace_component<Position>(ent, pos);
-    _reg.emplace_component<Speed>(ent, 300);
+    _reg.emplace_component<Speed>(ent, 5);
     _reg.emplace_component<Direction>(ent, 50, 0);
     _reg.emplace_component<SpawnGrace>(ent, std::chrono::seconds(5));
     // _reg.emplace_component<NetworkEntity>(ent, id);
@@ -124,11 +130,12 @@ const Entity Factory::create_ammo(Position pos, float damage_mult, int color_id)
     _reg.emplace_component<Position>(new_entity, pos.pos_X - (float) hitwidth / 2, pos.pos_Y - (float) hitheight / 2);
     _reg.emplace_component<Size>(new_entity, hitwidth, hitheight);
     #ifndef SERVER
-    _reg.emplace_component<Sprite>(new_entity, "./gui/ressources/Sprites/shoot_ammo.png");
+    _reg.emplace_component<Sprite>(new_entity, "./gui/ressources/Sprites/shoot_ammo.png", hitwidth, hitheight, 8, 5);
     #endif
-    _reg.emplace_component<Speed>(new_entity, 450);
+    _reg.emplace_component<Speed>(new_entity, 7.5);
     _reg.emplace_component<Direction>(new_entity, 1, 0);
     _reg.emplace_component<Damages>(new_entity, damage_mult);
     _reg.emplace_component<Health>(new_entity, 1);
+    _reg.emplace_component<Animation>(new_entity, color_id);
     return new_entity;
 }

@@ -85,9 +85,14 @@ struct Weapon {
 };
 
 struct Animation {
-    double count = 1;
+    int color_id = 0;
 
-    Animation(double count) : count(count) {};
+    Animation(int count) : color_id(count) {};
+};
+
+struct Backgrounds {
+    Backgrounds()
+    {};
 };
 
 struct EnemyCount {

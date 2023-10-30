@@ -34,24 +34,41 @@ void do_animation(
     sparse_array<Animation> &animations, sparse_array<Weapon> &weapons)
 {
     for (auto &&[sprite, animation] : zipper(sprites, animations)) {
-        // if (sprite->width_max == 8 && sprite->height_max == 5) {
-        //     sprite->sprite.y =
-        //         sprite->color_id * sprite->height_padding;
-        //     sprite->sprite.x +=
-        //         (sprite->sprite.x / sprite->width_padding ==
-        //                  sprite->width_max - 1
-        //              ? 0 // - sprite->width_padding)
-        //              : sprite->width_padding);
-        // }
+        if (sprite->width_max == 8 && sprite->height_max == 5) { //Ammunition case
+            sprite->sprite.y =
+                animation->color_id * sprite->height_padding;
+            sprite->sprite.x +=
+                (sprite->sprite.x / sprite->width_padding ==
+                         sprite->width_max - 1
+                     ? -6 * sprite->width_padding
+                     : sprite->width_padding);
+        } else { //Looping sprites frames
+            sprite->sprite.x =
+                (sprite->sprite.x / sprite->width_padding ==
+                         sprite->width_max - 1
+                     ? 0
+                     : sprite->sprite.x + sprite->width_padding);
+        }
+    }
 
-        // if (animation) {
-        //     sprite->sprite.y =
-        //         animation->color_id * sprite->height_padding;
-        //     if (animation->IsShooting)
-        //         sprite->sprite.x = 1 * sprite->width_padding;
-        //     else
-        //         sprite->sprite.x = 0 * sprite->width_padding;
-        // }
+    for (auto &&[weapon] : zipper(weapons)) {
+        sprites[(size_t)weapon->owner_id]->sprite.y =
+            animations[(size_t)weapon->owner_id]->color_id * sprites[(size_t)weapon->owner_id]->height_padding;
+        if (weapon->IsShooting)
+            sprites[(size_t)weapon->owner_id]->sprite.x = 1 * sprites[(size_t)weapon->owner_id]->width_padding;
+        else
+            sprites[(size_t)weapon->owner_id]->sprite.x = 0 * sprites[(size_t)weapon->owner_id]->width_padding;
+    }
+
+}
+
+void make_infinite_background(
+    Registry &r, sparse_array<Position> &positions,
+    sparse_array<Size> &sizes, sparse_array<Backgrounds> &bg)
+{    
+    for (auto &&[position, size, back] : zipper(positions, sizes, bg)) {
+        if (position->pos_X < -2 * size->size_X)
+            position->pos_X += 2 * size->size_X;
     }
 }
 
@@ -84,13 +101,13 @@ void handle_dir_inputs(
         r.currentCmd.cmd.moved.y += moves.y * GetFrameTime() * speedScale;
         r.currentCmd.mutex.unlock();
         if (IsKeyPressed(KEY_C))
-            player->color_id = player->color_id == 4 ? 0 : player->color_id + 1;
+            animation->color_id = animation->color_id == 4 ? 0 : animation->color_id + 1;
         break;
     }
 }
 
 void handle_shoot_inputs(
-    Registry &r, sparse_array<Player> &players, sparse_array<Size> &sizes,
+    Registry &r, sparse_array<Animation> &players, sparse_array<Size> &sizes,
     sparse_array<Weapon> &weapons, sparse_array<Position> &positions)
 {
     Factory factory(r);
