@@ -55,11 +55,12 @@ int main(int ac, char **av)
     reg.register_component<Rectangle>();
     reg.register_component<NetworkedEntity>();
     reg.register_component<SoundComponent>();
+    reg.register_component<MusicComponent>();
 
     auto current_player = create_player(reg, net_client.get_player_id(), nePos);
     Current_Player current_p;
-    SoundComponent gameMusic(
-        "./gui/ressources/Audio/battle_ost.mp3", SoundFx::BattleMusic);
+    MusicComponent gameMusic(
+        "./gui/ressources/Audio/battle_ost.mp3", MusicFx::Battle);
 
     reg.add_component(background, std::move(bgPos));
     reg.add_component(background, std::move(bgSize));
@@ -76,14 +77,13 @@ int main(int ac, char **av)
         display);
     reg.add_system<Direction, Player, Sprite, Speed, Current_Player>(
         handle_dir_inputs);
-    reg.add_system<Player, Position, Size, Current_Player, SoundComponent>(
-        handle_shoot_inputs);
+    reg.add_system<Player, Position, Size, Current_Player>(handle_shoot_inputs);
     //    reg.add_system<InputField, Rectangle>(hadle_text_inputs);
     reg.add_system<Position, Size>(make_infinite_background);
     reg.add_system<
         Position, NetworkedEntity, Speed, Current_Player, Size, Player>(
         updateWithSnapshots);
-    reg.add_system<SoundComponent>(handle_music);
+    reg.add_system<MusicComponent>(handle_music);
     reg.add_system<SoundComponent>(play_sound);
 
     while (!WindowShouldClose()) {

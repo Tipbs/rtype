@@ -22,10 +22,8 @@ void hadle_text_inputs(
     sparse_array<Rectangle> &rectangles);
 void handle_shoot_inputs(
     Registry &r, sparse_array<Player> &anim, sparse_array<Position> &pos,
-    sparse_array<Size> &siz, sparse_array<Current_Player> &current,
-    sparse_array<SoundComponent> &sounds);
+    sparse_array<Size> &siz, sparse_array<Current_Player> &current);
 void make_infinite_background(
     Registry &r, sparse_array<Position> &pos, sparse_array<Size> &siz);
-void handle_music(Registry &r, sparse_array<SoundComponent> &sounds);
-void play_sound(
-    Registry &r, sparse_array<SoundComponent> &sounds);
+void handle_music(Registry &r, sparse_array<MusicComponent> &musics);
+void play_sound(Registry &r, sparse_array<SoundComponent> &sounds);

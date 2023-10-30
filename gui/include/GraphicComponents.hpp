@@ -1,24 +1,42 @@
 #pragma once
 
+#include <iostream>
+#include <utility>
 #include <raylib.h>
 #include "../../shared/Component.hpp"
 
-enum SoundFx {
-    BattleMusic,
-    PlayerFx,
-    MobFx,
-    ButtonFx,
+enum MusicFx {
+    Battle,
+    Menu
+};
+
+struct MusicComponent {
+    Sound music;
+    MusicFx type;
+
+    MusicComponent(std::string path, MusicFx _type)
+    {
+        music = LoadSound(path.c_str());
+        type = _type;
+    }
 };
 
 struct SoundComponent {
-    Sound sfx;
-    SoundFx type;
-    bool isPlaying = false;
+    std::vector<std::tuple<Sound, bool &, bool>>
+        sounds; // tuple(SOUND, STATE_PTR, LAST_STATE)
 
-    SoundComponent(std::string path, SoundFx _type)
+    /*SoundComponent(std::vector<std::pair<std::string, bool &>> paths) {
+        for (auto &path: paths) {
+            bool &test = std::ref(path.second);
+            Sound sfx = LoadSound(path.first.c_str());
+            std::cout << "path second = " << test << std::endl;
+            sounds.push_back(std::make_tuple(sfx, path.second, false));
+        }
+        }*/
+    SoundComponent(std::string path, bool &bo)
     {
-        sfx = LoadSound(path.c_str());
-        type = _type;
+        Sound sfx = LoadSound(path.c_str());
+        sounds.emplace_back(sfx, bo, false);
     }
 };
 

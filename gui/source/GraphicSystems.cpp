@@ -96,11 +96,10 @@ void handle_dir_inputs(
 
 void handle_shoot_inputs(
     Registry &r, sparse_array<Player> &anim, sparse_array<Position> &pos,
-    sparse_array<Size> &siz, sparse_array<Current_Player> &current,
-    sparse_array<SoundComponent> &sounds)
+    sparse_array<Size> &siz, sparse_array<Current_Player> &current)
 {
-    for (auto &&[index, anima, posi, sizo, _, sound] :
-         indexed_zipper(anim, pos, siz, current, sounds)) {
+    for (auto &&[index, anima, posi, sizo, _] :
+         indexed_zipper(anim, pos, siz, current)) {
         if (IsKeyDown(KEY_SPACE)) {
             anima->IsShooting = true;
             anima->current_charge +=
@@ -118,19 +117,18 @@ void handle_shoot_inputs(
             r.currentCmd.cmd.setAttack(anim[index]->current_charge);
             r.currentCmd.mutex.unlock();
             anim[index]->current_charge = 1.;
-            sound->isPlaying = true;
         }
         break;
     }
 }
 
-void play_sound(
-    Registry &r, sparse_array<SoundComponent> &sounds)
+void play_sound(Registry &r, sparse_array<SoundComponent> &sounds)
 {
     for (auto &&[sound] : zipper(sounds)) {
-        if (sound->isPlaying == true) {
-            PlaySound(sound->sfx);
-            sound->isPlaying = false;
+        for (auto &sfx : sound->sounds) {
+            if (std::get<1>(sfx) == true && std::get<2>(sfx) == false)
+                PlaySound(std::get<0>(sfx));
+            std::get<2>(sfx) = std::get<1>(sfx);
         }
     }
 }
@@ -270,13 +268,13 @@ void updateWithSnapshots(
     r.netEnts.mutex.unlock();
 }
 
-void handle_music(Registry &r, sparse_array<SoundComponent> &sounds)
+void handle_music(Registry &r, sparse_array<MusicComponent> &musics)
 {
-    for (auto &&[index, sound] : indexed_zipper(sounds)) {
-        if (sound->type == SoundFx::BattleMusic) {
-            if (IsSoundPlaying(sound->sfx) == false) {
-                SetSoundVolume(sound->sfx, 0.3);
-                sound->isPlaying = true;
+    for (auto &&[index, music] : indexed_zipper(musics)) {
+        if (music->type == MusicFx::Battle) {
+            if (IsSoundPlaying(music->music) == false) {
+                SetSoundVolume(music->music, 0.3);
+                PlaySound(music->music);
             }
         }
     }
