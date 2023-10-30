@@ -20,7 +20,6 @@ void updateWithSnapshots(
 void handle_shoot_inputs(
     Registry &r, sparse_array<Player> &anim, sparse_array<Position> &pos,
     sparse_array<Size> &siz, sparse_array<Current_Player> &current);
-
 void resetPlayersDir(
     Registry &r, sparse_array<Player> &players,
     sparse_array<Direction> &directions);

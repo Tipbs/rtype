@@ -27,7 +27,7 @@ struct Sprite {
         sprite.width = (spritesheet.width) / width_multiplier;
         sprite.x = 0;
         sprite.y = 0;
-    };
+    }
 
     Sprite(
         const char *path, int width, int height, double width_multiplier,
@@ -45,10 +45,11 @@ struct Sprite {
         sprite.width = (spritesheet.width) / width_multiplier;
         sprite.x = 0;
         sprite.y = 0;
-    };
+    }
 
     Sprite(char *path, int width, int height)
     {
+        std::cout << "mauvais constructeur\n";
         Image sprit = LoadImage(path);
         ImageResizeNN(&sprit, width, height);
         spritesheet = LoadTextureFromImage(sprit);
@@ -60,7 +61,7 @@ struct Sprite {
         sprite.width = (spritesheet.width);
         sprite.x = 0;
         sprite.y = 0;
-    };
+    }
 
     Sprite(const char *path, int width, int height)
     {
@@ -75,7 +76,7 @@ struct Sprite {
         sprite.width = (spritesheet.width);
         sprite.x = 0;
         sprite.y = 0;
-    };
+    }
 
     Sprite(const char *path)
         : spritesheet(LoadTextureFromImage(LoadImage(path)))
@@ -88,7 +89,24 @@ struct Sprite {
         sprite.width = (spritesheet.width);
         sprite.x = 0;
         sprite.y = 0;
-    };
+    }
+
+    Sprite(const char *path, double width_multiplier,
+        double height_multiplier)
+    {
+        Image sprit = LoadImage(path);
+        ImageResizeNN(
+            &sprit, sprit.width * width_multiplier, sprit.height * height_multiplier);
+        spritesheet = LoadTextureFromImage(sprit);
+        width_padding = spritesheet.width;
+        height_padding = spritesheet.height;
+        width_max = spritesheet.width;
+        height_max = spritesheet.height;
+        sprite.height = spritesheet.height;
+        sprite.width = spritesheet.width;
+        sprite.x = 0;
+        sprite.y = 0;
+    }
 
     Sprite(char *path) : spritesheet(LoadTextureFromImage(LoadImage(path)))
     {
@@ -100,7 +118,7 @@ struct Sprite {
         sprite.width = (spritesheet.width);
         sprite.x = 0;
         sprite.y = 0;
-    };
+    }
 };
 
 struct Animation {
