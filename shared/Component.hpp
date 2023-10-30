@@ -63,3 +63,10 @@ struct SpawnGrace {
 	};
 };
 
+struct AlwaysShoot {
+	std::chrono::duration<float> delay;
+	std::chrono::steady_clock::time_point last_shoot;
+
+	AlwaysShoot(std::chrono::duration<float> duration)
+		: delay(duration), last_shoot(std::chrono::steady_clock::now()) { }
+};
