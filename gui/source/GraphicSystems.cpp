@@ -110,8 +110,8 @@ void handle_shoot_inputs(
             create_ammo(
                 r,
                 Position(
-                    posi->pos_X + (float) sizo->size_X,
-                    posi->pos_Y + (float) sizo->size_Y / 2),
+                    posi->pos_X + (float) sizo->size_X / 2,
+                    posi->pos_Y + (float) sizo->size_Y),
                 anima->current_charge, anima->color_id);
             r.currentCmd.mutex.lock();
             r.currentCmd.cmd.setAttack(anim[index]->current_charge);
@@ -175,8 +175,8 @@ void make_infinite_background(
         //     pos[0]->pos_X -= siz[0]->size_X;
 
         // BG going Downwards
-        // if (pos[0]->pos_Y > 0)
-        //     pos[0]->pos_Y -= siz[0]->size_Y;
+         //if (pos[0]->pos_Y > 0)
+         //    pos[0]->pos_Y -= siz[0]->size_Y;
     }
 }
 

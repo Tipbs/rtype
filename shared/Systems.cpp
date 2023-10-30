@@ -4,7 +4,6 @@
 #include <iostream>
 #include <ostream>
 #include <chrono>
-#include <syncstream>
 #include "Component.hpp"
 #include "Systems.hpp"
 #include "Registry.hpp"
@@ -57,10 +56,9 @@ sparse_array<Health> &healt,
 sparse_array<Damages> &dama, 
 size_t i1, size_t i2)
 {
+    std::cout << "Hello world" << std::endl;
     healt[i1]->health -= dama[i2]->damages;
-    std::osyncstream(std::cout) << "User " << i1 << " has taken " << dama[i2]->damages << " damages. He now have " << healt[i1]->health << " HP." << std::endl;
     healt[i2]->health -= dama[i1]->damages;
-    std::osyncstream(std::cout) << "User " << i2 << " has taken " << dama[i1]->damages << " damages. He now have " << healt[i2]->health << " HP." << std::endl;
     if (healt[i1]->health <= 0)
         r.kill_entity(r.entity_from_index(i1));
     if (healt[i2]->health <= 0)
@@ -76,8 +74,6 @@ sparse_array<Health> &helth)
 {
     auto time = GetTimePoint();
     for (auto &&[ind, pos, siz, dama, halth]: indexed_zipper(positions, size, dam, helth)) {
-        if (!(pos && siz && dama && halth))
-            continue;
         if (grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time + grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).time >= time)
                 continue;
         for (size_t ind2 = ind + 1; ind2 < positions.size(); ind2++) {
