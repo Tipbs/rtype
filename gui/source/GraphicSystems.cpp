@@ -118,10 +118,20 @@ void handle_shoot_inputs(
             r.currentCmd.cmd.setAttack(anim[index]->current_charge);
             r.currentCmd.mutex.unlock();
             anim[index]->current_charge = 1.;
-            if (sounds[index]->type == SoundFx::PlayerFx)
-                PlaySound(sounds[index]->sfx);
+            sound->isPlaying = true;
         }
         break;
+    }
+}
+
+void play_sound(
+    Registry &r, sparse_array<SoundComponent> &sounds)
+{
+    for (auto &&[sound] : zipper(sounds)) {
+        if (sound->isPlaying == true) {
+            PlaySound(sound->sfx);
+            sound->isPlaying = false;
+        }
     }
 }
 
@@ -266,7 +276,7 @@ void handle_music(Registry &r, sparse_array<SoundComponent> &sounds)
         if (sound->type == SoundFx::BattleMusic) {
             if (IsSoundPlaying(sound->sfx) == false) {
                 SetSoundVolume(sound->sfx, 0.3);
-                PlaySound(sound->sfx);
+                sound->isPlaying = true;
             }
         }
     }

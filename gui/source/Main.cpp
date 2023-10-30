@@ -84,6 +84,7 @@ int main(int ac, char **av)
         Position, NetworkedEntity, Speed, Current_Player, Size, Player>(
         updateWithSnapshots);
     reg.add_system<SoundComponent>(handle_music);
+    reg.add_system<SoundComponent>(play_sound);
 
     while (!WindowShouldClose()) {
         reg.run_systems();

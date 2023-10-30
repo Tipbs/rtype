@@ -13,6 +13,7 @@ enum SoundFx {
 struct SoundComponent {
     Sound sfx;
     SoundFx type;
+    bool isPlaying = false;
 
     SoundComponent(std::string path, SoundFx _type)
     {
