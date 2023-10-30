@@ -96,7 +96,8 @@ void handle_dir_inputs(
 
 void handle_shoot_inputs(
     Registry &r, sparse_array<Player> &anim, sparse_array<Position> &pos,
-    sparse_array<Size> &siz, sparse_array<Current_Player> &current, sparse_array<SoundComponent> &sounds)
+    sparse_array<Size> &siz, sparse_array<Current_Player> &current,
+    sparse_array<SoundComponent> &sounds)
 {
     for (auto &&[index, anima, posi, sizo, _, sound] :
          indexed_zipper(anim, pos, siz, current, sounds)) {
@@ -148,7 +149,8 @@ void hadle_text_inputs(
                                         // the queue
             }
             if (IsKeyPressed(KEY_BACKSPACE)) {
-                letterCount--; if (letterCount < 0)
+                letterCount--;
+                if (letterCount < 0)
                     letterCount = 0;
                 inputField->field[letterCount] = '\0';
             }

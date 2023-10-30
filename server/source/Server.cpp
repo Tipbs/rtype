@@ -156,13 +156,13 @@ void udp_server::send_playerId(
             boost::asio::placeholders::bytes_transferred));
 }
 
-bool areClientsReady(const std::map<boost::asio::ip::udp::endpoint, struct Clients> &clients)
+bool areClientsReady(
+    const std::map<boost::asio::ip::udp::endpoint, struct Clients> &clients)
 {
     int i = 0;
-    for (auto &client: clients) {
+    for (auto &client : clients)
         if (client.second.isClientConnected == true)
             i++;
-    }
     if (i >= 1)
         return true;
     return false;

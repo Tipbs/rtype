@@ -26,5 +26,4 @@ void handle_shoot_inputs(
     sparse_array<SoundComponent> &sounds);
 void make_infinite_background(
     Registry &r, sparse_array<Position> &pos, sparse_array<Size> &siz);
-void handle_music(
-    Registry &r, sparse_array<SoundComponent> &sounds);
+void handle_music(Registry &r, sparse_array<SoundComponent> &sounds);

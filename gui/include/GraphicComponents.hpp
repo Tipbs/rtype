@@ -14,7 +14,8 @@ struct SoundComponent {
     Sound sfx;
     SoundFx type;
 
-    SoundComponent(std::string path, SoundFx _type) {
+    SoundComponent(std::string path, SoundFx _type)
+    {
         sfx = LoadSound(path.c_str());
         type = _type;
     }
