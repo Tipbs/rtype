@@ -127,3 +127,31 @@ size_t create_zorg(Registry &reg, Position pos, size_t net_id = 0)
 
     return (size_t) new_entity;
 }
+
+size_t create_boss(Registry &reg, Position pos, size_t net_id)
+{
+    Entity const new_entity = reg.spawn_entity();
+    Size Size(98, 100);
+    Speed speedo(300);
+    Direction diro(0, 0);
+    SpawnGrace gra(std::chrono::seconds(1));
+    #ifndef SERVER
+    std::string path = "./gui/ressources/Sprites/boss.png";
+    Sprite sprite(path.c_str(), 97, 102, 10, 1);
+    #endif
+
+    reg.add_component(new_entity, std::move(pos));
+    reg.add_component(new_entity, std::move(Size));
+    #ifndef SERVER
+    reg.add_component(new_entity, std::move(sprite));
+    #endif
+    reg.add_component(new_entity, std::move(speedo));
+    reg.add_component(new_entity, std::move(diro));
+    //reg.emplace_component<AlwaysShoot>(
+    //    new_entity, std::chrono::milliseconds(750));
+    reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
+    reg.emplace_component<Health>(new_entity, 1);
+    //reg.emplace_component<NetworkedEntity>(new_entity, net_id);
+
+    return (size_t) new_entity;
+}

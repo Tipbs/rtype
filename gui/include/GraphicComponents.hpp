@@ -10,6 +10,8 @@ struct Sprite {
     double height_max;
     double width_max;
     int color_id = 0;
+    std::chrono::duration<float> animation_delay = std::chrono::milliseconds(500);
+    std::chrono::steady_clock::time_point time_since_last_anim = std::chrono::steady_clock::now();
 
     Sprite(
         char *path, int width, int height, double width_multiplier,

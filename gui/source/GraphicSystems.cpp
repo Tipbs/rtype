@@ -17,6 +17,7 @@ void display(
     sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields)
 {
     BeginDrawing();
+    auto now = std::chrono::steady_clock::now();
     for (auto &&[ind, pos, siz, spri] :
          indexed_zipper(positions, size, sprite)) {
         if (!(pos && siz && spri))
@@ -29,6 +30,13 @@ void display(
                          sprite[ind]->width_max - 1
                      ? 0 // - sprite[ind]->width_padding)
                      : sprite[ind]->width_padding);
+        } else if (
+            now > (sprite[ind]->time_since_last_anim +
+                   sprite[ind]->animation_delay)) {
+            sprite[ind]->sprite.y =
+                sprite[ind]->color_id * sprite[ind]->height_padding;
+            sprite[ind]->sprite.x += sprite[ind]->width_padding;
+            sprite[ind]->time_since_last_anim = now;
         }
         if (anim[ind]) {
             sprite[ind]->sprite.y =
@@ -175,8 +183,8 @@ void make_infinite_background(
         //     pos[0]->pos_X -= siz[0]->size_X;
 
         // BG going Downwards
-         //if (pos[0]->pos_Y > 0)
-         //    pos[0]->pos_Y -= siz[0]->size_Y;
+        // if (pos[0]->pos_Y > 0)
+        //    pos[0]->pos_Y -= siz[0]->size_Y;
     }
 }
 

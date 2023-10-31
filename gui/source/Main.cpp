@@ -58,6 +58,7 @@ int main(int ac, char **av)
     Current_Player current_p;
     create_zorg(reg, Position(1200, 50), 5);
     create_zorg(reg, Position(1300, 300), 5);
+    create_boss(reg, Position(400, 200), 5);
 
     reg.add_component(background, std::move(bgPos));
     reg.add_component(background, std::move(bgSize));
@@ -78,9 +79,6 @@ int main(int ac, char **av)
     reg.add_system<Position, Size>(make_infinite_background);
     reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
     reg.add_system<Position, NetworkedEntity, Speed, Current_Player, Size, Player>(updateWithSnapshots);
-    reg.add_system<
-        Position, NetworkedEntity, Speed, Current_Player, Size, Player>(
-        updateWithSnapshots);
 
     while (!WindowShouldClose()) {
         reg.run_systems();
