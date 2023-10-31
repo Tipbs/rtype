@@ -18,6 +18,7 @@ void Factory::register_components()
         Weapon,
         InputField,
         Rectangle,
+        HUD,
 #endif
         Player,
         Current_Player,
@@ -41,7 +42,7 @@ void Factory::add_systems()
     _reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     _reg.add_system<Position, Speed, Direction>(move);
 #ifndef SERVER
-    _reg.add_system<Position, Size, Sprite, Player, Rectangle, InputField>(
+    _reg.add_system<Position, Size, Sprite, Player, Rectangle, InputField, HUD>(
         display);
     _reg.add_system<Direction, Player, Sprite, Speed, Couleur>(
         handle_dir_inputs);
@@ -56,6 +57,9 @@ void Factory::add_systems()
         do_ship_animation);
     _reg.add_system<Position, Size, Backgrounds>(
         make_infinite_background);
+    _reg.add_system<Weapon, Couleur, HUD>(
+        updateHUD);
+
 #else
 
 #endif
@@ -143,4 +147,15 @@ const Entity Factory::create_ammo(Position pos, float damage_mult, int color_id)
     _reg.emplace_component<Animation>(new_entity);
     _reg.emplace_component<Couleur>(new_entity, color_id);
     return new_entity;
+}
+
+const Entity Factory::create_hud(const int ScreenWidth, const int ScreenHeight)
+{
+    Entity const hudholder = _reg.spawn_entity();
+
+    _reg.emplace_component<HUD>(hudholder);
+    _reg.emplace_component<Position>(hudholder, 0, 9. * ScreenHeight / 10);
+    _reg.emplace_component<Size>(hudholder, ScreenWidth, ScreenHeight / 10);
+
+    return hudholder;
 }

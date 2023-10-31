@@ -9,7 +9,6 @@ struct Sprite {
     double width_padding;
     double height_max;
     double width_max;
-    int color_id = 0;
 
     Sprite(const char *path)
         : spritesheet(LoadTextureFromImage(LoadImage(path)))

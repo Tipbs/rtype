@@ -11,10 +11,48 @@
 #include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
 
+std::vector<Color>ColorById {
+    BLUE,
+    PURPLE,
+    RED,
+    YELLOW,
+    GREEN
+};
+
+void display_hud(sparse_array<HUD> &hudy, sparse_array<Position> &positions, sparse_array<Size> &size)
+{
+
+    for (auto &&[i, hudy, posi, sizy] : indexed_zipper(hudy, positions, size)) {
+        if (!(hudy && posi && sizy))
+            continue;
+
+        int subWidth = sizy->size_X;
+        int subHeight = sizy->size_Y;
+        DrawRectangle(posi->pos_X, posi->pos_Y, subWidth, subHeight, BLACK);
+
+        DrawText("Charge : ", posi->pos_X, posi->pos_Y, 32, WHITE);
+        double current_charge = (hudy->charge <= 1) ? 0 : (hudy->charge >= 3) ? 1 : ((hudy->charge - 1.) / 2);
+        DrawRectangle(posi->pos_X + MeasureText("Charge : ", 32), posi->pos_Y, (subWidth / 2.) * current_charge, subHeight / 2, ColorById[hudy->color_id]);
+        DrawRectangleLines(posi->pos_X + MeasureText("Charge : ", 32), posi->pos_Y, subWidth / 2, subHeight / 2, WHITE);
+
+        DrawText("Score   : ", posi->pos_X, posi->pos_Y + (subHeight / 2.), 32, WHITE);
+        DrawText(std::to_string(hudy->score).c_str(), posi->pos_X + MeasureText("Score   : ", 32), posi->pos_Y + (subHeight / 2.), 32, WHITE);
+
+        int second_section = posi->pos_X + MeasureText("Charge : ", 32) + (subWidth / 2.);
+        DrawRectangle(second_section, posi->pos_Y, (subWidth - second_section) * current_charge, subHeight / 3, ColorById[(hudy->color_id + 1) % 5]);
+        DrawRectangleLines(second_section, posi->pos_Y, (subWidth - second_section), subHeight / 3, WHITE);
+        DrawRectangle(second_section, posi->pos_Y + (subHeight/3.), (subWidth - second_section) * current_charge, subHeight / 3, ColorById[(hudy->color_id + 2) % 5]);
+        DrawRectangleLines(second_section, posi->pos_Y + (subHeight/3.), (subWidth - second_section), subHeight / 3, WHITE);
+        DrawRectangle(second_section, posi->pos_Y + (2 * subHeight/3.), (subWidth - second_section) * current_charge, subHeight / 3, ColorById[(hudy->color_id + 3) % 5]);
+        DrawRectangleLines(second_section, posi->pos_Y + (2 * subHeight/3.), (subWidth - second_section), subHeight / 3, WHITE);
+    }
+}
+
 void display(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
     sparse_array<Sprite> &sprite, sparse_array<Player> &anim,
-    sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields)
+    sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields,
+    sparse_array<HUD> &hudy)
 {
     BeginDrawing();
     for (auto &&[ind, pos, siz, spri] :
@@ -26,6 +64,9 @@ void display(
             sprite[ind].value().spritesheet, sprite[ind].value().sprite,
             Rectpos, WHITE);
     }
+
+    display_hud(hudy, positions, size);
+
     EndDrawing();
 }
 
@@ -64,7 +105,6 @@ void do_ship_animation(
         else
             sprites[(size_t)weapon->owner_id]->sprite.x = 0 * sprites[(size_t)weapon->owner_id]->width_padding;
     }
-
 }
 
 void make_infinite_background(
@@ -254,4 +294,18 @@ void updateWithSnapshots(
     }
     net_ents.clear();
     r.netEnts.mutex.unlock();
+}
+
+void updateHUD(
+    Registry &r, sparse_array<Weapon> &weap,
+    sparse_array<Couleur> &col,
+    sparse_array<HUD> &hud)
+{
+    for (auto &&[weapon] : zipper(weap)) {
+        for (auto &&[hudy] : zipper(hud)) {
+            hudy->charge = weapon->current_charge;
+            hudy->score += 1;
+            hudy->color_id = col[(size_t)weapon->owner_id]->color_id;
+        }
+    }
 }

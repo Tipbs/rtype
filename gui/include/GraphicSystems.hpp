@@ -6,7 +6,8 @@
 void display(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
     sparse_array<Sprite> &sprite, sparse_array<Player> &anim,
-    sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields);
+    sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields,
+    sparse_array<HUD> &hudy);
 void handle_dir_inputs(
     Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &players,
     sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds,
@@ -31,3 +32,7 @@ void do_ship_animation(
 void make_infinite_background(
     Registry &r, sparse_array<Position> &positions,
     sparse_array<Size> &sizes, sparse_array<Backgrounds> &bg);
+void updateHUD(
+    Registry &r, sparse_array<Weapon> &weap,
+    sparse_array<Couleur> &col,
+    sparse_array<HUD> &hud);

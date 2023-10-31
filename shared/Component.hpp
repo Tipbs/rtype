@@ -106,3 +106,10 @@ struct EnemyCount {
     float spawnFrequency = 2;
     EnemyCount(int enemiesNb, int spawnFrequency = 2): leftToSpawn(enemiesNb), spawnFrequency(spawnFrequency) {};
 };
+
+struct HUD {
+	double charge = 0;
+	int score = 0;
+    int color_id = 0;
+	HUD() {charge = 0; score = 0; color_id = 0;};
+};
