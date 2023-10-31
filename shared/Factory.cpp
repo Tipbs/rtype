@@ -1,10 +1,12 @@
 #include "Factory.hpp"
 #include "Component.hpp"
+#include "Entity.hpp"
 #include "Systems.hpp"
 #include <chrono>
 #include <stdlib.h>     /* srand, rand */
 
 #ifndef SERVER
+    #include <raylib.h>
     #include "../gui/include/GraphicComponents.hpp"
     #include "../gui/include/GraphicSystems.hpp"
 #endif
@@ -18,7 +20,10 @@ void Factory::register_components()
         Weapon,
         InputField,
         Rectangle,
-        HUD,
+        // HUD,
+        Rect,
+        Color,
+        Text,
 #endif
         Player,
         Current_Player,
@@ -42,7 +47,7 @@ void Factory::add_systems()
     _reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     _reg.add_system<Position, Speed, Direction>(move);
 #ifndef SERVER
-    _reg.add_system<Position, Size, Sprite, Player, Rectangle, InputField, HUD>(
+    _reg.add_system<Position, Size, Sprite, Player, Rectangle, InputField, Rect, Color, Text>(
         display);
     _reg.add_system<Direction, Player, Sprite, Speed, Couleur>(
         handle_dir_inputs);
@@ -57,8 +62,8 @@ void Factory::add_systems()
         do_ship_animation);
     _reg.add_system<Position, Size, Backgrounds>(
         make_infinite_background);
-    _reg.add_system<Weapon, Couleur, HUD>(
-        updateHUD);
+    // _reg.add_system<Weapon, Couleur, HUD>(
+    //     updateHUD);
 
 #else
 
@@ -149,13 +154,80 @@ const Entity Factory::create_ammo(Position pos, float damage_mult, int color_id)
     return new_entity;
 }
 
-const Entity Factory::create_hud(const int ScreenWidth, const int ScreenHeight)
+#ifndef SERVER
+void Factory::create_hud(const int ScreenWidth, const int ScreenHeight)
 {
-    Entity const hudholder = _reg.spawn_entity();
+    float PosWidth = 0;
+    float PosHeight = 9. * ScreenHeight / 10.;
+    float SizWidth = ScreenWidth;
+    float SizHeight = ScreenHeight / 10.;
 
-    _reg.emplace_component<HUD>(hudholder);
-    _reg.emplace_component<Position>(hudholder, 0, 9. * ScreenHeight / 10);
-    _reg.emplace_component<Size>(hudholder, ScreenWidth, ScreenHeight / 10);
+    //DATA A RENDRE DYNAMIQUES
 
-    return hudholder;
+    Color play1color = BLUE;
+    Color play2color = MAGENTA;
+    Color play3color = RED;
+    Color play4color = ORANGE;
+    float multiplier = 0.65;
+    std::string score = "42";
+
+    //FIN DES DATA A RENDRE DYNAMIQUE
+
+    Entity const hudBlackLayer = _reg.spawn_entity();
+    _reg.emplace_component<Rect>(hudBlackLayer, false, Rectangle{PosWidth, PosHeight, SizWidth, SizHeight});
+    _reg.emplace_component<Color>(hudBlackLayer, BLACK);
+
+    Entity const hudPlay1Rect = _reg.spawn_entity();
+    _reg.emplace_component<Rect>(hudPlay1Rect, false, Rectangle{PosWidth + MeasureText("Charge : ", 32), PosHeight, (SizWidth / 2) * multiplier, (SizHeight / 2)});
+    _reg.emplace_component<Color>(hudPlay1Rect, play1color);
+
+    Entity const hudPlay1RectLines = _reg.spawn_entity();
+    _reg.emplace_component<Rect>(hudPlay1RectLines, true, Rectangle{PosWidth + MeasureText("Charge : ", 32), PosHeight, (SizWidth / 2), (SizHeight / 2)});
+    _reg.emplace_component<Color>(hudPlay1RectLines, WHITE);
+
+
+    float Side_Bar = PosWidth + MeasureText("Charge : ", 32) + (SizWidth / 2.);
+
+    Entity const hudPlay2Rect = _reg.spawn_entity();
+    _reg.emplace_component<Rect>(hudPlay2Rect, false, Rectangle{Side_Bar, PosHeight, (SizWidth - Side_Bar) * multiplier, SizHeight / 3});
+    _reg.emplace_component<Color>(hudPlay2Rect, play2color);
+
+    Entity const hudPlay2RectLines = _reg.spawn_entity();
+    _reg.emplace_component<Rect>(hudPlay2RectLines, true, Rectangle{Side_Bar, PosHeight, (SizWidth - Side_Bar), SizHeight / 3});
+    _reg.emplace_component<Color>(hudPlay2RectLines, WHITE);
+
+    Entity const hudPlay3Rect = _reg.spawn_entity();
+    _reg.emplace_component<Rect>(hudPlay3Rect, false, Rectangle{Side_Bar, PosHeight + (SizHeight / 3), (SizWidth - Side_Bar) * multiplier, SizHeight / 3});
+    _reg.emplace_component<Color>(hudPlay3Rect, play3color);
+
+    Entity const hudPlay3RectLines = _reg.spawn_entity();
+    _reg.emplace_component<Rect>(hudPlay3RectLines, true, Rectangle{Side_Bar, PosHeight + (SizHeight / 3), (SizWidth - Side_Bar), SizHeight / 3});
+    _reg.emplace_component<Color>(hudPlay3RectLines, WHITE);
+
+    Entity const hudPlay4Rect = _reg.spawn_entity();
+    _reg.emplace_component<Rect>(hudPlay4Rect, false, Rectangle{Side_Bar, PosHeight + 2 * (SizHeight / 3), (SizWidth - Side_Bar) * multiplier, SizHeight / 3});
+    _reg.emplace_component<Color>(hudPlay4Rect, play4color);
+
+    Entity const hudPlay4RectLines = _reg.spawn_entity();
+    _reg.emplace_component<Rect>(hudPlay4RectLines, true, Rectangle{Side_Bar, PosHeight + 2 * (SizHeight / 3), (SizWidth - Side_Bar), SizHeight / 3});
+    _reg.emplace_component<Color>(hudPlay4RectLines, WHITE);
+
+
+    Entity const ChargeText = _reg.spawn_entity();
+    _reg.emplace_component<Text>(ChargeText, "Charge : ", 32);
+    _reg.emplace_component<Position>(ChargeText, PosWidth, PosHeight);
+    _reg.emplace_component<Color>(ChargeText, WHITE);
+
+    Entity const ScoreText = _reg.spawn_entity();
+    _reg.emplace_component<Text>(ScoreText, "Score : ", 32);
+    _reg.emplace_component<Position>(ScoreText, PosWidth, PosHeight + (SizHeight / 2));
+    _reg.emplace_component<Color>(ScoreText, WHITE);
+
+    Entity const ScoreValueText = _reg.spawn_entity();
+    _reg.emplace_component<Text>(ScoreValueText, score, 32);
+    _reg.emplace_component<Position>(ScoreValueText, PosWidth + (MeasureText("Score : ", 32)), PosHeight + (SizHeight / 2));
+    _reg.emplace_component<Color>(ScoreValueText, WHITE);
+
+
 }
+#endif

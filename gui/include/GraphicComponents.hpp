@@ -45,3 +45,17 @@ struct Sprite {
 struct InputField {
     std::string field;
 };
+
+struct Rect {
+	bool draw_lines;
+	Rectangle rect;
+
+	Rect(bool draw_lines, Rectangle rect) : draw_lines(draw_lines), rect(rect) {};
+};
+
+struct Text {
+	std::string text;
+    int font_size = 0;
+
+    Text(std::string s, int count) : text(s), font_size(count) {};
+};
