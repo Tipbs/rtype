@@ -59,7 +59,7 @@ int main(int ac, char **av)
     Current_Player current_p;
     create_zorg(reg, Position(1200, 50), 5);
     create_zorg(reg, Position(1300, 300), 5);
-    create_boss(reg, Position(400, 200), 5);
+    create_boss(reg, Position(600, 400), 5);
 
     reg.add_component(background, std::move(bgPos));
     reg.add_component(background, std::move(bgSize));

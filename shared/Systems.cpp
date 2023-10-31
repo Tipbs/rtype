@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <iostream>
+#include <numbers>
 #include <ostream>
 #include <syncstream>
 #include "Bundle.hpp"
@@ -131,6 +132,19 @@ void enemyAlwaysShoot(
     }
 }
 
+void updateProjectiles(ProjectileShooter &shooter)
+{
+    auto size = shooter.infos.size();
+    auto radius = 80;
+    for (auto i = 0; i != size; ++i) {
+        double angle = 2 * std::numbers::pi * i / size + shooter.shotCount * 3;
+        double x = cos(angle) * radius;
+        double y = sin(angle) * radius;
+        shooter.infos[i].offset = Position(x, y);
+        shooter.infos[i].dir = Direction(cos(angle) / 3, sin(angle) / 3);
+    }
+}
+
 void shootProjectiles(
     Registry &r, sparse_array<ProjectileShooter> &shooters,
     sparse_array<Position> &positions, sparse_array<Size> &sizes)
@@ -147,6 +161,8 @@ void shootProjectiles(
                 create_boss_projectile(
                     r, *positions[index] + size_as_pos + proj.offset, proj.dir);
             }
+            ++shooters[index]->shotCount;
+            updateProjectiles(*shooters[index]);
         }
     }
 }
