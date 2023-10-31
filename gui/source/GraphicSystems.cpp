@@ -38,12 +38,16 @@ void display_hud(sparse_array<HUD> &hudy, sparse_array<Position> &positions, spa
         DrawText("Score   : ", posi->pos_X, posi->pos_Y + (subHeight / 2.), 32, WHITE);
         DrawText(std::to_string(hudy->score).c_str(), posi->pos_X + MeasureText("Score   : ", 32), posi->pos_Y + (subHeight / 2.), 32, WHITE);
 
+        double play2charge = current_charge;
+        double play3charge = current_charge;
+        double play4charge = current_charge;
+
         int second_section = posi->pos_X + MeasureText("Charge : ", 32) + (subWidth / 2.);
-        DrawRectangle(second_section, posi->pos_Y, (subWidth - second_section) * current_charge, subHeight / 3, ColorById[(hudy->color_id + 1) % 5]);
+        DrawRectangle(second_section, posi->pos_Y, (subWidth - second_section) * play2charge, subHeight / 3, ColorById[(hudy->color_id + 1) % 5]);
         DrawRectangleLines(second_section, posi->pos_Y, (subWidth - second_section), subHeight / 3, WHITE);
-        DrawRectangle(second_section, posi->pos_Y + (subHeight/3.), (subWidth - second_section) * current_charge, subHeight / 3, ColorById[(hudy->color_id + 2) % 5]);
+        DrawRectangle(second_section, posi->pos_Y + (subHeight/3.), (subWidth - second_section) * play3charge, subHeight / 3, ColorById[(hudy->color_id + 2) % 5]);
         DrawRectangleLines(second_section, posi->pos_Y + (subHeight/3.), (subWidth - second_section), subHeight / 3, WHITE);
-        DrawRectangle(second_section, posi->pos_Y + (2 * subHeight/3.), (subWidth - second_section) * current_charge, subHeight / 3, ColorById[(hudy->color_id + 3) % 5]);
+        DrawRectangle(second_section, posi->pos_Y + (2 * subHeight/3.), (subWidth - second_section) * play4charge, subHeight / 3, ColorById[(hudy->color_id + 3) % 5]);
         DrawRectangleLines(second_section, posi->pos_Y + (2 * subHeight/3.), (subWidth - second_section), subHeight / 3, WHITE);
     }
 }
