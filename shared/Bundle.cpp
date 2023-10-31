@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
+#include <numbers>
 #include "Component.hpp"
 #include "random"
 
@@ -161,6 +162,7 @@ size_t create_boss(Registry &reg, Position pos, size_t net_id)
     Speed speedo(300);
     Direction diro(0, 0);
     SpawnGrace gra(std::chrono::seconds(1));
+    ProjectileShooter proj_shooter(std::chrono::milliseconds(250));
 #ifndef SERVER
     std::string path = "./gui/ressources/Sprites/boss.png";
     Sprite sprite(path.c_str(), 97, 102, 10, 1);
@@ -177,6 +179,27 @@ size_t create_boss(Registry &reg, Position pos, size_t net_id)
     //     new_entity, std::chrono::milliseconds(750));
     reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
     reg.emplace_component<Health>(new_entity, 1000);
+    auto &shooter = reg.add_component<ProjectileShooter>(new_entity, std::move(proj_shooter));
+    //shooter->infos.push_back(ProjectileInfo(Position(0, 10), Direction(0 * 2, 0.2 * 2)));
+    //shooter->infos.push_back(ProjectileInfo(Position(5, 5), Direction(0.1 * 2, 0.1 * 2)));
+    //shooter->infos.push_back(ProjectileInfo(Position(5, 5), Direction(0.05 * 2, 0.15 * 2)));
+    //shooter->infos.push_back(ProjectileInfo(Position(5, 5), Direction(0.15 * 2, 0.05 * 2)));
+    //shooter->infos.push_back(ProjectileInfo(Position(5, -5), Direction(0.1 * 2, -0.1 * 2)));
+    //shooter->infos.push_back(ProjectileInfo(Position(10, 0), Direction(0.2 * 2, 0 * 2)));
+    //shooter->infos.push_back(ProjectileInfo(Position(0, -10), Direction(0 * 2, -0.2 * 2)));
+    //shooter->infos.push_back(ProjectileInfo(Position(-5, -5), Direction(-0.1 * 2, -0.1 * 2)));
+    //shooter->infos.push_back(ProjectileInfo(Position(-5, -5), Direction(-0.05 * 2, -0.15 * 2)));
+    //shooter->infos.push_back(ProjectileInfo(Position(-5, -5), Direction(-0.15 * 2, -0.05 * 2)));
+    //shooter->infos.push_back(ProjectileInfo(Position(-10, 0), Direction(-0.2 * 2, 0 * 2)));
+    //shooter->infos.push_back(ProjectileInfo(Position(-5, -5), Direction(-0.1 * 2, 0.1 * 2)));
+    auto radius = 80;
+    for (int i = 0; i <= 10; i++) {
+        double angle = 2 * std::numbers::pi * i / 10;
+        double x = cos(angle) * radius;
+        double y = sin(angle) * radius;
+        shooter->infos.push_back(
+            ProjectileInfo(Position(x, y), Direction(cos(angle) / 3, sin(angle) / 3)));
+    }
     // reg.emplace_component<NetworkedEntity>(new_entity, net_id);
 
     return (size_t) new_entity;
@@ -191,7 +214,7 @@ void create_boss_projectile(
     Size Size(hitwidth, hitheight); // hitbox
     std::string path =
         "./gui/ressources/Sprites/red_projectile.png"; // fichier de la munition
-    Speed speedo(450);
+    Speed speedo(300);
     Damages damag(20);
     Position posCopy(
         pos.pos_X - (float) hitwidth / 2, pos.pos_Y - (float) hitheight / 2);

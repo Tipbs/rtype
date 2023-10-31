@@ -54,12 +54,12 @@ int main(int ac, char **av)
     reg.register_component<Rectangle>();
     reg.register_component<NetworkedEntity>();
     reg.register_component<AlwaysShoot>();
+    reg.register_component<ProjectileShooter>();
     auto current_player = create_player(reg, net_client.get_player_id(), nePos);
     Current_Player current_p;
     create_zorg(reg, Position(1200, 50), 5);
     create_zorg(reg, Position(1300, 300), 5);
     create_boss(reg, Position(400, 200), 5);
-    create_boss_projectile(reg, Position(400, 200), Direction(0.3, 0));
 
     reg.add_component(background, std::move(bgPos));
     reg.add_component(background, std::move(bgSize));
@@ -79,6 +79,7 @@ int main(int ac, char **av)
     //    reg.add_system<InputField, Rectangle>(hadle_text_inputs);
     reg.add_system<Position, Size>(make_infinite_background);
     reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
+    reg.add_system<ProjectileShooter, Position, Size>(shootProjectiles);
     reg.add_system<Position, NetworkedEntity, Speed, Current_Player, Size, Player>(updateWithSnapshots);
 
     while (!WindowShouldClose()) {

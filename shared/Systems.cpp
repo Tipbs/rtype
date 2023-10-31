@@ -130,3 +130,23 @@ void enemyAlwaysShoot(
         }
     }
 }
+
+void shootProjectiles(
+    Registry &r, sparse_array<ProjectileShooter> &shooters,
+    sparse_array<Position> &positions, sparse_array<Size> &sizes)
+{
+    auto now = std::chrono::steady_clock::now();
+    for (auto index = 0; index != shooters.size(); ++index) {
+        if (!(shooters[index] && positions[index]) && sizes[index])
+            continue;
+        if (now > shooters[index]->lastShot + shooters[index]->delay) {
+            shooters[index]->lastShot = now;
+            auto size_as_pos =
+                Position(sizes[index]->size_X / 2, sizes[index]->size_Y / 2);
+            for (auto &proj : shooters[index]->infos) {
+                create_boss_projectile(
+                    r, *positions[index] + size_as_pos + proj.offset, proj.dir);
+            }
+        }
+    }
+}

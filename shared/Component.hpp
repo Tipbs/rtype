@@ -24,6 +24,10 @@ struct NetworkedEntity {
 struct Position {
 	double pos_X = 0;
 	double pos_Y = 0;
+    Position operator+(Position &pos)
+	{
+		return Position(pos_X + pos.pos_X, pos_Y + pos.pos_Y);
+	};
 	Position(double x, double y): pos_X(x), pos_Y(y) {};
 };
 
@@ -69,4 +73,18 @@ struct AlwaysShoot {
 
 	AlwaysShoot(std::chrono::duration<float> duration)
 		: delay(duration), last_shoot(std::chrono::steady_clock::now()) { }
+};
+
+struct ProjectileInfo {
+	Position offset;
+	Direction dir;
+};
+
+struct ProjectileShooter {
+	std::vector<ProjectileInfo> infos;
+	std::chrono::duration<float> delay;
+	std::chrono::steady_clock::time_point lastShot;
+
+	ProjectileShooter(std::chrono::duration<float> del) : delay(del), lastShot(std::chrono::steady_clock::now())
+	{}
 };
