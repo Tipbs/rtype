@@ -83,3 +83,5 @@ void create_ammo(Registry &reg, Position pos, Direction dir, float damage_mult, 
 void create_ammo(Registry &reg, Position pos, float damage_mult, int color_id);
 size_t create_zorg(Registry &reg, Position pos, size_t net_id);
 size_t create_boss(Registry &reg, Position pos, size_t net_id = 0);
+void create_boss_projectile(
+    Registry &reg, Position pos, Direction diro);

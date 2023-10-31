@@ -118,8 +118,8 @@ void handle_shoot_inputs(
             create_ammo(
                 r,
                 Position(
-                    posi->pos_X + (float) sizo->size_X / 2,
-                    posi->pos_Y + (float) sizo->size_Y),
+                    posi->pos_X + (float) sizo->size_X,
+                    posi->pos_Y + (float) sizo->size_Y / 2),
                 anima->current_charge, anima->color_id);
             r.currentCmd.mutex.lock();
             r.currentCmd.cmd.setAttack(anim[index]->current_charge);
