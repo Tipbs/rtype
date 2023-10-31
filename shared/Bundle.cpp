@@ -38,12 +38,12 @@ size_t create_player(Registry &reg, size_t id, Position pos)
     Entity const new_entity = reg.spawn_entity();
     Player player(1, id);
     Size Size(83, 43);
-    std::string path = "./gui/ressources/Sprites/r-typesheet42.gif";
+    std::string path = "./gui/ressources/Sprites/testships.png";
     Speed speedo(300);
     Direction diro(0, 0);
     SpawnGrace gra(std::chrono::seconds(1));
 #ifndef SERVER
-    Sprite sprite(path.c_str(), 83, 43, 5, 5);
+    Sprite sprite(path.c_str(), 83, 43, 2, 5);
 #endif
 
     reg.add_component(new_entity, std::move(pos));
@@ -162,7 +162,7 @@ size_t create_boss(Registry &reg, Position pos, size_t net_id)
     Speed speedo(300);
     Direction diro(0, 0);
     SpawnGrace gra(std::chrono::seconds(1));
-    ProjectileShooter proj_shooter(std::chrono::milliseconds(250));
+    ProjectileShooter proj_shooter(std::chrono::milliseconds(350));
 #ifndef SERVER
     std::string path = "./gui/ressources/Sprites/boss.png";
     Sprite sprite(path.c_str(), 97, 102, 10, 1);
@@ -193,8 +193,8 @@ size_t create_boss(Registry &reg, Position pos, size_t net_id)
     //shooter->infos.push_back(ProjectileInfo(Position(-10, 0), Direction(-0.2 * 2, 0 * 2)));
     //shooter->infos.push_back(ProjectileInfo(Position(-5, -5), Direction(-0.1 * 2, 0.1 * 2)));
     auto radius = 80;
-    for (int i = 0; i <= 10; i++) {
-        double angle = 2 * std::numbers::pi * i / 10;
+    for (int i = 0; i <= 12; i++) {
+        double angle = 2 * std::numbers::pi * i / 12;
         double x = cos(angle) * radius;
         double y = sin(angle) * radius;
         shooter->infos.push_back(
@@ -209,8 +209,8 @@ void create_boss_projectile(
     Registry &reg, Position pos, Direction diro)
 {
     Entity const new_entity = reg.spawn_entity();
-    int hitwidth = 48;
-    int hitheight = 48;
+    int hitwidth = 25;
+    int hitheight = 25;
     Size Size(hitwidth, hitheight); // hitbox
     std::string path =
         "./gui/ressources/Sprites/red_projectile.png"; // fichier de la munition

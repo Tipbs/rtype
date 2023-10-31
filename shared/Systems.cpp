@@ -137,7 +137,7 @@ void updateProjectiles(ProjectileShooter &shooter)
     auto size = shooter.infos.size();
     auto radius = 80;
     for (auto i = 0; i != size; ++i) {
-        double angle = 2 * std::numbers::pi * i / size + shooter.shotCount * 3;
+        double angle = 2 * std::numbers::pi * i / size + shooter.shotCount * 45;
         double x = cos(angle) * radius;
         double y = sin(angle) * radius;
         shooter.infos[i].offset = Position(x, y);
