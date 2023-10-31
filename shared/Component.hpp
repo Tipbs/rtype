@@ -84,10 +84,19 @@ struct Weapon {
     };
 };
 
-struct Animation {
-    double count = 1;
+struct Couleur {
+    int color_id = 0;
 
-    Animation(double count) : count(count) {};
+    Couleur(int count) : color_id(count) {};
+};
+
+struct Animation {
+    Animation() {};
+};
+
+struct Backgrounds {
+    Backgrounds()
+    {};
 };
 
 struct EnemyCount {
@@ -96,4 +105,11 @@ struct EnemyCount {
     float timeSinceLastSpawn = 0;
     float spawnFrequency = 2;
     EnemyCount(int enemiesNb, int spawnFrequency = 2): leftToSpawn(enemiesNb), spawnFrequency(spawnFrequency) {};
+};
+
+struct HUD {
+	double charge = 0;
+	int score = 0;
+    int color_id = 0;
+	HUD() {charge = 0; score = 0; color_id = 0;};
 };
