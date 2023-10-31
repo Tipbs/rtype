@@ -7,6 +7,7 @@
 #include <ostream>
 #include <syncstream>
 #include "Bundle.hpp"
+#include <chrono>
 #include "Component.hpp"
 #include "indexed_zipper.hpp"
 #include "Registry.hpp"
@@ -59,11 +60,9 @@ void damages(
     size_t i1, size_t i2)
 {
     std::cout << "y a collision\n";
+    std::cout << "Hello world" << std::endl;
     healt[i1]->health -= dama[i2]->damages;
     healt[i2]->health -= dama[i1]->damages;
-    std::osyncstream(std::cout)
-        << "User " << i2 << " has taken " << dama[i1]->damages
-        << " damages. He now have " << healt[i2]->health << " HP." << std::endl;
     if (healt[i1]->health <= 0)
         r.kill_entity(r.entity_from_index(i1));
     if (healt[i2]->health <= 0)
@@ -76,16 +75,9 @@ void colision(
     sparse_array<Health> &helth)
 {
     auto time = GetTimePoint();
-    for (auto &&[ind, pos, siz, dama, halth] :
-         indexed_zipper(positions, size, dam, helth)) {
-        if (!(pos && siz && dama && halth))
-            continue;
-        if (grace[ind]
-			.value_or(SpawnGrace(std::chrono::seconds(0)))
-			.creation_time +
-			grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).time >=
-            time)
-            continue;
+    for (auto &&[ind, pos, siz, dama, halth]: indexed_zipper(positions, size, dam, helth)) {
+        if (grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).creation_time + grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).time >= time)
+                continue;
         for (size_t ind2 = ind + 1; ind2 < positions.size(); ind2++) {
             if (grace[ind2]
                 .value_or(SpawnGrace(std::chrono::seconds(0)))
