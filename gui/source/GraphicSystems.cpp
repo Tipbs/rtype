@@ -120,10 +120,10 @@ void make_infinite_background(
 void handle_dir_inputs(
     Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &players,
     sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds,
-    sparse_array<Couleur> &colors)
+    sparse_array<Couleur> &colors, sparse_array<Current_Player> &curr)
 {
-    for (auto &&[diro, player, sprit, spe, color] :
-         zipper(dir, players, sprite, speeds, colors)) {
+    for (auto &&[diro, player, sprit, spe, color, _] :
+         zipper(dir, players, sprite, speeds, colors, curr)) {
         Vector2 moves = {0, 0};
         double speedScale = 1;
 
@@ -254,10 +254,13 @@ void updateWithSnapshots(
             });
         if (finded != entities.end())
             continue;
-        std::cout << "id: " << net.id << std::endl;
         auto pos = Position(net.pos.x, net.pos.y);
-        factory.create_player(net.id, pos);
-        std::cout << "Creating player\n";
+        if (net.type == EntityType::Player) {
+            std::cout << "id: " << net.id << std::endl;
+            factory.create_player(net.id, pos);
+        }
+        if (net.type == EntityType::Enemy)
+            factory.create_enemy(net.id, pos);
         it = net_ents.erase(it);
         if (it == net_ents.end())
             break;
@@ -281,6 +284,8 @@ void updateWithSnapshots(
             }
             pos.value().pos_X = finded->pos.x;
             pos.value().pos_Y = finded->pos.y;
+            std::cout << "pos x : " << pos->pos_X << std::endl;
+            std::cout << "pos y : " << pos->pos_Y << std::endl;
             if (!current && player && finded->attacking) {
                 factory.create_ammo(
                     Position(

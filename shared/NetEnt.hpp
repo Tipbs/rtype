@@ -5,7 +5,8 @@
 #include "Utils.hpp"
 
 enum class EntityType {
-    Player
+    Player,
+    Enemy
 };
 
 class NetEnt {
@@ -20,6 +21,12 @@ public:
     {
         id = 0;
         type = EntityType::Player;
+        attackState = 0;
+    }
+    NetEnt(EntityType _type)
+    {
+        id = 0;
+        type = _type;
         attackState = 0;
     }
     NetEnt &operator=(const NetEnt &) = default;

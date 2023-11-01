@@ -4,6 +4,7 @@
 #include <utility>
 #include <chrono>
 #include "Entity.hpp"
+#include "NetEnt.hpp"
 #include "Utils.hpp"
 
 #ifdef SERVER
@@ -23,8 +24,9 @@ struct Player {
 
 struct NetworkedEntity {
     int id;
+    EntityType type;
 
-    NetworkedEntity(int id) : id(id) {}
+    NetworkedEntity(int id, EntityType _type) : id(id), type(_type) {}
 };
 
 struct Position {

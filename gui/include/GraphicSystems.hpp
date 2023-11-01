@@ -11,7 +11,7 @@ void display(
 void handle_dir_inputs(
     Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &players,
     sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds,
-    sparse_array<Couleur> &colors);
+    sparse_array<Couleur> &colors, sparse_array<Current_Player>&);
 void hadle_text_inputs(
     Registry &r, sparse_array<InputField> &inputFields,
     sparse_array<Rectangle> &rectangles);

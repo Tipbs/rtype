@@ -28,7 +28,6 @@ void udp_client::send()
 {
     std::ostringstream oss;
     boost::archive::binary_oarchive archive(oss);
-    // std::cout << "coucou je suis hardstuck\n";
     _reg.currentCmd.mutex.lock();
     auto copyCmd = _reg.currentCmd.cmd;
     _reg.currentCmd.cmd.reset();
@@ -118,7 +117,8 @@ void udp_client::net_get_id(
             boost::archive::binary_iarchive archive(iss);
             Utils::PlayerId tmp;
             archive >> tmp;
-            _player_id = tmp.id;
+            _player_id.id = tmp.id;
+            _player_id.pos = tmp.pos;
         } catch (const std::exception &err) {
             std::cerr << "serialization exception: " << err.what();
             throw err;
@@ -140,7 +140,7 @@ void udp_client::fetch_player_id()
         boost::bind(
             &udp_client::net_get_id, this, boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred));
-    while (_player_id == -1) {
+    while (_player_id.id == -1) {
         if (std::chrono::system_clock::now() - timeout >
             std::chrono::seconds(10)) {
             std::cerr << "Failed to get player id from server\n";
@@ -151,7 +151,7 @@ void udp_client::fetch_player_id()
         _svc.run();
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-    std::osyncstream(std::cout) << "player id: " << _player_id << "\n";
+    std::osyncstream(std::cout) << "player id: " << _player_id.id << "\n";
 }
 
 udp_client::udp_client(
@@ -164,6 +164,7 @@ udp_client::udp_client(
     udp::resolver::query query(boost::asio::ip::udp::v4(), ip, port);
     udp::resolver::iterator iter = resolver.resolve(query);
     _remote_point = *iter;
+    _player_id.id = -1;
     fetch_player_id();
     // std::thread fetch(&udp_client::fetch_player_id, this);
     // fetch.join();

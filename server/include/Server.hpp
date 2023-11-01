@@ -15,9 +15,12 @@
 #include "../../shared/Systems.hpp"
 #include "../../shared/UserCmd.hpp"
 #include "../../shared/Utils.hpp"
+#include "../../shared/Factory.hpp"
+#include "../../shared/Parser.hpp"
 
 struct Clients {
     std::size_t _id;
+    std::size_t player;
     bool isClientConnected;
     boost::posix_time::ptime _timer;
 };
@@ -34,11 +37,10 @@ class udp_server {
     void handle_send(const boost::system::error_code &error, std::size_t);
 
     void start_snapshot();
-    void send_playerId(std::size_t playerId, boost::asio::ip::udp::endpoint);
+    void send_playerId(Utils::PlayerId playerId, boost::asio::ip::udp::endpoint);
     void wait_for_connexion(std::size_t);
     void handle_broadcast(const boost::system::error_code &, std::size_t);
     void multiple_broadcast(
-        std::map<boost::asio::ip::udp::endpoint, struct Clients>,
         std::vector<NetEnt>);
     void deserialize(const std::size_t);
 
@@ -51,6 +53,7 @@ class udp_server {
     Registry reg;
 
     std::size_t _port;
+    std::size_t players_nb = 0;
 
     boost::asio::io_context _svc;
     boost::asio::ip::udp::socket _socket;
@@ -65,4 +68,6 @@ class udp_server {
     std::thread tick;
     std::thread broadcasting;
     std::mutex cmd_mutex;
+
+    Parser parser;
 };

@@ -43,14 +43,21 @@ void extract(
 {
     for (auto &&[ind, pos] : indexed_zipper(positions)) {
         auto &spe = speeds[ind];
-        if (!(pos && spe && ents[ind]))
+        if (!(pos && spe && ents[ind]) && !(weapons[ind]))
             continue;
         NetEnt tmp;
-        tmp.id = ind;
+        tmp.id = ents[ind]->id;
+        tmp.type = ents[ind]->type;
         tmp.pos.x = pos->pos_X;
         tmp.pos.y = pos->pos_Y;
         auto &weapon = weapons[ind];
         if (weapon) {
+            tmp.type = ents[(size_t)weapon->owner_id]->type;
+            tmp.id = ents[(size_t)weapon->owner_id]->id;
+            tmp.pos.x = positions[(size_t)weapon->owner_id]->pos_X;
+            tmp.pos.y = positions[(size_t)weapon->owner_id]->pos_Y;
+            std::cout << "pos x : " << tmp.pos.x << std::endl;
+            std::cout << "pos y : " << tmp.pos.y << std::endl;
             tmp.attacking = weapon->IsShooting;
             tmp.attackState = weapon->current_charge;
             reg._netent.push_back(tmp);

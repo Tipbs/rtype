@@ -4,7 +4,7 @@
 #include "Component.hpp"
 #include "Entity.hpp"
 #include "Registry.hpp"
-#include "../../shared/NetEnt.hpp"
+#include "NetEnt.hpp"
 
 class Factory {
     public:
@@ -14,8 +14,10 @@ class Factory {
         // const Entity create(size_t id, Args ...args);
         const Entity create_background(const int ScreenWidth, const int ScreenHeight);
         const Entity create_player(int id, Position pos);
+        const Entity create_current_player(int id, Position pos);
         const Entity create_weapon(Entity owner);
-        const Entity create_enemy();
+        const Entity create_enemy(int id, Position pos);
+        const Entity create_enemy(Position pos);
         const Entity create_ammo(Position pos, float damage_mult, int color_id);
         const Entity create_hud(const int ScreenWidth, const int ScreenHeight);
         void register_components();

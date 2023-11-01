@@ -33,7 +33,7 @@ int main(int ac, char **av)
     factory.create_background(ScreenWidth, ScreenHeight);
     factory.create_hud(ScreenWidth, ScreenHeight);
     Entity player =
-        factory.create_player(net_client.get_player_id(), Position(0, 0));
+        factory.create_current_player(net_client.get_player_id().id, net_client.get_player_id().pos);
     factory.create_weapon(player);
     factory.add_systems();
 
