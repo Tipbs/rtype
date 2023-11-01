@@ -94,7 +94,7 @@ const Entity Factory::create_background(const int ScreenWidth, const int ScreenH
 #ifndef SERVER
     _reg.emplace_component<Sprite>(background, bgpath.c_str(), 3 * ScreenWidth, ScreenHeight);
 #endif
-    _reg.emplace_component<Speed>(background, 2);
+    _reg.emplace_component<Speed>(background, 50);
     _reg.emplace_component<Direction>(background, -1, 0);
     _reg.emplace_component<Backgrounds>(background);
     return background;
@@ -136,7 +136,7 @@ const Entity Factory::create_enemy(Position pos)
     const Entity ent = _reg.spawn_entity();
 
     _reg.emplace_component<Position>(ent, pos);
-    _reg.emplace_component<Speed>(ent, 5);
+    _reg.emplace_component<Speed>(ent, 100);
     _reg.emplace_component<Direction>(ent, 50, 0);
     _reg.emplace_component<SpawnGrace>(ent, std::chrono::seconds(5));
     _reg.emplace_component<NetworkedEntity>(ent, (size_t)ent + 4, EntityType::Enemy);
@@ -148,7 +148,7 @@ const Entity Factory::create_enemy(int id, Position pos)
     const Entity ent = _reg.spawn_entity();
 
     _reg.emplace_component<Position>(ent, pos);
-    _reg.emplace_component<Speed>(ent, 5);
+    _reg.emplace_component<Speed>(ent, 100);
     _reg.emplace_component<Direction>(ent, 50, 0);
     _reg.emplace_component<SpawnGrace>(ent, std::chrono::seconds(5));
      _reg.emplace_component<NetworkedEntity>(ent, id, EntityType::Enemy);
@@ -168,7 +168,7 @@ const Entity Factory::create_ammo(
     #ifndef SERVER
     _reg.emplace_component<Sprite>(new_entity, "./gui/ressources/Sprites/shoot_ammo.png", hitwidth, hitheight, 8, 5);
     #endif
-    _reg.emplace_component<Speed>(new_entity, 7.5);
+    _reg.emplace_component<Speed>(new_entity, 300);
     _reg.emplace_component<Direction>(new_entity, 1, 0);
     _reg.emplace_component<Damages>(new_entity, damage_mult);
     _reg.emplace_component<Health>(new_entity, 1);
@@ -189,7 +189,7 @@ const Entity Factory::create_ammo(Position pos, float damage_mult, int color_id)
     #ifndef SERVER
     _reg.emplace_component<Sprite>(new_entity, "./gui/ressources/Sprites/shoot_ammo.png", hitwidth, hitheight, 8, 5);
     #endif
-    _reg.emplace_component<Speed>(new_entity, 7.5);
+    _reg.emplace_component<Speed>(new_entity, 300);
     _reg.emplace_component<Direction>(new_entity, 1, 0);
     _reg.emplace_component<Damages>(new_entity, damage_mult);
     _reg.emplace_component<Health>(new_entity, 1);
@@ -202,7 +202,7 @@ const Entity Factory::create_zorg(Position pos, size_t net_id)
 {
     Entity const new_entity = _reg.spawn_entity();
     Size Size(48, 48);
-    Speed speedo(4);
+    Speed speedo(150);
     Direction diro(-0.40, 0);
     SpawnGrace gra(std::chrono::seconds(1));
     #ifndef SERVER
@@ -245,7 +245,7 @@ const Entity Factory::create_asteroids(Position pos, size_t net_id)
             _reg.emplace_component<Sprite>(new_entity, "./gui/ressources/Sprites/Asteroid.png", 48, 48, 1, 1);
     }
     #endif
-    _reg.emplace_component<Speed>(new_entity, 3.5);
+    _reg.emplace_component<Speed>(new_entity, 150);
     _reg.emplace_component<Direction>(new_entity, Direction{-1, (double)(((rand() % 21) - 10) / 10.)});
     _reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
     _reg.emplace_component<Health>(new_entity, 1);
@@ -341,7 +341,7 @@ const Entity Factory::create_boss_projectile(Position pos, Direction diro)
 #ifndef SERVER
     _reg.emplace_component<Sprite>(entity, "./gui/ressources/Sprites/red_projectile.png", 25, 25, 1, 1);
 #endif
-    _reg.emplace_component<Speed>(entity, 8);
+    _reg.emplace_component<Speed>(entity, 200);
     _reg.add_component(entity, std::move(diro));
     _reg.emplace_component<Damages>(entity, 20);
     _reg.emplace_component<Health>(entity, 1);
