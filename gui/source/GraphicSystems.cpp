@@ -301,3 +301,10 @@ void updateWithSnapshots(
 //         }
 //     }
 // }
+
+void update_dynamic_text(Registry &r, sparse_array<DynamicText> &dynamicTexts)
+{
+    for (auto &&[dynamicText]: zipper(dynamicTexts)) {
+        dynamicText->text = std::to_string(dynamicText->variable);
+    }
+}

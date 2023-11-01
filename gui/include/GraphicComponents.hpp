@@ -65,3 +65,10 @@ struct Text {
 
     Text(std::string s, int count) : text(s), font_size(count) {};
 };
+
+struct DynamicText {
+    std::string text = "";
+    int &variable;
+
+    DynamicText(int &variable): variable(variable) {};
+};

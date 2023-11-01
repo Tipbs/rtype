@@ -36,3 +36,4 @@ void make_infinite_background(
 //     Registry &r, sparse_array<Weapon> &weap,
 //     sparse_array<Couleur> &col,
 //     sparse_array<HUD> &hud);
+void update_dynamic_text(Registry &r, sparse_array<DynamicText> &dynamicTexts);

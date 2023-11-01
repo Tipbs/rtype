@@ -25,6 +25,7 @@ void Factory::register_components()
         Rect,
         Color,
         Text,
+        DynamicText,
 #endif
         Player,
         Current_Player,
@@ -66,6 +67,7 @@ void Factory::add_systems()
         make_infinite_background);
     // _reg.add_system<Weapon, Couleur, HUD>(
     //     updateHUD);
+    _reg.add_system<DynamicText>(update_dynamic_text);
 
 #else
 
@@ -207,8 +209,8 @@ const Entity Factory::create_zorg(Registry &reg, Position pos, size_t net_id)
     return (size_t) new_entity;
 }
 
-#ifndef SERVER
-void Factory::create_hud(const int ScreenWidth, const int ScreenHeight)
+// #ifndef SERVER
+void Factory::create_hud(const int ScreenWidth, const int ScreenHeight, Score &score)
 {
     float PosWidth = 0;
     float PosHeight = 9. * ScreenHeight / 10.;
@@ -272,6 +274,7 @@ void Factory::create_hud(const int ScreenWidth, const int ScreenHeight)
     _reg.emplace_component<Color>(ChargeText, WHITE);
 
     Entity const ScoreText = _reg.spawn_entity();
+    _reg.emplace_component<DynamicText>(ScoreText, score.score)
     _reg.emplace_component<Text>(ScoreText, "Score : ", 32);
     _reg.emplace_component<Position>(ScoreText, PosWidth, PosHeight + (SizHeight / 2));
     _reg.emplace_component<Color>(ScoreText, WHITE);
@@ -283,7 +286,7 @@ void Factory::create_hud(const int ScreenWidth, const int ScreenHeight)
 
 
 }
-#endif
+// #endif
 
 const Entity Factory::create_boss_projectile(Position pos, Direction diro)
 {
