@@ -27,6 +27,7 @@ void damages(
     size_t i1, size_t i2)
 {
     std::cout << "y a collision\n";
+    std::cout << "Hello world" << std::endl;
     healt[i1]->health -= dama[i2]->damages;
     // std::osyncstream(std::cout) << "User " << i1 << " has taken " << dama[i2]->damages << " damages. He now have " << healt[i1]->health << " HP." << std::endl;
     healt[i2]->health -= dama[i1]->damages;

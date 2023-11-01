@@ -43,6 +43,7 @@ void display(
     sparse_array<Text> &text)
 {
     BeginDrawing();
+    auto now = std::chrono::steady_clock::now();
     for (auto &&[ind, pos, siz, spri] :
          indexed_zipper(positions, size, sprite)) {
         Vector2 Rectpos = {
