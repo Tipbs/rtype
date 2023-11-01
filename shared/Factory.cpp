@@ -11,6 +11,8 @@
     #include <raylib.h>
     #include "../gui/include/GraphicComponents.hpp"
     #include "../gui/include/GraphicSystems.hpp"
+#else
+    #include "../server/include/ServerSystems.hpp"
 #endif
 
 
@@ -19,7 +21,6 @@ void Factory::register_components()
     _reg.register_components<
 #ifndef SERVER
         Sprite,
-        Weapon,
         InputField,
         Rectangle,
         // HUD,
@@ -28,6 +29,7 @@ void Factory::register_components()
         Text,
 #endif
         Player,
+        Weapon,
         Current_Player,
         Position,
         Damages,
@@ -41,12 +43,16 @@ void Factory::register_components()
         Couleur,
         ProjectileShooter,
         Backgrounds,
-        AlwaysShoot
+        AlwaysShoot,
+        EnemyCount
     >();
 }
 
 void Factory::add_systems()
 {
+#ifdef SERVER
+    _reg.add_system<Direction, Speed, Position, Size, Weapon, Player>(synchronize); 
+#endif
     _reg.add_system<SpawnGrace>(update_grace);
     _reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     _reg.add_system<Position, Speed, Direction>(move);
@@ -72,6 +78,8 @@ void Factory::add_systems()
     //     updateHUD);
 
 #else
+    _reg.add_system<Position, Speed, Weapon, NetworkedEntity>(extract); 
+    _reg.add_system<Player, Direction>(resetPlayersDir); 
 
 #endif
 }
@@ -112,7 +120,7 @@ const Entity Factory::create_player(int id, Position pos)
     _reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
     _reg.emplace_component<Animation>(new_entity);
     _reg.emplace_component<Couleur>(new_entity, 0);
-    _reg.emplace_component<NetworkedEntity>(new_entity, id);
+    _reg.emplace_component<NetworkedEntity>(new_entity, id, EntityType::Player);
 
     return new_entity;
 }
@@ -126,17 +134,27 @@ const Entity Factory::create_weapon(Entity owner)
     return weapon;
 }
 
-const Entity Factory::create_enemy()
+const Entity Factory::create_enemy(Position pos)
 {
     const Entity ent = _reg.spawn_entity();
-    float randomNumber = rand() % 100 + 1;
-    Utils::Vec2 pos = {900, randomNumber};
 
     _reg.emplace_component<Position>(ent, pos);
     _reg.emplace_component<Speed>(ent, 5);
     _reg.emplace_component<Direction>(ent, 50, 0);
     _reg.emplace_component<SpawnGrace>(ent, std::chrono::seconds(5));
-    // _reg.emplace_component<NetworkEntity>(ent, id);
+     _reg.emplace_component<NetworkedEntity>(ent, (size_t)ent + 4, EntityType::Enemy);
+    return ent;
+}
+
+const Entity Factory::create_enemy(int id, Position pos)
+{
+    const Entity ent = _reg.spawn_entity();
+
+    _reg.emplace_component<Position>(ent, pos);
+    _reg.emplace_component<Speed>(ent, 5);
+    _reg.emplace_component<Direction>(ent, 50, 0);
+    _reg.emplace_component<SpawnGrace>(ent, std::chrono::seconds(5));
+     _reg.emplace_component<NetworkedEntity>(ent, id, EntityType::Enemy);
     return ent;
 }
 
