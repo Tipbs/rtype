@@ -19,8 +19,8 @@ void move(
 		pos->pos_X += x_offset * GetFrameTime();
 		pos->pos_Y += y_offset * GetFrameTime();
 #else
-        pos->pos_X += x_offset;
-        pos->pos_Y += y_offset;
+        pos->pos_X += x_offset * GetFrameTime();
+        pos->pos_Y += y_offset * GetFrameTime();
  #endif
     }
 }

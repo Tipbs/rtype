@@ -56,31 +56,27 @@ void Factory::add_systems()
     _reg.add_system<SpawnGrace>(update_grace);
     _reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
     _reg.add_system<Position, Speed, Direction>(move);
+    _reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
+    _reg.add_system<ProjectileShooter, Position, Size, Player>(shootProjectiles);
 #ifndef SERVER
     _reg.add_system<Position, Size, Sprite, Player, Rectangle, InputField, Rect, Color, Text>(
         display);
-    _reg.add_system<Direction, Player, Sprite, Speed, Couleur>(
+    _reg.add_system<Direction, Current_Player, Sprite, Speed, Couleur>(
         handle_dir_inputs);
     _reg.add_system<Couleur, Size, Weapon, Position>(handle_shoot_inputs);
     //    _reg.add_system<InputField, Rectangle>(hadle_text_inputs);
     _reg.add_system<Sprite, Couleur>(
         do_animation);
-    _reg.add_system<Sprite, Couleur, Weapon>(
-        do_ship_animation);
     _reg.add_system<Position, Size, Backgrounds>(
         make_infinite_background);
-    _reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
-    _reg.add_system<ProjectileShooter, Position, Size, Player>(shootProjectiles);
     _reg.add_system<
         Position, NetworkedEntity, Speed, Current_Player, Size, Player>(
         updateWithSnapshots);
     // _reg.add_system<Weapon, Couleur, HUD>(
     //     updateHUD);
-
 #else
     _reg.add_system<Position, Speed, Weapon, NetworkedEntity>(extract); 
-    _reg.add_system<Player, Direction>(resetPlayersDir); 
-
+    _reg.add_system<Player, Direction>(resetPlayersDir);
 #endif
 }
 
@@ -115,7 +111,8 @@ const Entity Factory::create_player(int id, Position pos)
 #ifndef SERVER
     _reg.emplace_component<Sprite>(new_entity, path.c_str(), 83, 43, 2, 5);
 #endif
-    _reg.emplace_component<Speed>(new_entity, 5);
+    _reg.emplace_component<Speed>(new_entity, 300);
+
     _reg.emplace_component<Direction>(new_entity, 0, 0);
     _reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
     _reg.emplace_component<Animation>(new_entity);

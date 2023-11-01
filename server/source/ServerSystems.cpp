@@ -52,10 +52,7 @@ void extract(
     sparse_array<Speed> &speeds, sparse_array<Weapon> &weapons,
     sparse_array<NetworkedEntity> &ents)
 {
-    for (auto &&[ind, pos, _] : indexed_zipper(positions, ents)) {
-        auto &spe = speeds[ind];
-        if (!(pos && spe && ents[ind]))
-            continue;
+    for (auto &&[ind, pos, ent_id] : indexed_zipper(positions, ents)) {
         NetEnt tmp;
         tmp.type = ents[ind]->_type;
         tmp.id = ind;
@@ -66,8 +63,7 @@ void extract(
             tmp.attacking = weapon->IsShooting;
             tmp.attackState = weapon->current_charge;
         }
-        if (tmp.type == EntityType::Player)
-            reg._netent.push_back(tmp);
+		reg._netent.push_back(tmp);
     }
 }
 
