@@ -1,6 +1,7 @@
 #include <chrono>
 #include <climits>
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <semaphore>
 #include <raylib.h>

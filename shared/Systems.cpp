@@ -105,7 +105,7 @@ void enemyAlwaysShoot(
     Factory factory(r);
 
     auto now = std::chrono::steady_clock::now();
-    for (auto index = 0; index != always_shoot.size(); ++index) {
+    for (size_t index = 0; index != always_shoot.size(); ++index) {
         auto &shoot = always_shoot[index];
         const auto &pos = positions[index];
         const auto &size = sizes[index];
@@ -172,7 +172,7 @@ static void updateBossProjectiles(
     auto size = shooter.infos.size();
     auto radius = 80;
     // shift the next shot
-    for (auto i = 0; i != size; ++i) {
+    for (size_t i = 0; i != size; ++i) {
         double angle = 2 * std::numbers::pi * i / size + shooter.shotCount * 45;
         double x = cos(angle) * radius;
         double y = sin(angle) * radius;
@@ -202,8 +202,8 @@ void shootProjectiles(
     Factory factory(r);
 
     auto now = std::chrono::steady_clock::now();
-    for (auto index = 0; index != shooters.size(); ++index) {
-        if (!(shooters[index] && positions[index] && sizes[index]))
+    for (size_t index = 0; index != shooters.size(); ++index) {
+        if (!(shooters[index] && positions[index]) && sizes[index])
             continue;
         if (now > shooters[index]->lastShot + shooters[index]->delay) {
             shooters[index]->lastShot = now;
