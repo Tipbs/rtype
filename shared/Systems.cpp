@@ -203,7 +203,7 @@ void shootProjectiles(
 
     auto now = std::chrono::steady_clock::now();
     for (size_t index = 0; index != shooters.size(); ++index) {
-        if (!(shooters[index] && positions[index]) && sizes[index])
+        if (!(shooters[index] && positions[index] && sizes[index]))
             continue;
         if (now > shooters[index]->lastShot + shooters[index]->delay) {
             shooters[index]->lastShot = now;
