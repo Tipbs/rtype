@@ -4,6 +4,7 @@
 #include "Systems.hpp"
 #include <chrono>
 #include <math.h>
+#include <numbers>
 #include <stdlib.h>     /* srand, rand */
 
 #ifndef SERVER
@@ -39,8 +40,8 @@ void Factory::register_components()
         Animation,
         Couleur,
         ProjectileShooter,
-        AlwaysShoot,
-        Backgrounds
+        Backgrounds,
+        AlwaysShoot
     >();
 }
 
@@ -56,17 +57,17 @@ void Factory::add_systems()
         handle_dir_inputs);
     _reg.add_system<Couleur, Size, Weapon, Position>(handle_shoot_inputs);
     //    _reg.add_system<InputField, Rectangle>(hadle_text_inputs);
-    _reg.add_system<
-        Position, NetworkedEntity, Speed, Current_Player, Size, Player>(
-        updateWithSnapshots);
     _reg.add_system<Sprite, Couleur>(
         do_animation);
     _reg.add_system<Sprite, Couleur, Weapon>(
         do_ship_animation);
     _reg.add_system<Position, Size, Backgrounds>(
         make_infinite_background);
-    _reg.add_system<AlwaysShoot, Position, Size>(
-        enemyAlwaysShoot);
+    _reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
+    _reg.add_system<ProjectileShooter, Position, Size, Player>(shootProjectiles);
+    _reg.add_system<
+        Position, NetworkedEntity, Speed, Current_Player, Size, Player>(
+        updateWithSnapshots);
     // _reg.add_system<Weapon, Couleur, HUD>(
     //     updateHUD);
 

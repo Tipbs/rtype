@@ -4,7 +4,7 @@
 #include "Component.hpp"
 #include "Entity.hpp"
 #include "Registry.hpp"
-#include "../../shared/NetEnt.hpp"
+#include "NetEnt.hpp"
 
 class Factory {
     public:
