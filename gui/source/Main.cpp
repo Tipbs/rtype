@@ -38,8 +38,7 @@ int main(int ac, char **av)
     auto net_player_info = net_client.get_player_id();
     Entity player =
         factory.create_player(net_player_info.id, net_player_info.pos);
-    Current_Player test;
-    reg.add_component<Current_Player>(player, std::move(test));
+    reg.emplace_component<Current_Player>(player);
     std::cout << "player pos id: " << net_player_info.id << std::endl;
     std::cout << "player pos x: " << net_player_info.pos.x << std::endl;
     std::cout << "player pos y: " << net_player_info.pos.y << std::endl;
