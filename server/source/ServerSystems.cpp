@@ -53,8 +53,9 @@ void extract(
         if (weapon) {
             tmp.attacking = weapon->IsShooting;
             tmp.attackState = weapon->current_charge;
-            reg._netent.push_back(tmp);
         }
+        if (tmp.type == EntityType::Player)
+            reg._netent.push_back(tmp);
     }
 }
 

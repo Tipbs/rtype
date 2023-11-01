@@ -128,18 +128,13 @@ void spawn_enemy(Registry &r,
     for (auto &&[enemyCount]: zipper(enemiesCount)) {
         enemyCount->timeSinceLastSpawn += GetFrameTime();
         if (enemyCount->leftToSpawn > 0 && enemyCount->timeSinceLastSpawn > enemyCount->spawnFrequency) {
-            std::cout << enemyCount->timeSinceLastSpawn << " enemies left : " << enemyCount->leftToSpawn << std::endl;
-            const Entity ent = r.spawn_entity();
+            enemyCount->timeSinceLastSpawn = 0;
+            enemyCount->leftToSpawn--;
+            Factory f(r);
             float randomNumber = rand() % 1080;
             Utils::Vec2 pos = {1000, randomNumber + 50};
 
-            r.emplace_component<Position>(ent, pos);
-            r.emplace_component<Speed>(ent, 300);
-            r.emplace_component<Direction>(ent, 50, 0);
-            r.emplace_component<SpawnGrace>(ent, std::chrono::seconds(5));
-            // r.emplace_component<NetworkEntity>(ent, id);
-            enemyCount->timeSinceLastSpawn = 0;
-            enemyCount->leftToSpawn--;
+            f.create_enemy(pos);
         }
     }
 }

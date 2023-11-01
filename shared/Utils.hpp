@@ -16,10 +16,12 @@ namespace Utils {
 
     struct PlayerId {
         std::size_t id;
+        Vec2 pos;
 
         template<class Archive>
         void serialize(Archive &ar, const unsigned int version) {
             ar &id;
+            ar &pos;
         };
     };
 };

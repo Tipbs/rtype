@@ -140,10 +140,12 @@ void udp_server::handle_send(
 }
 
 void udp_server::send_playerId(
-    std::size_t playerId, udp::endpoint client_endpoint)
+    Utils::PlayerId playerId, udp::endpoint client_endpoint)
 {
     Utils::PlayerId player;
-    player.id = playerId;
+    player.id = playerId.id;
+    player.pos.x = playerId.pos.x;
+    player.pos.y = playerId.pos.y;
     std::ostringstream oss;
     boost::archive::binary_oarchive archive(oss);
     archive << player;
@@ -163,18 +165,28 @@ void udp_server::wait_for_connexion(std::size_t bytes_transferred)
     if (bytes_transferred != 1 && clients.size() == 0)
         return;
     if (bytes_transferred == 1 && clients.count(_remote_point) == 0) {
-        Entity player = factory.create_player(0, Position(0, 0));
-        if (clients.size() == 0)
+        if (clients.size() == 0) {
             start_threads();
+            return;
+        }
+        Entity player = parser.create_player(netId);
         clients[_remote_point]._id = (size_t) player;
+        clients[_remote_point].player = (size_t) netId;
+        netId++;
         clients[_remote_point].isClientConnected = false;
         clients[_remote_point]._timer =
             boost::posix_time::microsec_clock::universal_time();
-        send_playerId(clients[_remote_point]._id, _remote_point);
+        Utils::PlayerId p;
+        p.id = clients[_remote_point]._id;
+        p.pos = parser.get_player_pos(p.id);
+        send_playerId(p, _remote_point);
     } else if (bytes_transferred == 1 && clients.count(_remote_point) != 0) {
         clients[_remote_point]._timer =
             boost::posix_time::microsec_clock::universal_time();
-        send_playerId(clients[_remote_point]._id, _remote_point);
+        Utils::PlayerId p;
+        p.id = clients[_remote_point]._id;
+        p.pos = parser.get_player_pos(p.id);
+        send_playerId(p, _remote_point);
     } else {
         clients[_remote_point].isClientConnected = true;
         clients[_remote_point]._timer =
@@ -221,6 +233,20 @@ void udp_server::start_receive() // Receive function
 
 void udp_server::start_threads()
 {
+    parser.open_file("./server/ressources/Maps/map_01.json");
+    Entity enemy_count = reg.spawn_entity();
+    reg.emplace_component<EnemyCount>(enemy_count, parser.get_enemy_count(), 5); 
+    Entity player = parser.create_player(netId);
+    clients[_remote_point]._id = (size_t) player;
+    clients[_remote_point].player = (size_t) netId;
+    netId++;
+    clients[_remote_point].isClientConnected = false;
+    clients[_remote_point]._timer =
+        boost::posix_time::microsec_clock::universal_time();
+    Utils::PlayerId p;
+    p.id = clients[_remote_point]._id;
+    p.pos = parser.get_player_pos(p.id);
+    send_playerId(p, _remote_point);
     tick = std::thread(&udp_server::handle_tick, this); // Timer thread
     broadcasting =
         std::thread(&udp_server::start_snapshot, this); // Snapshot thread
@@ -231,7 +257,7 @@ void udp_server::start_threads()
 
 udp_server::udp_server(std::size_t port)
     : _svc(), _socket(_svc, udp::endpoint(udp::v4(), port)), tick_timer(_svc),
-      check_timer(_svc)
+      check_timer(_svc), parser(reg)
 {
     Factory factory(reg);
 
