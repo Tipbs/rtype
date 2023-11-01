@@ -79,7 +79,7 @@ int main(int ac, char **av)
     //    reg.add_system<InputField, Rectangle>(hadle_text_inputs);
     reg.add_system<Position, Size>(make_infinite_background);
     reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
-    reg.add_system<ProjectileShooter, Position, Size>(shootProjectiles);
+    reg.add_system<ProjectileShooter, Position, Size, Player>(shootProjectiles);
     reg.add_system<Position, NetworkedEntity, Speed, Current_Player, Size, Player>(updateWithSnapshots);
 
     while (!WindowShouldClose()) {

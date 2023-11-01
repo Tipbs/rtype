@@ -78,6 +78,8 @@ struct AlwaysShoot {
 struct ProjectileInfo {
 	Position offset;
 	Direction dir;
+        ProjectileInfo(Position off, Direction direction)
+            : offset(off), dir(direction) {}
 };
 
 struct ProjectileShooter {

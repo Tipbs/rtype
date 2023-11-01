@@ -56,7 +56,7 @@ size_t create_player(Registry &reg, size_t id, Position pos)
     reg.add_component(new_entity, std::move(gra));
     reg.add_component(new_entity, std::move(player));
 
-    return (size_t) new_entity;
+    return (size_t)new_entity;
 }
 
 void create_ammo(
@@ -180,18 +180,6 @@ size_t create_boss(Registry &reg, Position pos, size_t net_id)
     reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
     reg.emplace_component<Health>(new_entity, 1000);
     auto &shooter = reg.add_component<ProjectileShooter>(new_entity, std::move(proj_shooter));
-    //shooter->infos.push_back(ProjectileInfo(Position(0, 10), Direction(0 * 2, 0.2 * 2)));
-    //shooter->infos.push_back(ProjectileInfo(Position(5, 5), Direction(0.1 * 2, 0.1 * 2)));
-    //shooter->infos.push_back(ProjectileInfo(Position(5, 5), Direction(0.05 * 2, 0.15 * 2)));
-    //shooter->infos.push_back(ProjectileInfo(Position(5, 5), Direction(0.15 * 2, 0.05 * 2)));
-    //shooter->infos.push_back(ProjectileInfo(Position(5, -5), Direction(0.1 * 2, -0.1 * 2)));
-    //shooter->infos.push_back(ProjectileInfo(Position(10, 0), Direction(0.2 * 2, 0 * 2)));
-    //shooter->infos.push_back(ProjectileInfo(Position(0, -10), Direction(0 * 2, -0.2 * 2)));
-    //shooter->infos.push_back(ProjectileInfo(Position(-5, -5), Direction(-0.1 * 2, -0.1 * 2)));
-    //shooter->infos.push_back(ProjectileInfo(Position(-5, -5), Direction(-0.05 * 2, -0.15 * 2)));
-    //shooter->infos.push_back(ProjectileInfo(Position(-5, -5), Direction(-0.15 * 2, -0.05 * 2)));
-    //shooter->infos.push_back(ProjectileInfo(Position(-10, 0), Direction(-0.2 * 2, 0 * 2)));
-    //shooter->infos.push_back(ProjectileInfo(Position(-5, -5), Direction(-0.1 * 2, 0.1 * 2)));
     auto radius = 80;
     for (int i = 0; i <= 12; i++) {
         double angle = 2 * std::numbers::pi * i / 12;
@@ -200,7 +188,7 @@ size_t create_boss(Registry &reg, Position pos, size_t net_id)
         shooter->infos.push_back(
             ProjectileInfo(Position(x, y), Direction(cos(angle) / 3, sin(angle) / 3)));
     }
-    // reg.emplace_component<NetworkedEntity>(new_entity, net_id);
+     //reg.emplace_component<NetworkedEntity>(new_entity, net_id);
 
     return (size_t) new_entity;
 }

@@ -17,6 +17,5 @@ void enemyAlwaysShoot(
     sparse_array<Position> &positions, sparse_array<Size> &sizes);
 void shootProjectiles(
     Registry &r, sparse_array<ProjectileShooter> &shooters,
-    sparse_array<Position> &positions, sparse_array<Size> &sizes);
-void bossUpdateProjectiles(
-    Registry &r, sparse_array<ProjectileShooter> &shooters);
+    sparse_array<Position> &positions, sparse_array<Size> &sizes,
+    sparse_array<Player> &player);
