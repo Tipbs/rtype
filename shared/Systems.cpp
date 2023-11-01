@@ -1,57 +1,26 @@
-#include "Systems.hpp"
-#include <chrono>
 #include <cmath>
-#include <cstddef>
-#include <cstdlib>
-#include <iostream>
-#include <numbers>
-#include <ostream>
-#include <syncstream>
-#include "Bundle.hpp"
 #include "Component.hpp"
+#include "Factory.hpp"
+#include "Systems.hpp"
 #include "indexed_zipper.hpp"
-#include "Registry.hpp"
 #include "zipper.hpp"
-
-#ifdef SERVER
-std::mutex mutex;
-static auto time_since_last_tick =
-    std::chrono::high_resolution_clock::now(); // voir si raylib utilise m�me
-                                               // chose
-
-// float GetFrameTime()
-//{
-//	std::scoped_lock lock(mutex);
-//	const auto now = std::chrono::high_resolution_clock::now();
-//	return std::chrono::duration<double>(now -
-// time_since_last_tick).count();
-// }
-float GetFrameTime() { return 1; }
-
-void ResetFrameTime()
-{
-    std::scoped_lock lock(mutex);
-    time_since_last_tick = std::chrono::high_resolution_clock::now();
-}
-#else
-#include <raylib.h>
-#endif // !SERVER
-
-std::chrono::steady_clock::time_point GetTimePoint()
-{
-    return std::chrono::steady_clock::now();
-}
 
 void move(
     Registry &r, sparse_array<Position> &positions, sparse_array<Speed> &speed,
     sparse_array<Direction> &dir)
 {
-    for (auto &&[index, pos, spe, diro] :
-         indexed_zipper(positions, speed, dir)) {
-        // std::osyncstream(std::cout) << "y = " << pos->pos_Y << "  x = " <<
-        // pos->pos_X << std::endl;
-        pos->pos_X += spe->speed * diro->dir_X * GetFrameTime();
-        pos->pos_Y += spe->speed * diro->dir_Y * GetFrameTime();
+
+    for (auto &&[pos, spe, diro]: zipper(positions, speed, dir)) {
+        double x_offset = spe->speed * diro->dir_X;
+        double y_offset = spe->speed * diro->dir_Y;
+
+#ifdef SERVER
+		pos->pos_X += x_offset * GetFrameTime();
+		pos->pos_Y += y_offset * GetFrameTime();
+#else
+        pos->pos_X += x_offset;
+        pos->pos_Y += y_offset;
+ #endif
     }
 }
 
@@ -62,50 +31,49 @@ void damages(
     std::cout << "y a collision\n";
     std::cout << "Hello world" << std::endl;
     healt[i1]->health -= dama[i2]->damages;
+    // std::osyncstream(std::cout) << "User " << i1 << " has taken " << dama[i2]->damages << " damages. He now have " << healt[i1]->health << " HP." << std::endl;
     healt[i2]->health -= dama[i1]->damages;
+    // std::osyncstream(std::cout) << "User " << i2 << " has taken " << dama[i1]->damages << " damages. He now have " << healt[i2]->health << " HP." << std::endl;
     if (healt[i1]->health <= 0)
         r.kill_entity(r.entity_from_index(i1));
     if (healt[i2]->health <= 0)
         r.kill_entity(r.entity_from_index(i2));
 }
 
-void colision(
-    Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
-    sparse_array<SpawnGrace> &grace, sparse_array<Damages> &dam,
-    sparse_array<Health> &helth)
+void update_grace(Registry &r,
+sparse_array<SpawnGrace> &graces)
 {
     auto time = GetTimePoint();
-    for (auto &&[ind, pos, siz, dama, halth] :
-         indexed_zipper(positions, size, dam, helth)) {
-        if (grace[ind]
-                    .value_or(SpawnGrace(std::chrono::seconds(0)))
-                    .creation_time +
-                grace[ind].value_or(SpawnGrace(std::chrono::seconds(0))).time >=
-            time)
+
+    for (auto &&[ind, grace]: indexed_zipper(graces)) {
+        if (grace->creation_time + grace->time >= time) {
+            r.remove_component<SpawnGrace>(ind);
+        }
+    }
+}
+
+void colision(Registry &r,
+sparse_array<Position> &positions, 
+sparse_array<Size> &size, 
+sparse_array<SpawnGrace> &grace, 
+sparse_array<Damages> &dam, 
+sparse_array<Health> &helth)
+{
+    for (auto &&[ind, pos, siz, dama, halth]: indexed_zipper(positions, size, dam, helth)) {
+        if (grace[ind].has_value()) {
             continue;
-        for (size_t ind2 = ind + 1; ind2 < positions.size(); ind2++) {
-            if (grace[ind2]
-                        .value_or(SpawnGrace(std::chrono::seconds(0)))
-                        .creation_time +
-                    grace[ind2]
-                        .value_or(SpawnGrace(std::chrono::seconds(0)))
-                        .time >=
-                time)
+        }
+        for (auto &&[ind2, pos2, siz2, dama2, halth2]: indexed_zipper(positions, size, dam, helth)) {
+            if (ind2 <= ind || grace[ind2].has_value()) {
                 continue;
-            if (positions[ind].value().pos_X >
-                positions[ind2].value().pos_X + size[ind2].value().size_X / 2.)
+            }
+            if (pos->pos_X > pos2->pos_X + siz2->size_X)
                 continue;
-            else if (
-                positions[ind].value().pos_Y >
-                positions[ind2].value().pos_Y + size[ind2].value().size_Y / 2.)
+            else if (pos->pos_Y > pos2->pos_Y + siz2->size_Y)
                 continue;
-            else if (
-                positions[ind2].value().pos_X >
-                positions[ind].value().pos_X - size[ind].value().size_X / 2.)
+            else if (pos2->pos_X > pos->pos_X + siz->size_X)
                 continue;
-            else if (
-                positions[ind2].value().pos_Y >
-                positions[ind].value().pos_Y - size[ind].value().size_Y / 2.)
+            else if (pos2->pos_Y > pos->pos_Y + siz->size_Y)
                 continue;
             else
                 damages(r, helth, dam, ind, ind2);
@@ -117,6 +85,8 @@ void enemyAlwaysShoot(
     Registry &r, sparse_array<AlwaysShoot> &always_shoot,
     sparse_array<Position> &positions, sparse_array<Size> &sizes)
 {
+    Factory factory(r);
+
     auto now = std::chrono::steady_clock::now();
     for (auto index = 0; index != always_shoot.size(); ++index) {
         auto &shoot = always_shoot[index];
@@ -126,12 +96,42 @@ void enemyAlwaysShoot(
             continue;
         if (now - shoot->last_shoot > shoot->delay) {
             shoot->last_shoot = now;
-            create_ammo(
-                r,
+            factory.create_ammo(
                 Position(
                     pos->pos_X - (size->size_X / 2),
                     pos->pos_Y + (size->size_Y / 2)),
                 Direction(-1, 0), 1.0, 3);
+        }
+    }
+}
+
+void update_weapon_position(Registry &r, sparse_array<Weapon> &weapons, sparse_array<Position> &positions)
+{
+    for (auto &&[weapon, position]: zipper(weapons, positions)) {
+        position->pos_X =  positions[static_cast<size_t>(weapon->owner_id)]->pos_X + 5;
+        position->pos_Y =  positions[static_cast<size_t>(weapon->owner_id)]->pos_Y + 5;
+    }
+}
+
+void spawn_enemy(Registry &r,
+    sparse_array<EnemyCount> &enemiesCount
+)
+{
+    for (auto &&[enemyCount]: zipper(enemiesCount)) {
+        enemyCount->timeSinceLastSpawn += GetFrameTime();
+        if (enemyCount->leftToSpawn > 0 && enemyCount->timeSinceLastSpawn > enemyCount->spawnFrequency) {
+            std::cout << enemyCount->timeSinceLastSpawn << " enemies left : " << enemyCount->leftToSpawn << std::endl;
+            const Entity ent = r.spawn_entity();
+            float randomNumber = rand() % 1080;
+            Utils::Vec2 pos = {1000, randomNumber + 50};
+
+            r.emplace_component<Position>(ent, pos);
+            r.emplace_component<Speed>(ent, 300);
+            r.emplace_component<Direction>(ent, 50, 0);
+            r.emplace_component<SpawnGrace>(ent, std::chrono::seconds(5));
+            // r.emplace_component<NetworkEntity>(ent, id);
+            enemyCount->timeSinceLastSpawn = 0;
+            enemyCount->leftToSpawn--;
         }
     }
 }
@@ -187,6 +187,8 @@ void shootProjectiles(
     sparse_array<Position> &positions, sparse_array<Size> &sizes,
     sparse_array<Player> &players)
 {
+    Factory factory(r);
+
     auto now = std::chrono::steady_clock::now();
     for (auto index = 0; index != shooters.size(); ++index) {
         if (!(shooters[index] && positions[index]) && sizes[index])
@@ -196,8 +198,8 @@ void shootProjectiles(
             auto size_as_pos =
                 Position(sizes[index]->size_X / 2, sizes[index]->size_Y / 2);
             for (auto &proj : shooters[index]->infos) {
-                create_boss_projectile(
-                    r, *positions[index] + size_as_pos + proj.offset, proj.dir);
+                factory.create_boss_projectile(
+                    *positions[index] + size_as_pos + proj.offset, proj.dir);
             }
             ++shooters[index]->shotCount;
             updateBossProjectiles(

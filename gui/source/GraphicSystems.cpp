@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <syncstream>
 #include <raylib.h>
-#include "../../shared/Bundle.hpp"
+#include "../../shared/Factory.hpp"
 #include "../../shared/indexed_zipper.hpp"
 #include "../../shared/Registry.hpp"
 #include "../../shared/Sparse_array.hpp"
@@ -11,42 +11,41 @@
 #include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
 
+std::vector<Color>ColorById {
+    BLUE,
+    PURPLE,
+    RED,
+    YELLOW,
+    GREEN
+};
+
+void draw_rectangle(sparse_array<Rect> &rect, sparse_array<Color> &col)
+{
+    for (auto &&[recto, color] : zipper(rect, col))
+        if (recto->draw_lines)
+            DrawRectangleLines(recto->rect.x, recto->rect.y, recto->rect.width, recto->rect.height, color.value());
+        else
+            DrawRectangle(recto->rect.x, recto->rect.y, recto->rect.width, recto->rect.height, color.value());
+}
+
+void draw_text(sparse_array<Text> &text, sparse_array<Position> &positions, sparse_array<Color> &col)
+{
+    for (auto &&[texto, pos, color] : zipper(text, positions, col))
+        DrawText(texto->text.c_str(), pos->pos_X, pos->pos_Y, texto->font_size, color.value());
+}
+
 void display(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
     sparse_array<Sprite> &sprite, sparse_array<Player> &anim,
-    sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields)
+    sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields,
+    sparse_array<Rect> &rect,
+    sparse_array<Color> &col,
+    sparse_array<Text> &text)
 {
     BeginDrawing();
     auto now = std::chrono::steady_clock::now();
     for (auto &&[ind, pos, siz, spri] :
          indexed_zipper(positions, size, sprite)) {
-        if (!(pos && siz && spri))
-            continue;
-        if (sprite[ind]->width_max == 8 && sprite[ind]->height_max == 5) {
-            sprite[ind]->sprite.y =
-                sprite[ind]->color_id * sprite[ind]->height_padding;
-            sprite[ind]->sprite.x +=
-                (sprite[ind]->sprite.x / sprite[ind]->width_padding ==
-                         sprite[ind]->width_max - 1
-                     ? 0 // - sprite[ind]->width_padding)
-                     : sprite[ind]->width_padding);
-        } else if (
-            now > (sprite[ind]->time_since_last_anim +
-                   sprite[ind]->animation_delay)) {
-            sprite[ind]->sprite.y =
-                sprite[ind]->color_id * sprite[ind]->height_padding;
-            sprite[ind]->sprite.x += sprite[ind]->width_padding;
-            sprite[ind]->time_since_last_anim = now;
-        }
-        if (anim[ind]) {
-            sprite[ind]->sprite.y =
-                anim[ind]->color_id * sprite[ind]->height_padding;
-            if (anim[ind]->IsShooting)
-                sprite[ind]->sprite.x = 1 * sprite[ind]->width_padding;
-            else
-                sprite[ind]->sprite.x = 0 * sprite[ind]->width_padding;
-        }
-
         Vector2 Rectpos = {
             (float) (positions[ind].value().pos_X),
             (float) positions[ind].value().pos_Y};
@@ -54,40 +53,81 @@ void display(
             sprite[ind].value().spritesheet, sprite[ind].value().sprite,
             Rectpos, WHITE);
     }
+
+    draw_rectangle(rect, col);
+    draw_text(text, positions, col);
+
     EndDrawing();
 }
 
-void handle_dir_inputs(
-    Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &anim,
-    sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds,
-    sparse_array<Current_Player> &currents)
+void do_animation(
+    Registry &r, sparse_array<Sprite> &sprites,
+    sparse_array<Couleur> &couleurs)
 {
-    for (auto &&[diro, anima, sprit, spe, current] :
-         zipper(dir, anim, sprite, speeds, currents)) {
-        const double AnimationPad = 0.02;
-        double heigh = 1;
-        heigh = anima->count;
+    for (auto &&[sprite, colors] : zipper(sprites, couleurs)) {
+        if (sprite->width_max == 8 && sprite->height_max == 5) { //Ammunition case
+            sprite->sprite.y =
+                colors->color_id * sprite->height_padding;
+            sprite->sprite.x +=
+                (sprite->sprite.x / sprite->width_padding ==
+                         sprite->width_max - 1
+                     ? -6 * sprite->width_padding
+                     : sprite->width_padding);
+        } else { //Looping sprites frames
+            sprite->sprite.x =
+                (sprite->sprite.x / sprite->width_padding ==
+                         sprite->width_max - 1
+                     ? 0
+                     : sprite->sprite.x + sprite->width_padding);
+        }
+    }
+}
+
+void do_ship_animation(
+    Registry &r, sparse_array<Sprite> &sprites,
+    sparse_array<Couleur> &couleurs, sparse_array<Weapon> &weapons)
+{
+    for (auto &&[weapon] : zipper(weapons)) {
+        sprites[(size_t)weapon->owner_id]->sprite.y =
+            couleurs[(size_t)weapon->owner_id]->color_id * sprites[(size_t)weapon->owner_id]->height_padding;
+        if (weapon->IsShooting)
+            sprites[(size_t)weapon->owner_id]->sprite.x = 1 * sprites[(size_t)weapon->owner_id]->width_padding;
+        else
+            sprites[(size_t)weapon->owner_id]->sprite.x = 0 * sprites[(size_t)weapon->owner_id]->width_padding;
+    }
+}
+
+void make_infinite_background(
+    Registry &r, sparse_array<Position> &positions,
+    sparse_array<Size> &sizes, sparse_array<Backgrounds> &bg)
+{    
+    for (auto &&[position, size, back] : zipper(positions, sizes, bg)) {
+        if (position->pos_X < -2 * size->size_X)
+            position->pos_X += 2 * size->size_X;
+    }
+}
+
+void handle_dir_inputs(
+    Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &players,
+    sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds,
+    sparse_array<Couleur> &colors)
+{
+    for (auto &&[diro, player, sprit, spe, color] :
+         zipper(dir, players, sprite, speeds, colors)) {
         Vector2 moves = {0, 0};
         double speedScale = 1;
+
+        if (IsKeyDown(KEY_LEFT_SHIFT))
+            speedScale /= 2;
 
         if (IsKeyDown(KEY_RIGHT))
             moves.x += 1;
         if (IsKeyDown(KEY_LEFT))
             moves.x -= 1;
-        if (IsKeyDown(KEY_LEFT_SHIFT))
-            speedScale /= 2;
-
-        if (IsKeyDown(KEY_DOWN) == IsKeyDown(KEY_UP)) {
-            heigh = (heigh < 1)    ? heigh + AnimationPad
-                    : (heigh == 1) ? 1
-                                   : heigh - AnimationPad;
-        } else if (IsKeyDown(KEY_UP)) {
-            moves.y -= 1; // 1;
-            heigh = (heigh >= 2) ? 2 : heigh + (5 * AnimationPad);
-        } else if (IsKeyDown(KEY_DOWN)) {
+        if (IsKeyDown(KEY_UP))
+            moves.y -= 1;
+        if (IsKeyDown(KEY_DOWN))
             moves.y += 1;
-            heigh = (heigh <= 0) ? 0 : heigh - (5 * AnimationPad);
-        }
         diro->dir_X = moves.x * speedScale;
         diro->dir_Y = moves.y * speedScale;
         // speeds[1]->speed = speed;
@@ -96,35 +136,37 @@ void handle_dir_inputs(
         r.currentCmd.cmd.moved.y += moves.y * GetFrameTime() * speedScale;
         r.currentCmd.mutex.unlock();
         if (IsKeyPressed(KEY_C))
-            anima->color_id = anima->color_id == 4 ? 0 : anima->color_id + 1;
-        anima->count = heigh;
+            color->color_id = color->color_id == 4 ? 0 : color->color_id + 1;
         break;
     }
 }
 
 void handle_shoot_inputs(
-    Registry &r, sparse_array<Player> &anim, sparse_array<Position> &pos,
-    sparse_array<Size> &siz, sparse_array<Current_Player> &current)
+    Registry &r, sparse_array<Couleur> &colors, sparse_array<Size> &sizes,
+    sparse_array<Weapon> &weapons, sparse_array<Position> &positions)
 {
-    for (auto &&[index, anima, posi, sizo, _] :
-         indexed_zipper(anim, pos, siz, current)) {
+    Factory factory(r);
+
+    for (auto &&[weapon] : zipper(weapons)) {
+        size_t owner_id = static_cast<size_t>(weapon->owner_id);
         if (IsKeyDown(KEY_SPACE)) {
-            anima->IsShooting = true;
-            anima->current_charge +=
-                (anima->current_charge >= 3) ? 0 : 5 * GetFrameTime();
+            weapon->IsShooting = true;
+            weapon->current_charge +=
+                (weapon->current_charge >= 3) ? 0 : 5 * GetFrameTime();
         }
         if (IsKeyReleased(KEY_SPACE)) {
-            anima->IsShooting = false;
-            create_ammo(
-                r,
+            weapon->IsShooting = false;
+            factory.create_ammo(
                 Position(
-                    posi->pos_X + (float) sizo->size_X,
-                    posi->pos_Y + (float) sizo->size_Y / 2),
-                anima->current_charge, anima->color_id);
+                    positions[owner_id]->pos_X +
+                        (float) sizes[owner_id]->size_X,
+                    positions[owner_id]->pos_Y +
+                        (float) sizes[owner_id]->size_Y / 2),
+                weapon->current_charge, colors[owner_id]->color_id);
             r.currentCmd.mutex.lock();
-            r.currentCmd.cmd.setAttack(anim[index]->current_charge);
+            r.currentCmd.cmd.setAttack(weapon->current_charge);
             r.currentCmd.mutex.unlock();
-            anim[index]->current_charge = 1.;
+            weapon->current_charge = 1.;
         }
         break;
     }
@@ -165,29 +207,6 @@ void hadle_text_inputs(
     }
 }
 
-void make_infinite_background(
-    Registry &r, sparse_array<Position> &pos, sparse_array<Size> &siz)
-{
-    if (pos[0] && siz[0]) {
-
-        // BG going to the Left
-        if (pos[0]->pos_X < -2 * siz[0]->size_X)
-            pos[0]->pos_X += 2 * siz[0]->size_X;
-
-        // BG going Upwards
-        // if (pos[0]->pos_Y < -siz[0]->size_Y)
-        //     pos[0]->pos_Y += siz[0]->size_Y;
-
-        // BG going to the Right
-        // if (pos[0]->pos_X > 0)
-        //     pos[0]->pos_X -= siz[0]->size_X;
-
-        // BG going Downwards
-        // if (pos[0]->pos_Y > 0)
-        //    pos[0]->pos_Y -= siz[0]->size_Y;
-    }
-}
-
 void killDeadEntities(Registry &r, sparse_array<NetworkedEntity> &entities)
 {
     auto &net_ents = r.netEnts.ents;
@@ -211,6 +230,7 @@ void updateWithSnapshots(
     sparse_array<Player> &players)
 {
     auto &net_ents = r.netEnts.ents;
+    Factory factory(r);
 
     r.netEnts.mutex.lock();
     for (auto it = net_ents.begin(); it != net_ents.end(); ++it) {
@@ -226,7 +246,7 @@ void updateWithSnapshots(
             continue;
         std::cout << "id: " << net.id << std::endl;
         auto pos = Position(net.pos.x, net.pos.y);
-        create_player(r, net.id, pos);
+        factory.create_player(net.id, pos);
         std::cout << "Creating player\n";
         it = net_ents.erase(it);
         if (it == net_ents.end())
@@ -252,15 +272,30 @@ void updateWithSnapshots(
             pos.value().pos_X = finded->pos.x;
             pos.value().pos_Y = finded->pos.y;
             if (!current && player && finded->attacking) {
-                create_ammo(
-                    r,
+                factory.create_ammo(
                     Position(
                         pos->pos_X + (float) size->size_X,
                         pos->pos_Y + (float) size->size_Y / 2),
                     finded->attackState, player->color_id);
+                // pour le moment le tir ne marche qu'avec les players
+                // vu que create_ammo demande un color_id
             }
         }
     }
     net_ents.clear();
     r.netEnts.mutex.unlock();
 }
+
+// void updateHUD(
+//     Registry &r, sparse_array<Weapon> &weap,
+//     sparse_array<Couleur> &col,
+//     sparse_array<HUD> &hud)
+// {
+//     for (auto &&[weapon] : zipper(weap)) {
+//         for (auto &&[hudy] : zipper(hud)) {
+//             hudy->charge = weapon->current_charge;
+//             hudy->score += 1;
+//             hudy->color_id = col[(size_t)weapon->owner_id]->color_id;
+//         }
+//     }
+// }

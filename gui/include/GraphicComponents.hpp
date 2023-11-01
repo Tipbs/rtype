@@ -13,73 +13,6 @@ struct Sprite {
     std::chrono::duration<float> animation_delay = std::chrono::milliseconds(500);
     std::chrono::steady_clock::time_point time_since_last_anim = std::chrono::steady_clock::now();
 
-    Sprite(
-        char *path, int width, int height, double width_multiplier,
-        double height_multiplier)
-    {
-        Image sprit = LoadImage(path);
-        ImageResizeNN(
-            &sprit, width * width_multiplier, height * height_multiplier);
-        spritesheet = LoadTextureFromImage(sprit);
-        width_padding = spritesheet.width / width_multiplier;
-        height_padding = spritesheet.height / height_multiplier;
-        width_max = width_multiplier;
-        height_max = height_multiplier;
-        sprite.height = (spritesheet.height) / height_multiplier;
-        sprite.width = (spritesheet.width) / width_multiplier;
-        sprite.x = 0;
-        sprite.y = 0;
-    }
-
-    Sprite(
-        const char *path, int width, int height, double width_multiplier,
-        double height_multiplier)
-    {
-        Image sprit = LoadImage(path);
-        ImageResizeNN(
-            &sprit, width * width_multiplier, height * height_multiplier);
-        spritesheet = LoadTextureFromImage(sprit);
-        width_padding = spritesheet.width / width_multiplier;
-        height_padding = spritesheet.height / height_multiplier;
-        width_max = width_multiplier;
-        height_max = height_multiplier;
-        sprite.height = (spritesheet.height) / height_multiplier;
-        sprite.width = (spritesheet.width) / width_multiplier;
-        sprite.x = 0;
-        sprite.y = 0;
-    }
-
-    Sprite(char *path, int width, int height)
-    {
-        std::cout << "mauvais constructeur\n";
-        Image sprit = LoadImage(path);
-        ImageResizeNN(&sprit, width, height);
-        spritesheet = LoadTextureFromImage(sprit);
-        width_padding = spritesheet.width;
-        height_padding = spritesheet.height;
-        width_max = width;
-        height_max = height;
-        sprite.height = (spritesheet.height);
-        sprite.width = (spritesheet.width);
-        sprite.x = 0;
-        sprite.y = 0;
-    }
-
-    Sprite(const char *path, int width, int height)
-    {
-        Image sprit = LoadImage(path);
-        ImageResizeNN(&sprit, width, height);
-        spritesheet = LoadTextureFromImage(sprit);
-        width_padding = spritesheet.width;
-        height_padding = spritesheet.height;
-        width_max = width;
-        height_max = height;
-        sprite.height = (spritesheet.height);
-        sprite.width = (spritesheet.width);
-        sprite.x = 0;
-        sprite.y = 0;
-    }
-
     Sprite(const char *path)
         : spritesheet(LoadTextureFromImage(LoadImage(path)))
     {
@@ -91,45 +24,41 @@ struct Sprite {
         sprite.width = (spritesheet.width);
         sprite.x = 0;
         sprite.y = 0;
-    }
+    };
 
-    Sprite(const char *path, double width_multiplier,
-        double height_multiplier)
+    Sprite(
+        const char *path, int width, int height, double width_multiplier = 1,
+        double height_multiplier = 1)
     {
         Image sprit = LoadImage(path);
         ImageResizeNN(
-            &sprit, sprit.width * width_multiplier, sprit.height * height_multiplier);
+            &sprit, width * width_multiplier, height * height_multiplier);
         spritesheet = LoadTextureFromImage(sprit);
-        width_padding = spritesheet.width;
-        height_padding = spritesheet.height;
-        width_max = spritesheet.width;
-        height_max = spritesheet.height;
-        sprite.height = spritesheet.height;
-        sprite.width = spritesheet.width;
+        width_padding = spritesheet.width / width_multiplier;
+        height_padding = spritesheet.height / height_multiplier;
+        width_max = width_multiplier;
+        height_max = height_multiplier;
+        sprite.height = (spritesheet.height) / height_multiplier;
+        sprite.width = (spritesheet.width) / width_multiplier;
         sprite.x = 0;
         sprite.y = 0;
-    }
-
-    Sprite(char *path) : spritesheet(LoadTextureFromImage(LoadImage(path)))
-    {
-        width_padding = spritesheet.width;
-        height_padding = spritesheet.height;
-        width_max = spritesheet.width;
-        height_max = spritesheet.height;
-        sprite.height = (spritesheet.height);
-        sprite.width = (spritesheet.width);
-        sprite.x = 0;
-        sprite.y = 0;
-    }
-};
-
-struct Animation {
-    // Rectangle rect; //contains size as well
-    Sprite sprite;
-    Position *frames; // contains a list of position for each frames of an
-                      // animated picture.
+    };
 };
 
 struct InputField {
     std::string field;
+};
+
+struct Rect {
+	bool draw_lines;
+	Rectangle rect;
+
+	Rect(bool draw_lines, Rectangle rect) : draw_lines(draw_lines), rect(rect) {};
+};
+
+struct Text {
+	std::string text;
+    int font_size = 0;
+
+    Text(std::string s, int count) : text(s), font_size(count) {};
 };
