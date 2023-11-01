@@ -63,7 +63,6 @@ void udp_client::handle_receive(
             _reg.netEnts.ents.insert(
                 _reg.netEnts.ents.begin(), tmp.begin(), tmp.end());
             _reg.netEnts.mutex.unlock();
-            std::cout << "netent size: " << _reg.netEnts.ents.size() << std::endl;
         } catch (std::exception &err) {
             std::osyncstream(std::cout)
                 << "Error in handle_receive: " << err.what()
