@@ -90,9 +90,46 @@ const Entity Factory::create_background(const int ScreenWidth, const int ScreenH
 #ifndef SERVER
     _reg.emplace_component<Sprite>(background, bgpath.c_str(), 3 * ScreenWidth, ScreenHeight);
 #endif
-    _reg.emplace_component<Speed>(background, 2);
+    _reg.emplace_component<Speed>(background, 0.2);
     _reg.emplace_component<Direction>(background, -1, 0);
     _reg.emplace_component<Backgrounds>(background);
+
+
+    Entity const background1 = _reg.spawn_entity();
+    std::string bgpath1 = "./gui/ressources/Backgrounds/Back_stars.png"; // temp > 2 > 3 > 1
+
+    _reg.emplace_component<Position>(background1, 0, 0);
+    _reg.emplace_component<Size>(background1, ScreenWidth, ScreenHeight);
+#ifndef SERVER
+    _reg.emplace_component<Sprite>(background1, bgpath1.c_str(), 3 * ScreenWidth, ScreenHeight);
+#endif
+    _reg.emplace_component<Speed>(background1, 0.5);
+    _reg.emplace_component<Direction>(background1, -1, 0);
+    _reg.emplace_component<Backgrounds>(background1);
+
+    Entity const background2 = _reg.spawn_entity();
+    std::string bgpath2 = "./gui/ressources/Backgrounds/Back_planets.png"; // temp > 2 > 3 > 1
+
+    _reg.emplace_component<Position>(background2, 0, 0);
+    _reg.emplace_component<Size>(background2, ScreenWidth, ScreenHeight);
+#ifndef SERVER
+    _reg.emplace_component<Sprite>(background2, bgpath2.c_str(), 3 * ScreenWidth, ScreenHeight);
+#endif
+    _reg.emplace_component<Speed>(background2, 0.8);
+    _reg.emplace_component<Direction>(background2, -1, 0);
+    _reg.emplace_component<Backgrounds>(background2);
+
+    Entity const background3 = _reg.spawn_entity();
+    std::string bgpath3 = "./gui/ressources/Backgrounds/Back_front.png"; // temp > 2 > 3 > 1
+
+    _reg.emplace_component<Position>(background3, 0, 0);
+    _reg.emplace_component<Size>(background3, ScreenWidth, ScreenHeight);
+#ifndef SERVER
+    _reg.emplace_component<Sprite>(background3, bgpath3.c_str(), 3 * ScreenWidth, ScreenHeight);
+#endif
+    _reg.emplace_component<Speed>(background3, 2);
+    _reg.emplace_component<Direction>(background3, -1, 0);
+    _reg.emplace_component<Backgrounds>(background3);
     return background;
 }
 
