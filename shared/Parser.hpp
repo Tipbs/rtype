@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../shared/NetEnt.hpp"
+#include "NetEnt.hpp"
 #include <string>
 #include "Factory.hpp"
 #include <boost/property_tree/ptree.hpp>
