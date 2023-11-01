@@ -15,3 +15,7 @@ void colision(
 void enemyAlwaysShoot(
     Registry &r, sparse_array<AlwaysShoot> &always_shoot,
     sparse_array<Position> &positions, sparse_array<Size> &sizes);
+void shootProjectiles(
+    Registry &r, sparse_array<ProjectileShooter> &shooters,
+    sparse_array<Position> &positions, sparse_array<Size> &sizes,
+    sparse_array<Player> &player);

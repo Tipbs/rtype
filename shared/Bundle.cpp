@@ -2,6 +2,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
+#include <numbers>
 #include "Component.hpp"
 #include "random"
 
@@ -37,12 +38,12 @@ size_t create_player(Registry &reg, size_t id, Position pos)
     Entity const new_entity = reg.spawn_entity();
     Player player(1, id);
     Size Size(83, 43);
-    std::string path = "./gui/ressources/Sprites/r-typesheet42.gif";
+    std::string path = "./gui/ressources/Sprites/testships.png";
     Speed speedo(300);
     Direction diro(0, 0);
     SpawnGrace gra(std::chrono::seconds(1));
 #ifndef SERVER
-    Sprite sprite(path.c_str(), 83, 43, 5, 5);
+    Sprite sprite(path.c_str(), 83, 43, 2, 5);
 #endif
 
     reg.add_component(new_entity, std::move(pos));
@@ -55,7 +56,7 @@ size_t create_player(Registry &reg, size_t id, Position pos)
     reg.add_component(new_entity, std::move(gra));
     reg.add_component(new_entity, std::move(player));
 
-    return (size_t) new_entity;
+    return (size_t)new_entity;
 }
 
 void create_ammo(
@@ -161,6 +162,7 @@ size_t create_boss(Registry &reg, Position pos, size_t net_id)
     Speed speedo(300);
     Direction diro(0, 0);
     SpawnGrace gra(std::chrono::seconds(1));
+    ProjectileShooter proj_shooter(std::chrono::milliseconds(350));
 #ifndef SERVER
     std::string path = "./gui/ressources/Sprites/boss.png";
     Sprite sprite(path.c_str(), 97, 102, 10, 1);
@@ -177,7 +179,16 @@ size_t create_boss(Registry &reg, Position pos, size_t net_id)
     //     new_entity, std::chrono::milliseconds(750));
     reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
     reg.emplace_component<Health>(new_entity, 1000);
-    // reg.emplace_component<NetworkedEntity>(new_entity, net_id);
+    auto &shooter = reg.add_component<ProjectileShooter>(new_entity, std::move(proj_shooter));
+    auto radius = 80;
+    for (int i = 0; i <= 12; i++) {
+        double angle = 2 * std::numbers::pi * i / 12;
+        double x = cos(angle) * radius;
+        double y = sin(angle) * radius;
+        shooter->infos.push_back(
+            ProjectileInfo(Position(x, y), Direction(cos(angle) / 3, sin(angle) / 3)));
+    }
+     //reg.emplace_component<NetworkedEntity>(new_entity, net_id);
 
     return (size_t) new_entity;
 }
@@ -186,12 +197,12 @@ void create_boss_projectile(
     Registry &reg, Position pos, Direction diro)
 {
     Entity const new_entity = reg.spawn_entity();
-    int hitwidth = 48;
-    int hitheight = 48;
+    int hitwidth = 25;
+    int hitheight = 25;
     Size Size(hitwidth, hitheight); // hitbox
     std::string path =
         "./gui/ressources/Sprites/red_projectile.png"; // fichier de la munition
-    Speed speedo(450);
+    Speed speedo(300);
     Damages damag(20);
     Position posCopy(
         pos.pos_X - (float) hitwidth / 2, pos.pos_Y - (float) hitheight / 2);
