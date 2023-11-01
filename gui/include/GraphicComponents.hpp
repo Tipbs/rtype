@@ -10,8 +10,10 @@ struct Sprite {
     double height_max;
     double width_max;
     int color_id = 0;
-    std::chrono::duration<float> animation_delay = std::chrono::milliseconds(500);
-    std::chrono::steady_clock::time_point time_since_last_anim = std::chrono::steady_clock::now();
+    std::chrono::duration<float> animation_delay =
+        std::chrono::milliseconds(500);
+    std::chrono::steady_clock::time_point time_since_last_anim =
+        std::chrono::steady_clock::now();
 
     Sprite(const char *path)
         : spritesheet(LoadTextureFromImage(LoadImage(path)))
@@ -50,14 +52,15 @@ struct InputField {
 };
 
 struct Rect {
-	bool draw_lines;
-	Rectangle rect;
+    bool draw_lines;
+    Rectangle rect;
 
-	Rect(bool draw_lines, Rectangle rect) : draw_lines(draw_lines), rect(rect) {};
+    Rect(bool draw_lines, Rectangle rect)
+        : draw_lines(draw_lines), rect(rect) {};
 };
 
 struct Text {
-	std::string text;
+    std::string text;
     int font_size = 0;
 
     Text(std::string s, int count) : text(s), font_size(count) {};

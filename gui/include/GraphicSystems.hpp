@@ -7,8 +7,7 @@ void display(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
     sparse_array<Sprite> &sprite, sparse_array<Player> &anim,
     sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields,
-    sparse_array<Rect> &rect,
-    sparse_array<Color> &col,
+    sparse_array<Rect> &rect, sparse_array<Color> &col,
     sparse_array<Text> &text);
 void handle_dir_inputs(
     Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &players,
@@ -26,14 +25,13 @@ void updateWithSnapshots(
     sparse_array<Current_Player> &currents, sparse_array<Size> &sizes,
     sparse_array<Player> &players);
 void do_animation(
-    Registry &r, sparse_array<Sprite> &sprites,
-    sparse_array<Couleur> &colors);
+    Registry &r, sparse_array<Sprite> &sprites, sparse_array<Couleur> &colors);
 void do_ship_animation(
-    Registry &r, sparse_array<Sprite> &sprites,
-    sparse_array<Couleur> &couleurs, sparse_array<Weapon> &weapons);
+    Registry &r, sparse_array<Sprite> &sprites, sparse_array<Couleur> &couleurs,
+    sparse_array<Weapon> &weapons);
 void make_infinite_background(
-    Registry &r, sparse_array<Position> &positions,
-    sparse_array<Size> &sizes, sparse_array<Backgrounds> &bg);
+    Registry &r, sparse_array<Position> &positions, sparse_array<Size> &sizes,
+    sparse_array<Backgrounds> &bg);
 // void updateHUD(
 //     Registry &r, sparse_array<Weapon> &weap,
 //     sparse_array<Couleur> &col,
