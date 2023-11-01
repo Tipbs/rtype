@@ -17,7 +17,10 @@ class Factory {
         const Entity create_weapon(Entity owner);
         const Entity create_enemy();
         const Entity create_ammo(Position pos, float damage_mult, int color_id);
+        const Entity create_ammo(Position pos, Direction diro, float damage_mult, int color_id);
         const Entity create_zorg(Registry &reg, Position pos, size_t net_id = 0);
+        const Entity create_boss_projectile(Position pos, Direction diro);
+        const Entity create_boss(Position pos, size_t net_id);
         void create_hud(const int ScreenWidth, const int ScreenHeight);
         void register_components();
         void add_systems();

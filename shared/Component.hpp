@@ -34,7 +34,7 @@ struct Position {
 	{
 		return Position(pos_X + pos.pos_X, pos_Y + pos.pos_Y);
 	};
-	Position(double x, double y): pos_X(x), pos_Y(y) {};
+	Position(double x = 0, double y = 0): pos_X(x), pos_Y(y) {};
 	Position(Utils::Vec2 vec): pos_X(vec.x), pos_Y(vec.y) {};
 };
 

@@ -38,6 +38,7 @@ int main(int ac, char **av)
         factory.create_player(net_client.get_player_id(), Position(0, 0));
     factory.create_weapon(player);
     factory.add_systems();
+    factory.create_boss(Position(100, 100), 0);
 
     while (!WindowShouldClose()) {
         reg.run_systems();

@@ -3,6 +3,7 @@
 #include "Entity.hpp"
 #include "Systems.hpp"
 #include <chrono>
+#include <math.h>
 #include <stdlib.h>     /* srand, rand */
 
 #ifndef SERVER
@@ -37,6 +38,7 @@ void Factory::register_components()
         NetworkedEntity,
         Animation,
         Couleur,
+        ProjectileShooter,
         Backgrounds
     >();
 }
@@ -132,6 +134,29 @@ const Entity Factory::create_enemy()
     _reg.emplace_component<SpawnGrace>(ent, std::chrono::seconds(5));
     // _reg.emplace_component<NetworkEntity>(ent, id);
     return ent;
+}
+
+const Entity Factory::create_ammo(
+    Position pos, Direction diro, float damage_mult,
+    int color_id)
+{
+    Entity const new_entity = _reg.spawn_entity();
+    int hitwidth = 120 * (damage_mult / 2);
+    int hitheight = 24 * (damage_mult / 2);
+
+    _reg.emplace_component<Position>(new_entity, pos.pos_X - (float) hitwidth / 2, pos.pos_Y - (float) hitheight / 2);
+    _reg.emplace_component<Size>(new_entity, hitwidth, hitheight);
+    #ifndef SERVER
+    _reg.emplace_component<Sprite>(new_entity, "./gui/ressources/Sprites/shoot_ammo.png", hitwidth, hitheight, 8, 5);
+    #endif
+    _reg.emplace_component<Speed>(new_entity, 7.5);
+    _reg.emplace_component<Direction>(new_entity, 1, 0);
+    _reg.emplace_component<Damages>(new_entity, damage_mult);
+    _reg.emplace_component<Health>(new_entity, 1);
+    _reg.emplace_component<Animation>(new_entity);
+    _reg.emplace_component<Couleur>(new_entity, color_id);
+    _reg.add_component(new_entity, std::move(diro));
+    return new_entity;
 }
 
 const Entity Factory::create_ammo(Position pos, float damage_mult, int color_id)
@@ -259,3 +284,57 @@ void Factory::create_hud(const int ScreenWidth, const int ScreenHeight)
 
 }
 #endif
+
+const Entity Factory::create_boss_projectile(Position pos, Direction diro)
+{
+    Entity const entity = _reg.spawn_entity();
+
+    _reg.add_component(entity, std::move(pos));
+    _reg.emplace_component<Size>(entity, 25, 25);
+#ifndef SERVER
+    _reg.emplace_component<Sprite>(entity, "./gui/ressources/Sprites/red_projectile.png", 25, 25, 1, 1);
+#endif
+    _reg.emplace_component<Speed>(entity, 8);
+    _reg.add_component(entity, std::move(diro));
+    _reg.emplace_component<Damages>(entity, 20);
+    _reg.emplace_component<Health>(entity, 1);
+    return entity;
+}
+
+const Entity Factory::create_boss(Position pos, size_t net_id)
+{
+    Entity const new_entity = _reg.spawn_entity();
+    Size Size(98, 100);
+    Speed speedo(300);
+    Direction diro(0, 0);
+    SpawnGrace gra(std::chrono::seconds(1));
+    ProjectileShooter proj_shooter(std::chrono::milliseconds(350));
+#ifndef SERVER
+    std::string path = "./gui/ressources/Sprites/boss.png";
+    Sprite sprite(path.c_str(), 97, 102, 10, 1);
+#endif
+
+    _reg.add_component(new_entity, std::move(pos));
+    _reg.add_component(new_entity, std::move(Size));
+#ifndef SERVER
+    _reg.add_component(new_entity, std::move(sprite));
+#endif
+    _reg.add_component(new_entity, std::move(speedo));
+    _reg.add_component(new_entity, std::move(diro));
+    // _reg.emplace_component<AlwaysShoot>(
+    //     new_entity, std::chrono::milliseconds(750));
+    _reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
+    _reg.emplace_component<Health>(new_entity, 1000);
+    auto &shooter = _reg.add_component<ProjectileShooter>(new_entity, std::move(proj_shooter));
+    auto radius = 80;
+    for (int i = 0; i <= 12; i++) {
+        double angle = 2 * std::numbers::pi * i / 12;
+        double x = cos(angle) * radius;
+        double y = sin(angle) * radius;
+        shooter->infos.push_back(
+            ProjectileInfo(Position(x, y), Direction(cos(angle) / 3, sin(angle) / 3)));
+    }
+     //_reg.emplace_component<NetworkedEntity>(new_entity, net_id);
+
+    return (size_t) new_entity;
+}
