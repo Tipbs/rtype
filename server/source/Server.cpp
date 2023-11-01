@@ -126,7 +126,7 @@ void udp_server::deserialize(const std::size_t bytes_transferred)
         UserCmd tmp;
         archive >> tmp;
         cmd_mutex.lock();
-        cmd[clients[_remote_point]._id].push_back(tmp);
+        cmd[clients[_remote_point].player].push_back(tmp);
         cmd_mutex.unlock();
     } catch (boost::archive::archive_exception &e) {
         std::cerr << "deserialization failed: " << e.what() << std::endl;
@@ -142,13 +142,9 @@ void udp_server::handle_send(
 void udp_server::send_playerId(
     Utils::PlayerId playerId, udp::endpoint client_endpoint)
 {
-    Utils::PlayerId player;
-    player.id = playerId.id;
-    player.pos.x = playerId.pos.x;
-    player.pos.y = playerId.pos.y;
     std::ostringstream oss;
     boost::archive::binary_oarchive archive(oss);
-    archive << player;
+    archive << playerId;
     std::string serializedData = oss.str();
     _socket.async_send_to(
         boost::asio::buffer(serializedData.c_str(), serializedData.size()),
@@ -170,8 +166,8 @@ void udp_server::wait_for_connexion(std::size_t bytes_transferred)
             return;
         }
         Entity player = parser.create_player(netId);
-        clients[_remote_point]._id = (size_t) player;
-        clients[_remote_point].player = (size_t) netId;
+        clients[_remote_point]._id = (size_t) netId;
+        clients[_remote_point].player = (size_t) player;
         netId++;
         clients[_remote_point].isClientConnected = false;
         clients[_remote_point]._timer =
@@ -237,8 +233,8 @@ void udp_server::start_threads()
     Entity enemy_count = reg.spawn_entity();
     reg.emplace_component<EnemyCount>(enemy_count, parser.get_enemy_count(), 5); 
     Entity player = parser.create_player(netId);
-    clients[_remote_point]._id = (size_t) player;
-    clients[_remote_point].player = (size_t) netId;
+    clients[_remote_point]._id = (size_t) netId;
+    clients[_remote_point].player = (size_t) player;
     netId++;
     clients[_remote_point].isClientConnected = false;
     clients[_remote_point]._timer =

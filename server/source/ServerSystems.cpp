@@ -53,7 +53,11 @@ void extract(
     sparse_array<NetworkedEntity> &ents)
 {
     for (auto &&[ind, pos, _] : indexed_zipper(positions, ents)) {
+        auto &spe = speeds[ind];
+        if (!(pos && spe && ents[ind]))
+            continue;
         NetEnt tmp;
+        tmp.type = ents[ind]->_type;
         tmp.id = ind;
         tmp.pos.x = pos->pos_X;
         tmp.pos.y = pos->pos_Y;

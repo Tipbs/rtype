@@ -247,8 +247,10 @@ void updateWithSnapshots(
             continue;
         std::cout << "id: " << net.id << std::endl;
         auto pos = Position(net.pos.x, net.pos.y);
-        factory.create_player(net.id, pos);
-        std::cout << "Creating player\n";
+        if (net.type == EntityType::Player) {
+            factory.create_player(net.id, pos);
+            std::cout << "Creating player\n";
+        }
         it = net_ents.erase(it);
         if (it == net_ents.end())
             break;

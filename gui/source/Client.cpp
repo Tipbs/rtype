@@ -51,8 +51,8 @@ void udp_client::handle_receive(
 {
     // std::osyncstream(std::cout) << "Received mais erreur\n";
     if (!error) {
-        // std::osyncstream(std::cout) << "Received " << bytes_transferred <<
-        // "bytes" << std::endl;
+         std::osyncstream(std::cout) << "Received " << bytes_transferred <<
+         "bytes" << std::endl;
         try {
             std::string seralizedData(_recv_buffer.data(), bytes_transferred);
             std::istringstream iss(seralizedData);
@@ -63,6 +63,7 @@ void udp_client::handle_receive(
             _reg.netEnts.ents.insert(
                 _reg.netEnts.ents.begin(), tmp.begin(), tmp.end());
             _reg.netEnts.mutex.unlock();
+            std::cout << "netent size: " << _reg.netEnts.ents.size() << std::endl;
         } catch (std::exception &err) {
             std::osyncstream(std::cout)
                 << "Error in handle_receive: " << err.what()
@@ -118,7 +119,8 @@ void udp_client::net_get_id(
             boost::archive::binary_iarchive archive(iss);
             Utils::PlayerId tmp;
             archive >> tmp;
-            _player_id = tmp.id;
+            _player_id.id = tmp.id;
+            _player_id.pos = tmp.pos;
         } catch (const std::exception &err) {
             std::cerr << "serialization exception: " << err.what();
             throw err;
@@ -140,7 +142,7 @@ void udp_client::fetch_player_id()
         boost::bind(
             &udp_client::net_get_id, this, boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred));
-    while (_player_id == -1) {
+    while (_player_id.id == -1) {
         if (std::chrono::system_clock::now() - timeout >
             std::chrono::seconds(10)) {
             std::cerr << "Failed to get player id from server\n";
@@ -151,7 +153,7 @@ void udp_client::fetch_player_id()
         _svc.run();
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-    std::osyncstream(std::cout) << "player id: " << _player_id << "\n";
+    std::osyncstream(std::cout) << "player id: " << _player_id.id << "\n";
 }
 
 udp_client::udp_client(
@@ -160,6 +162,7 @@ udp_client::udp_client(
     : _reg(reg), _socket(svc), _svc(svc), timer(svc)
 {
     _socket.open(udp::v4());
+    _player_id.id = -1;
     udp::resolver resolver(svc);
     udp::resolver::query query(boost::asio::ip::udp::v4(), ip, port);
     udp::resolver::iterator iter = resolver.resolve(query);

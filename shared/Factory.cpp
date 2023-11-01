@@ -142,7 +142,7 @@ const Entity Factory::create_enemy(Position pos)
     _reg.emplace_component<Speed>(ent, 5);
     _reg.emplace_component<Direction>(ent, 50, 0);
     _reg.emplace_component<SpawnGrace>(ent, std::chrono::seconds(5));
-     _reg.emplace_component<NetworkedEntity>(ent, (size_t)ent + 4, EntityType::Enemy);
+    _reg.emplace_component<NetworkedEntity>(ent, (size_t)ent + 4, EntityType::Enemy);
     return ent;
 }
 
