@@ -107,9 +107,10 @@ struct EnemyCount {
     EnemyCount(int enemiesNb, int spawnFrequency = 2): leftToSpawn(enemiesNb), spawnFrequency(spawnFrequency) {};
 };
 
-// struct HUD {
-// 	double charge = 0;
-// 	int score = 0;
-//     int color_id = 0;
-// 	HUD() {charge = 0; score = 0; color_id = 0;};
-// };
+struct AlwaysShoot {
+	std::chrono::duration<float> delay;
+	std::chrono::steady_clock::time_point last_shoot;
+
+	AlwaysShoot(std::chrono::duration<float> duration)
+		: delay(duration), last_shoot(std::chrono::steady_clock::now()) { }
+};

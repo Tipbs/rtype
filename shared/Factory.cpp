@@ -154,6 +154,34 @@ const Entity Factory::create_ammo(Position pos, float damage_mult, int color_id)
     return new_entity;
 }
 
+const Entity Factory::create_zorg(Registry &reg, Position pos, size_t net_id)
+{
+    Entity const new_entity = reg.spawn_entity();
+    Size Size(48, 48);
+    Speed speedo(300);
+    Direction diro(-0.40, 0);
+    SpawnGrace gra(std::chrono::seconds(1));
+    #ifndef SERVER
+    std::string path = "./gui/ressources/Sprites/Drone.png";
+    Sprite sprite(path.c_str(), 1.5, 1.5);
+    #endif
+
+    reg.add_component(new_entity, std::move(pos));
+    reg.add_component(new_entity, std::move(Size));
+    #ifndef SERVER
+    reg.add_component(new_entity, std::move(sprite));
+    #endif
+    reg.add_component(new_entity, std::move(speedo));
+    reg.add_component(new_entity, std::move(diro));
+    reg.emplace_component<AlwaysShoot>(
+        new_entity, std::chrono::milliseconds(750));
+    reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
+    reg.emplace_component<Health>(new_entity, 1);
+    //reg.emplace_component<NetworkedEntity>(new_entity, net_id);
+
+    return (size_t) new_entity;
+}
+
 #ifndef SERVER
 void Factory::create_hud(const int ScreenWidth, const int ScreenHeight)
 {

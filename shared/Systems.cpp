@@ -3,10 +3,9 @@
 #include "indexed_zipper.hpp"
 #include "zipper.hpp"
 
-void move(Registry &r, 
-sparse_array<Position> &positions,
-sparse_array<Speed> &speed, 
-sparse_array<Direction> &dir)
+void move(
+    Registry &r, sparse_array<Position> &positions, sparse_array<Speed> &speed,
+    sparse_array<Direction> &dir)
 {
 
     for (auto &&[pos, spe, diro]: zipper(positions, speed, dir)) {
@@ -23,11 +22,11 @@ sparse_array<Direction> &dir)
     }
 }
 
-void damages(Registry &r,
-sparse_array<Health> &healt,
-sparse_array<Damages> &dama, 
-size_t i1, size_t i2)
+void damages(
+    Registry &r, sparse_array<Health> &healt, sparse_array<Damages> &dama,
+    size_t i1, size_t i2)
 {
+    std::cout << "y a collision\n";
     healt[i1]->health -= dama[i2]->damages;
     // std::osyncstream(std::cout) << "User " << i1 << " has taken " << dama[i2]->damages << " damages. He now have " << healt[i1]->health << " HP." << std::endl;
     healt[i2]->health -= dama[i1]->damages;
@@ -73,9 +72,31 @@ sparse_array<Health> &helth)
                 continue;
             else if (pos2->pos_Y > pos->pos_Y + siz->size_Y)
                 continue;
-            else {
+            else
                 damages(r, helth, dam, ind, ind2);
-            }
+        }
+    }
+}
+
+void enemyAlwaysShoot(
+    Registry &r, sparse_array<AlwaysShoot> &always_shoot,
+    sparse_array<Position> &positions, sparse_array<Size> &sizes)
+{
+    auto now = std::chrono::steady_clock::now();
+    for (auto index = 0; index != always_shoot.size(); ++index) {
+        auto &shoot = always_shoot[index];
+        const auto &pos = positions[index];
+        const auto &size = sizes[index];
+        if (!(pos && shoot && size))
+            continue;
+        if (now - shoot->last_shoot > shoot->delay) {
+            shoot->last_shoot = now;
+            create_ammo(
+                r,
+                Position(
+                    pos->pos_X - (size->size_X / 2),
+                    pos->pos_Y + (size->size_Y / 2)),
+                Direction(-1, 0), 1.0, 3);
         }
     }
 }

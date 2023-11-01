@@ -51,8 +51,7 @@ void udp_client::handle_receive(
 {
     // std::osyncstream(std::cout) << "Received mais erreur\n";
     if (!error) {
-        std::osyncstream(std::cout)
-            << "Received " << bytes_transferred << "bytes" << std::endl;
+        //std::osyncstream(std::cout) << "Received " << bytes_transferred << "bytes" << std::endl;
         try {
             std::string seralizedData(_recv_buffer.data(), bytes_transferred);
             std::istringstream iss(seralizedData);
@@ -183,20 +182,3 @@ udp_client::~udp_client()
     tick.std::thread::~thread();
     sending.std::thread::~thread();
 }
-
-// int main(int ac, char **av)
-// {
-//     try {
-//         boost::asio::io_context _svc;
-//         std::string port = "5000";
-//         std::string ip = "127.0.0.1";
-//         if (ac == 3 && std::stoi(av[2])) {
-//             ip = av[1];
-//             port = av[2];
-//         }
-//         udp_client client(_svc, ip, port);
-//         _svc.run();
-//     } catch (std::exception &e) {
-//         std::cerr << e.what() << std::endl;
-//     }
-// }
