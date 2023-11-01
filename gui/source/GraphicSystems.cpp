@@ -44,7 +44,6 @@ void display(
     sparse_array<Text> &text)
 {
     BeginDrawing();
-    auto now = std::chrono::steady_clock::now();
     for (auto &&[ind, pos, siz, spri] :
          indexed_zipper(positions, size, sprite)) {
         Vector2 Rectpos = {
@@ -268,9 +267,8 @@ void updateWithSnapshots(
             if (finded == net_ents.end())
                 continue;
             if (current && std::abs(finded->pos.x - pos.value().pos_X) < 30.0 &&
-                std::abs(finded->pos.y - pos.value().pos_Y) < 30.0) {
+                std::abs(finded->pos.y - pos.value().pos_Y) < 30.0)
                 continue;
-            }
             pos.value().pos_X = finded->pos.x;
             pos.value().pos_Y = finded->pos.y;
             if (!current && player && finded->attacking) {
