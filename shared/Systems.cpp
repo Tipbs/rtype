@@ -1,4 +1,5 @@
 #include <cmath>
+#include <numbers>
 #include "Component.hpp"
 #include "Factory.hpp"
 #include "Systems.hpp"
@@ -64,16 +65,23 @@ sparse_array<Health> &helth)
             continue;
         }
         for (auto &&[ind2, pos2, siz2, dama2, halth2]: indexed_zipper(positions, size, dam, helth)) {
+            if (!positions[ind]) { // need to recheck because damages may have kill the entity
+                continue;
+            }
             if (ind2 <= ind || grace[ind2].has_value()) {
                 continue;
             }
-            if (pos->pos_X > pos2->pos_X + siz2->size_X)
+            if (positions[ind]->pos_X >
+				positions[ind2]->pos_X + size[ind2]->size_X)
+				continue;
+            else if (
+                positions[ind]->pos_Y > positions[ind2]->pos_Y + size[ind2]->size_Y)
                 continue;
-            else if (pos->pos_Y > pos2->pos_Y + siz2->size_Y)
+            else if (
+                positions[ind2]->pos_X > positions[ind]->pos_X + size[ind]->size_X)
                 continue;
-            else if (pos2->pos_X > pos->pos_X + siz->size_X)
-                continue;
-            else if (pos2->pos_Y > pos->pos_Y + siz->size_Y)
+            else if (
+                positions[ind2]->pos_Y > positions[ind]->pos_Y + size[ind]->size_Y)
                 continue;
             else
                 damages(r, helth, dam, ind, ind2);
@@ -191,7 +199,7 @@ void shootProjectiles(
 
     auto now = std::chrono::steady_clock::now();
     for (auto index = 0; index != shooters.size(); ++index) {
-        if (!(shooters[index] && positions[index]) && sizes[index])
+        if (!(shooters[index] && positions[index] && sizes[index]))
             continue;
         if (now > shooters[index]->lastShot + shooters[index]->delay) {
             shooters[index]->lastShot = now;
