@@ -11,35 +11,36 @@
 #include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
 
-std::vector<Color>ColorById {
-    BLUE,
-    PURPLE,
-    RED,
-    YELLOW,
-    GREEN
-};
+std::vector<Color> ColorById {BLUE, PURPLE, RED, YELLOW, GREEN};
 
 void draw_rectangle(sparse_array<Rect> &rect, sparse_array<Color> &col)
 {
     for (auto &&[recto, color] : zipper(rect, col))
         if (recto->draw_lines)
-            DrawRectangleLines(recto->rect.x, recto->rect.y, recto->rect.width, recto->rect.height, color.value());
+            DrawRectangleLines(
+                recto->rect.x, recto->rect.y, recto->rect.width,
+                recto->rect.height, color.value());
         else
-            DrawRectangle(recto->rect.x, recto->rect.y, recto->rect.width, recto->rect.height, color.value());
+            DrawRectangle(
+                recto->rect.x, recto->rect.y, recto->rect.width,
+                recto->rect.height, color.value());
 }
 
-void draw_text(sparse_array<Text> &text, sparse_array<Position> &positions, sparse_array<Color> &col)
+void draw_text(
+    sparse_array<Text> &text, sparse_array<Position> &positions,
+    sparse_array<Color> &col)
 {
     for (auto &&[texto, pos, color] : zipper(text, positions, col))
-        DrawText(texto->text.c_str(), pos->pos_X, pos->pos_Y, texto->font_size, color.value());
+        DrawText(
+            texto->text.c_str(), pos->pos_X, pos->pos_Y, texto->font_size,
+            color.value());
 }
 
 void display(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
     sparse_array<Sprite> &sprite, sparse_array<Player> &anim,
     sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields,
-    sparse_array<Rect> &rect,
-    sparse_array<Color> &col,
+    sparse_array<Rect> &rect, sparse_array<Color> &col,
     sparse_array<Text> &text)
 {
     BeginDrawing();
@@ -61,19 +62,18 @@ void display(
 }
 
 void do_animation(
-    Registry &r, sparse_array<Sprite> &sprites,
-    sparse_array<Couleur> &couleurs)
+    Registry &r, sparse_array<Sprite> &sprites, sparse_array<Couleur> &couleurs)
 {
     for (auto &&[sprite, colors] : zipper(sprites, couleurs)) {
-        if (sprite->width_max == 8 && sprite->height_max == 5) { //Ammunition case
-            sprite->sprite.y =
-                colors->color_id * sprite->height_padding;
+        if (sprite->width_max == 8 &&
+            sprite->height_max == 5) { // Ammunition case
+            sprite->sprite.y = colors->color_id * sprite->height_padding;
             sprite->sprite.x +=
                 (sprite->sprite.x / sprite->width_padding ==
                          sprite->width_max - 1
                      ? -6 * sprite->width_padding
                      : sprite->width_padding);
-        } else { //Looping sprites frames
+        } else { // Looping sprites frames
             sprite->sprite.x =
                 (sprite->sprite.x / sprite->width_padding ==
                          sprite->width_max - 1
@@ -84,27 +84,29 @@ void do_animation(
 }
 
 void do_ship_animation(
-    Registry &r, sparse_array<Sprite> &sprites,
-    sparse_array<Couleur> &couleurs, sparse_array<Weapon> &weapons)
+    Registry &r, sparse_array<Sprite> &sprites, sparse_array<Couleur> &couleurs,
+    sparse_array<Weapon> &weapons)
 {
     for (auto &&[weapon] : zipper(weapons)) {
-        sprites[(size_t)weapon->owner_id]->sprite.y =
-            couleurs[(size_t)weapon->owner_id]->color_id * sprites[(size_t)weapon->owner_id]->height_padding;
+        sprites[(size_t) weapon->owner_id]->sprite.y =
+            couleurs[(size_t) weapon->owner_id]->color_id *
+            sprites[(size_t) weapon->owner_id]->height_padding;
         if (weapon->IsShooting)
-            sprites[(size_t)weapon->owner_id]->sprite.x = 1 * sprites[(size_t)weapon->owner_id]->width_padding;
+            sprites[(size_t) weapon->owner_id]->sprite.x =
+                1 * sprites[(size_t) weapon->owner_id]->width_padding;
         else
-            sprites[(size_t)weapon->owner_id]->sprite.x = 0 * sprites[(size_t)weapon->owner_id]->width_padding;
+            sprites[(size_t) weapon->owner_id]->sprite.x =
+                0 * sprites[(size_t) weapon->owner_id]->width_padding;
     }
 }
 
 void make_infinite_background(
-    Registry &r, sparse_array<Position> &positions,
-    sparse_array<Size> &sizes, sparse_array<Backgrounds> &bg)
-{    
-    for (auto &&[position, size, back] : zipper(positions, sizes, bg)) {
+    Registry &r, sparse_array<Position> &positions, sparse_array<Size> &sizes,
+    sparse_array<Backgrounds> &bg)
+{
+    for (auto &&[position, size, back] : zipper(positions, sizes, bg))
         if (position->pos_X < -2 * size->size_X)
             position->pos_X += 2 * size->size_X;
-    }
 }
 
 void handle_dir_inputs(
@@ -266,9 +268,8 @@ void updateWithSnapshots(
             if (finded == net_ents.end())
                 continue;
             if (current && std::abs(finded->pos.x - pos.value().pos_X) < 30.0 &&
-                std::abs(finded->pos.y - pos.value().pos_Y) < 30.0) {
+                std::abs(finded->pos.y - pos.value().pos_Y) < 30.0)
                 continue;
-            }
             pos.value().pos_X = finded->pos.x;
             pos.value().pos_Y = finded->pos.y;
             if (!current && player && finded->attacking) {

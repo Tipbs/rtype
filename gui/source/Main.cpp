@@ -4,19 +4,19 @@
 #include <cstdlib>
 #include <iostream>
 #include <semaphore>
+#include <raylib.h>
 #include "../../shared/Parser.hpp"
 #include "../../shared/Registry.hpp"
 #include "Client.hpp"
 #include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
-#include <raylib.h>
 
 int main(int ac, char **av)
 {
     const int ScreenWidth = 1280;
     const int ScreenHeight = 720;
-    //const int ScreenWidth = 900;
-    //const int ScreenHeight = 1000;
+    // const int ScreenWidth = 900;
+    // const int ScreenHeight = 1000;
     boost::asio::io_context context;
     Registry reg;
     std::string port = "5000";
