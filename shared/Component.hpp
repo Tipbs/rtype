@@ -3,6 +3,7 @@
 #include <string>
 #include <utility>
 #include <chrono>
+#include <vector>
 #include "Entity.hpp"
 #include "Utils.hpp"
 
