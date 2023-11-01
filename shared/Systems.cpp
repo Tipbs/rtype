@@ -132,3 +132,147 @@ void spawn_enemy(Registry &r,
         }
     }
 }
+
+static size_t getClosestPlayerToBoss(
+    sparse_array<Position> &pos, sparse_array<Player> &player,
+    Position &boss_pos)
+{
+    size_t closest = -1;
+    size_t closest_distance = -1; // would require sqrt to be the real distance
+    for (auto &&[index, pos, player] : indexed_zipper(pos, player)) {
+        auto distance_to_boss = std::pow(boss_pos.pos_X - pos->pos_X, 2) +
+                                std::pow(boss_pos.pos_Y - pos->pos_Y, 2);
+        if (distance_to_boss < closest_distance) {
+            closest = index;
+            closest_distance = distance_to_boss;
+        }
+    }
+    return closest;
+}
+
+static void updateBossProjectiles(
+    ProjectileShooter &shooter, sparse_array<Position> &pos,
+    sparse_array<Player> &players)
+{
+    auto size = shooter.infos.size();
+    auto radius = 80;
+    // shift the next shot
+    for (auto i = 0; i != size; ++i) {
+        double angle = 2 * std::numbers::pi * i / size + shooter.shotCount * 45;
+        double x = cos(angle) * radius;
+        double y = sin(angle) * radius;
+        shooter.infos[i].offset = Position(x, y);
+        shooter.infos[i].dir = Direction(cos(angle) / 3, sin(angle) / 3);
+    }
+    // shoot the closest player
+    Position bossPos(600, 300);
+    size_t closest_player = getClosestPlayerToBoss(pos, players, bossPos);
+    Position &player_pos = *pos[closest_player];
+    Direction dir_to_player = Direction(
+        player_pos.pos_X - bossPos.pos_X, player_pos.pos_Y - bossPos.pos_Y);
+    auto dir_vec_len = std::sqrt(
+        std::pow(dir_to_player.dir_X, 2) + std::pow(dir_to_player.dir_Y, 2));
+    dir_to_player.dir_X /= dir_vec_len;
+    dir_to_player.dir_Y /= dir_vec_len;
+    if (!shooter.infos.empty())
+        shooter.infos.pop_back(); // remove the last shot on closest player
+    shooter.infos.push_back(ProjectileInfo(Position(0, 0), dir_to_player));
+}
+
+void shootProjectiles(
+    Registry &r, sparse_array<ProjectileShooter> &shooters,
+    sparse_array<Position> &positions, sparse_array<Size> &sizes,
+    sparse_array<Player> &players)
+{
+    auto now = std::chrono::steady_clock::now();
+    for (auto index = 0; index != shooters.size(); ++index) {
+        if (!(shooters[index] && positions[index]) && sizes[index])
+            continue;
+        if (now > shooters[index]->lastShot + shooters[index]->delay) {
+            shooters[index]->lastShot = now;
+            auto size_as_pos =
+                Position(sizes[index]->size_X / 2, sizes[index]->size_Y / 2);
+            for (auto &proj : shooters[index]->infos) {
+                create_boss_projectile(
+                    r, *positions[index] + size_as_pos + proj.offset, proj.dir);
+            }
+            ++shooters[index]->shotCount;
+            updateBossProjectiles(
+                *shooters[index], positions,
+                players); // atm called for each shooter but should check if
+                          // it's the boss and the phase of the boss (health)
+        }
+    }
+}
+
+static size_t getClosestPlayerToBoss(
+    sparse_array<Position> &pos, sparse_array<Player> &player,
+    Position &boss_pos)
+{
+    size_t closest = -1;
+    size_t closest_distance = -1; // would require sqrt to be the real distance
+    for (auto &&[index, pos, player] : indexed_zipper(pos, player)) {
+        auto distance_to_boss = std::pow(boss_pos.pos_X - pos->pos_X, 2) +
+                                std::pow(boss_pos.pos_Y - pos->pos_Y, 2);
+        if (distance_to_boss < closest_distance) {
+            closest = index;
+            closest_distance = distance_to_boss;
+        }
+    }
+    return closest;
+}
+
+static void updateBossProjectiles(
+    ProjectileShooter &shooter, sparse_array<Position> &pos,
+    sparse_array<Player> &players)
+{
+    auto size = shooter.infos.size();
+    auto radius = 80;
+    // shift the next shot
+    for (auto i = 0; i != size; ++i) {
+        double angle = 2 * std::numbers::pi * i / size + shooter.shotCount * 45;
+        double x = cos(angle) * radius;
+        double y = sin(angle) * radius;
+        shooter.infos[i].offset = Position(x, y);
+        shooter.infos[i].dir = Direction(cos(angle) / 3, sin(angle) / 3);
+    }
+    // shoot the closest player
+    Position bossPos(600, 300);
+    size_t closest_player = getClosestPlayerToBoss(pos, players, bossPos);
+    Position &player_pos = *pos[closest_player];
+    Direction dir_to_player = Direction(
+        player_pos.pos_X - bossPos.pos_X, player_pos.pos_Y - bossPos.pos_Y);
+    auto dir_vec_len = std::sqrt(
+        std::pow(dir_to_player.dir_X, 2) + std::pow(dir_to_player.dir_Y, 2));
+    dir_to_player.dir_X /= dir_vec_len;
+    dir_to_player.dir_Y /= dir_vec_len;
+    if (!shooter.infos.empty())
+        shooter.infos.pop_back(); // remove the last shot on closest player
+    shooter.infos.push_back(ProjectileInfo(Position(0, 0), dir_to_player));
+}
+
+void shootProjectiles(
+    Registry &r, sparse_array<ProjectileShooter> &shooters,
+    sparse_array<Position> &positions, sparse_array<Size> &sizes,
+    sparse_array<Player> &players)
+{
+    auto now = std::chrono::steady_clock::now();
+    for (auto index = 0; index != shooters.size(); ++index) {
+        if (!(shooters[index] && positions[index]) && sizes[index])
+            continue;
+        if (now > shooters[index]->lastShot + shooters[index]->delay) {
+            shooters[index]->lastShot = now;
+            auto size_as_pos =
+                Position(sizes[index]->size_X / 2, sizes[index]->size_Y / 2);
+            for (auto &proj : shooters[index]->infos) {
+                create_boss_projectile(
+                    r, *positions[index] + size_as_pos + proj.offset, proj.dir);
+            }
+            ++shooters[index]->shotCount;
+            updateBossProjectiles(
+                *shooters[index], positions,
+                players); // atm called for each shooter but should check if
+                          // it's the boss and the phase of the boss (health)
+        }
+    }
+}
