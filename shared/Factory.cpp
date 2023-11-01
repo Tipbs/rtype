@@ -25,7 +25,7 @@ void Factory::register_components()
         Rect,
         Color,
         Text,
-        DynamicText,
+        // DynamicText,
 #endif
         Player,
         Current_Player,
@@ -40,6 +40,7 @@ void Factory::register_components()
         Animation,
         Couleur,
         ProjectileShooter,
+        Score,
         Backgrounds
     >();
 }
@@ -67,7 +68,7 @@ void Factory::add_systems()
         make_infinite_background);
     // _reg.add_system<Weapon, Couleur, HUD>(
     //     updateHUD);
-    _reg.add_system<DynamicText>(update_dynamic_text);
+    // _reg.add_system<DynamicText>(update_dynamic_text);
 
 #else
 
@@ -111,7 +112,7 @@ const Entity Factory::create_player(int id, Position pos)
     _reg.emplace_component<Animation>(new_entity);
     _reg.emplace_component<Couleur>(new_entity, 0);
     _reg.emplace_component<NetworkedEntity>(new_entity, id);
-
+    _reg.emplace_component<Score>(new_entity, 0);
     return new_entity;
 }
 
@@ -209,8 +210,8 @@ const Entity Factory::create_zorg(Registry &reg, Position pos, size_t net_id)
     return (size_t) new_entity;
 }
 
-// #ifndef SERVER
-void Factory::create_hud(const int ScreenWidth, const int ScreenHeight, Score &score)
+#ifndef SERVER
+void Factory::create_hud(const int ScreenWidth, const int ScreenHeight, Score &scoreComponent)
 {
     float PosWidth = 0;
     float PosHeight = 9. * ScreenHeight / 10.;
@@ -274,8 +275,9 @@ void Factory::create_hud(const int ScreenWidth, const int ScreenHeight, Score &s
     _reg.emplace_component<Color>(ChargeText, WHITE);
 
     Entity const ScoreText = _reg.spawn_entity();
-    _reg.emplace_component<DynamicText>(ScoreText, score.score)
-    _reg.emplace_component<Text>(ScoreText, "Score : ", 32);
+    // DynamicText djjd(std::ref(score.score), 32);
+    // _reg.emplace_component<DynamicText>(ScoreText, std::ref(score.score), 32);
+    // _reg.emplace_component<Text>(ScoreText, "Score : ", 32);
     _reg.emplace_component<Position>(ScoreText, PosWidth, PosHeight + (SizHeight / 2));
     _reg.emplace_component<Color>(ScoreText, WHITE);
 
@@ -286,7 +288,7 @@ void Factory::create_hud(const int ScreenWidth, const int ScreenHeight, Score &s
 
 
 }
-// #endif
+#endif
 
 const Entity Factory::create_boss_projectile(Position pos, Direction diro)
 {

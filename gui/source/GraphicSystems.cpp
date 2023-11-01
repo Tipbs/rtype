@@ -36,6 +36,16 @@ void draw_text(
             color.value());
 }
 
+// void draw_dynamic_text(
+//     sparse_array<DynamicText> &text, sparse_array<Position> &positions,
+//     sparse_array<Color> &col)
+// {
+//     for (auto &&[texto, pos, color] : zipper(text, positions, col))
+//         DrawText(
+//             texto->text.c_str(), pos->pos_X, pos->pos_Y, texto->font_size,
+//             color.value());
+// }
+
 void display(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
     sparse_array<Sprite> &sprite, sparse_array<Player> &anim,
@@ -302,9 +312,9 @@ void updateWithSnapshots(
 //     }
 // }
 
-void update_dynamic_text(Registry &r, sparse_array<DynamicText> &dynamicTexts)
-{
-    for (auto &&[dynamicText]: zipper(dynamicTexts)) {
-        dynamicText->text = std::to_string(dynamicText->variable);
-    }
-}
+// void update_dynamic_text(Registry &r, sparse_array<DynamicText> &dynamicTexts)
+// {
+    // for (auto &&[dynamicText]: zipper(dynamicTexts)) {
+    //     dynamicText->text = std::to_string(dynamicText->variable);
+    // }
+// }
