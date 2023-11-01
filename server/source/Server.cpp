@@ -173,14 +173,14 @@ void udp_server::wait_for_connexion(std::size_t bytes_transferred)
         clients[_remote_point]._timer =
             boost::posix_time::microsec_clock::universal_time();
         Utils::PlayerId p;
-        p.id = clients[_remote_point]._id;
+        p.id = clients[_remote_point].player;
         p.pos = parser.get_player_pos(p.id);
         send_playerId(p, _remote_point);
     } else if (bytes_transferred == 1 && clients.count(_remote_point) != 0) {
         clients[_remote_point]._timer =
             boost::posix_time::microsec_clock::universal_time();
         Utils::PlayerId p;
-        p.id = clients[_remote_point]._id;
+        p.id = clients[_remote_point].player;
         p.pos = parser.get_player_pos(p.id);
         send_playerId(p, _remote_point);
     } else {
@@ -240,7 +240,7 @@ void udp_server::start_threads()
     clients[_remote_point]._timer =
         boost::posix_time::microsec_clock::universal_time();
     Utils::PlayerId p;
-    p.id = clients[_remote_point]._id;
+    p.id = clients[_remote_point].player;
     p.pos = parser.get_player_pos(p.id);
     send_playerId(p, _remote_point);
     tick = std::thread(&udp_server::handle_tick, this); // Timer thread

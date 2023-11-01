@@ -115,10 +115,8 @@ void handle_dir_inputs(
     sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds,
     sparse_array<Couleur> &colors)
 {
-	std::cout << "dir pas cool\n";
     for (auto &&[diro, player, sprit, spe, color] :
          zipper(dir, players, sprite, speeds, colors)) {
-        std::cout << "dir cool\n";
         Vector2 moves = {0, 0};
         double speedScale = 1;
 
@@ -223,6 +221,8 @@ void killDeadEntities(Registry &r, sparse_array<NetworkedEntity> &entities)
                 return ent.id == entities[index]->id;
             });
         if (finded == net_ents.end()) {
+            std::cout << "netent: " << net_ents[0].id << " " << entities[index]->id
+                      << std::endl;
             r.kill_entity(index);
             std::cout << "killing entity " << index << std::endl;
         }
