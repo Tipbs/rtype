@@ -10,7 +10,6 @@ void move(
     Registry &r, sparse_array<Position> &positions, sparse_array<Speed> &speed,
     sparse_array<Direction> &dir)
 {
-
     for (auto &&[pos, spe, diro]: zipper(positions, speed, dir)) {
         double x_offset = spe->speed * diro->dir_X;
         double y_offset = spe->speed * diro->dir_Y;
@@ -117,7 +116,7 @@ void enemyAlwaysShoot(
                 Position(
                     pos->pos_X - (size->size_X / 2),
                     pos->pos_Y + (size->size_Y / 2)),
-                Direction(-1, 0), 1.0, 3);
+                Direction(-1, 0), 1.0, 3, 0);
         }
     }
 }
@@ -143,7 +142,7 @@ void spawn_enemy(Registry &r,
             float randomNumber = rand() % 1080;
             Utils::Vec2 pos = {1000, randomNumber + 50};
 
-            f.create_enemy(pos);
+            f.create_enemy(pos, 0);
         }
     }
 }
@@ -211,7 +210,7 @@ void shootProjectiles(
                 Position(sizes[index]->size_X / 2, sizes[index]->size_Y / 2);
             for (auto &proj : shooters[index]->infos) {
                 factory.create_boss_projectile(
-                    *positions[index] + size_as_pos + proj.offset, proj.dir);
+                    *positions[index] + size_as_pos + proj.offset, proj.dir, 0);
             }
             ++shooters[index]->shotCount;
             updateBossProjectiles(
