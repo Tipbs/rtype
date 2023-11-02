@@ -43,7 +43,6 @@ int main(int ac, char **av)
     std::cout << "player pos x: " << net_player_info.pos.x << std::endl;
     std::cout << "player pos y: " << net_player_info.pos.y << std::endl;
     factory.create_weapon(player);
-    factory.create_boss(Position(100, 100), 0);
     factory.add_systems();
 
     while (!WindowShouldClose()) {

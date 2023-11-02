@@ -42,7 +42,7 @@ class udp_client {
     void net_get_id(
         const boost::system::error_code &error, std::size_t bytes_transfered);
     Registry &_reg;
-    std::vector<char> _recv_buffer = std::vector<char>(512);
+    std::vector<char> _recv_buffer = std::vector<char>(2048);
     Utils::PlayerId _player_id;
     boost::asio::ip::udp::socket _socket;
     boost::asio::ip::udp::endpoint _remote_point;

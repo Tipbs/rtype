@@ -60,7 +60,7 @@ class udp_server {
     boost::asio::deadline_timer tick_timer;
     boost::asio::deadline_timer check_timer;
     boost::asio::ip::udp::endpoint _remote_point;
-    boost::array<char, 512> _recv_buffer;
+    boost::array<char, 2048> _recv_buffer;
 
     std::map<boost::asio::ip::udp::endpoint, struct Clients> clients;
     std::map<std::size_t, std::vector<UserCmd>> cmd;

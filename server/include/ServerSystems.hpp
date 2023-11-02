@@ -27,3 +27,8 @@ void resetAnimationsDir(
 void resetPlayersDir(
     Registry &r, sparse_array<Player> &players,
     sparse_array<Direction> &directions);
+void kill_zord(
+    Registry &r, sparse_array<EnemyCount> &enemyCount,
+    sparse_array<BossCount> &bosses,
+    sparse_array<NetworkedEntity> &ents, sparse_array<Position> &positions,
+    sparse_array<Health> &);

@@ -7,6 +7,7 @@
 enum class EntityType {
     Player,
     Enemy,
+    Boss,
     None
 };
 
