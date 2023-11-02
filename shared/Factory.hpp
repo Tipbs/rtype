@@ -23,7 +23,7 @@ class Factory {
         const Entity create_boss_projectile(Position pos, Direction diro);
         const Entity create_boss(Position pos, size_t net_id);
         const Entity create_boss(Position pos);
-        void create_hud(const int ScreenWidth, const int ScreenHeight);
+        void create_hud(const int ScreenWidth, const int ScreenHeight, Entity scoreFrom, Entity chargeFrom);
         void register_components();
         void add_systems();
 

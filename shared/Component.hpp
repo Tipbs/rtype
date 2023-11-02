@@ -144,3 +144,9 @@ struct ProjectileShooter {
 	ProjectileShooter(std::chrono::duration<float> del) : delay(del), lastShot(std::chrono::steady_clock::now())
 	{}
 };
+
+struct Score {
+    int score;
+
+    Score(int score): score(score) {};
+};

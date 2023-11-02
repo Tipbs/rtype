@@ -32,7 +32,5 @@ void do_ship_animation(
 void make_infinite_background(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &sizes,
     sparse_array<Backgrounds> &bg);
-// void updateHUD(
-//     Registry &r, sparse_array<Weapon> &weap,
-//     sparse_array<Couleur> &col,
-//     sparse_array<HUD> &hud);
+void update_score_text(Registry &r, sparse_array<Score> &scores, sparse_array<ScoreText> &scoreTexts, sparse_array<Text> &texts);
+void update_charge_rect(Registry &r, sparse_array<Weapon> &weapons, sparse_array<ChargeRect> &chargeRects, sparse_array<Rect> &rects);

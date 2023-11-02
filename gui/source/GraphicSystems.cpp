@@ -156,8 +156,7 @@ void handle_shoot_inputs(
             weapon->IsShooting = true;
             weapon->current_charge +=
                 (weapon->current_charge >= 3) ? 0 : 5 * GetFrameTime();
-        }
-        if (IsKeyReleased(KEY_SPACE)) {
+        } else if (IsKeyReleased(KEY_SPACE)) {
             weapon->IsShooting = false;
             factory.create_ammo(
                 Position(
@@ -311,3 +310,18 @@ void updateWithSnapshots(
 //         }
 //     }
 // }
+
+void update_score_text(Registry &r, sparse_array<Score> &scores, sparse_array<ScoreText> &scoreTexts, sparse_array<Text> &texts)
+{
+    for (auto &&[scoreText, text]: zipper(scoreTexts, texts)) {
+        text->text = std::to_string(scores[static_cast<size_t>(scoreText->from)]->score);
+    }
+}
+
+void update_charge_rect(Registry &r, sparse_array<Weapon> &weapons, sparse_array<ChargeRect> &chargeRects, sparse_array<Rect> &rects)
+{
+    for (auto &&[chargeRect, rect]: zipper(chargeRects, rects)) {
+        std::cout << weapons[static_cast<size_t>(chargeRect->from)]->current_charge << std::endl;
+        rect->rect.width = (weapons[static_cast<size_t>(chargeRect->from)]->current_charge - 1) * chargeRect->maxWidth;
+    }
+}
