@@ -35,9 +35,8 @@ int main(int ac, char **av)
     factory.create_background(ScreenWidth, ScreenHeight);
     Entity player =
         factory.create_player(net_client.get_player_id(), Position(0, 0));
-    // std::optional<Score> score = reg.get_components<Score>()[(size_t) player];
-    // factory.create_hud(ScreenWidth, ScreenHeight, score.value());
-    factory.create_weapon(player);
+    Entity weapon = factory.create_weapon(player);
+    factory.create_hud(ScreenWidth, ScreenHeight, player, weapon);
     factory.create_boss(Position(100, 100), 0);
     factory.add_systems();
 

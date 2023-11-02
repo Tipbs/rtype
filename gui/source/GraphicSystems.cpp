@@ -36,16 +36,6 @@ void draw_text(
             color.value());
 }
 
-// void draw_dynamic_text(
-//     sparse_array<DynamicText> &text, sparse_array<Position> &positions,
-//     sparse_array<Color> &col)
-// {
-//     for (auto &&[texto, pos, color] : zipper(text, positions, col))
-//         DrawText(
-//             texto->text.c_str(), pos->pos_X, pos->pos_Y, texto->font_size,
-//             color.value());
-// }
-
 void display(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
     sparse_array<Sprite> &sprite, sparse_array<Player> &anim,
@@ -165,8 +155,7 @@ void handle_shoot_inputs(
             weapon->IsShooting = true;
             weapon->current_charge +=
                 (weapon->current_charge >= 3) ? 0 : 5 * GetFrameTime();
-        }
-        if (IsKeyReleased(KEY_SPACE)) {
+        } else if (IsKeyReleased(KEY_SPACE)) {
             weapon->IsShooting = false;
             factory.create_ammo(
                 Position(
@@ -312,9 +301,17 @@ void updateWithSnapshots(
 //     }
 // }
 
-// void update_dynamic_text(Registry &r, sparse_array<DynamicText> &dynamicTexts)
-// {
-    // for (auto &&[dynamicText]: zipper(dynamicTexts)) {
-    //     dynamicText->text = std::to_string(dynamicText->variable);
-    // }
-// }
+void update_score_text(Registry &r, sparse_array<Score> &scores, sparse_array<ScoreText> &scoreTexts, sparse_array<Text> &texts)
+{
+    for (auto &&[scoreText, text]: zipper(scoreTexts, texts)) {
+        text->text = std::to_string(scores[static_cast<size_t>(scoreText->from)]->score);
+    }
+}
+
+void update_charge_rect(Registry &r, sparse_array<Weapon> &weapons, sparse_array<ChargeRect> &chargeRects, sparse_array<Rect> &rects)
+{
+    for (auto &&[chargeRect, rect]: zipper(chargeRects, rects)) {
+        std::cout << weapons[static_cast<size_t>(chargeRect->from)]->current_charge << std::endl;
+        rect->rect.width = (weapons[static_cast<size_t>(chargeRect->from)]->current_charge - 1) * chargeRect->maxWidth;
+    }
+}

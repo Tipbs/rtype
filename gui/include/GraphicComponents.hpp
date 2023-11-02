@@ -66,10 +66,15 @@ struct Text {
     Text(std::string s, int count) : text(s), font_size(count) {};
 };
 
-struct DynamicText {
-    std::string text = "";
-    int &variable;
-    int font_size = 0;
+struct ScoreText {
+    Entity from;
 
-    DynamicText(int &variable, int font_size): variable(variable), font_size(font_size) {};
+    ScoreText(Entity from): from(from) {};
+};
+
+struct ChargeRect {
+    Entity from;
+    double maxWidth;
+
+    ChargeRect(Entity from, double maxWidth): from(from), maxWidth(maxWidth) {};
 };

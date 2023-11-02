@@ -25,7 +25,8 @@ void Factory::register_components()
         Rect,
         Color,
         Text,
-        // DynamicText,
+        ScoreText,
+        ChargeRect,
 #endif
         Player,
         Current_Player,
@@ -68,8 +69,8 @@ void Factory::add_systems()
         make_infinite_background);
     // _reg.add_system<Weapon, Couleur, HUD>(
     //     updateHUD);
-    // _reg.add_system<DynamicText>(update_dynamic_text);
-
+    _reg.add_system<Score, ScoreText, Text>(update_score_text);
+    _reg.add_system<Weapon, ChargeRect, Rect>(update_charge_rect);
 #else
 
 #endif
@@ -211,7 +212,7 @@ const Entity Factory::create_zorg(Registry &reg, Position pos, size_t net_id)
 }
 
 #ifndef SERVER
-void Factory::create_hud(const int ScreenWidth, const int ScreenHeight, Score &scoreComponent)
+void Factory::create_hud(const int ScreenWidth, const int ScreenHeight, Entity scoreFrom, Entity chargeFrom)
 {
     float PosWidth = 0;
     float PosHeight = 9. * ScreenHeight / 10.;
@@ -234,6 +235,8 @@ void Factory::create_hud(const int ScreenWidth, const int ScreenHeight, Score &s
     _reg.emplace_component<Color>(hudBlackLayer, BLACK);
 
     Entity const hudPlay1Rect = _reg.spawn_entity();
+    double rectChargeWidth = (SizWidth / 2) * multiplier;
+    _reg.emplace_component<ChargeRect>(hudPlay1Rect, std::move(chargeFrom), std::move(rectChargeWidth));
     _reg.emplace_component<Rect>(hudPlay1Rect, false, Rectangle{PosWidth + MeasureText("Charge : ", 32), PosHeight, (SizWidth / 2) * multiplier, (SizHeight / 2)});
     _reg.emplace_component<Color>(hudPlay1Rect, play1color);
 
@@ -274,17 +277,16 @@ void Factory::create_hud(const int ScreenWidth, const int ScreenHeight, Score &s
     _reg.emplace_component<Position>(ChargeText, PosWidth, PosHeight);
     _reg.emplace_component<Color>(ChargeText, WHITE);
 
-    Entity const ScoreText = _reg.spawn_entity();
-    // DynamicText djjd(std::ref(score.score), 32);
-    // _reg.emplace_component<DynamicText>(ScoreText, std::ref(score.score), 32);
-    // _reg.emplace_component<Text>(ScoreText, "Score : ", 32);
-    _reg.emplace_component<Position>(ScoreText, PosWidth, PosHeight + (SizHeight / 2));
-    _reg.emplace_component<Color>(ScoreText, WHITE);
+    Entity const scoreText = _reg.spawn_entity();
+    _reg.emplace_component<Text>(scoreText, "Score : ", 32);
+    _reg.emplace_component<Position>(scoreText, PosWidth, PosHeight + (SizHeight / 2));
+    _reg.emplace_component<Color>(scoreText, WHITE);
 
-    Entity const ScoreValueText = _reg.spawn_entity();
-    _reg.emplace_component<Text>(ScoreValueText, score, 32);
-    _reg.emplace_component<Position>(ScoreValueText, PosWidth + (MeasureText("Score : ", 32)), PosHeight + (SizHeight / 2));
-    _reg.emplace_component<Color>(ScoreValueText, WHITE);
+    Entity const scoreValueText = _reg.spawn_entity();
+    _reg.add_component<ScoreText>(scoreValueText, std::move(scoreFrom));
+    _reg.emplace_component<Text>(scoreValueText, "", 32);
+    _reg.emplace_component<Position>(scoreValueText, PosWidth + (MeasureText("Score : ", 32)), PosHeight + (SizHeight / 2));
+    _reg.emplace_component<Color>(scoreValueText, WHITE);
 
 
 }

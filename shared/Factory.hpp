@@ -21,7 +21,7 @@ class Factory {
         const Entity create_zorg(Registry &reg, Position pos, size_t net_id = 0);
         const Entity create_boss_projectile(Position pos, Direction diro);
         const Entity create_boss(Position pos, size_t net_id);
-        void create_hud(const int ScreenWidth, const int ScreenHeight, Score &score);
+        void create_hud(const int ScreenWidth, const int ScreenHeight, Entity scoreFrom, Entity chargeFrom);
         void register_components();
         void add_systems();
 
