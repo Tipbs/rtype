@@ -11,6 +11,7 @@ enum class EntityType {
     Projectile,
     Ammo,
     Enemy,
+    Boss,
     None
 };
 

@@ -11,11 +11,11 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include "../../shared/NetEnt.hpp"
+#include "../../shared/Parser.hpp"
 #include "../../shared/Registry.hpp"
 #include "../../shared/Systems.hpp"
 #include "../../shared/UserCmd.hpp"
 #include "../../shared/Utils.hpp"
-#include "../../shared/Parser.hpp"
 
 struct Clients {
     std::size_t _id;
@@ -36,7 +36,8 @@ class udp_server {
     void handle_send(const boost::system::error_code &error, std::size_t);
 
     void start_snapshot();
-    void send_playerId(Utils::PlayerId playerId, boost::asio::ip::udp::endpoint);
+    void
+    send_playerId(Utils::PlayerId playerId, boost::asio::ip::udp::endpoint);
     void wait_for_connexion(std::size_t);
     void handle_broadcast(const boost::system::error_code &, std::size_t);
     void multiple_broadcast(
@@ -60,7 +61,7 @@ class udp_server {
     boost::asio::deadline_timer tick_timer;
     boost::asio::deadline_timer check_timer;
     boost::asio::ip::udp::endpoint _remote_point;
-    boost::array<char, 512> _recv_buffer;
+    boost::array<char, 2048> _recv_buffer;
 
     std::map<boost::asio::ip::udp::endpoint, struct Clients> clients;
     std::map<std::size_t, std::vector<UserCmd>> cmd;

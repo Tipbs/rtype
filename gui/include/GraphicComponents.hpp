@@ -65,3 +65,17 @@ struct Text {
 
     Text(std::string s, int count) : text(s), font_size(count) {};
 };
+
+struct ScoreText {
+    Entity from;
+
+    ScoreText(Entity from) : from(from) {};
+};
+
+struct ChargeRect {
+    Entity from;
+    double maxWidth;
+
+    ChargeRect(Entity from, double maxWidth)
+        : from(from), maxWidth(maxWidth) {};
+};

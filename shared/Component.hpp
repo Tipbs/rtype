@@ -114,6 +114,12 @@ struct EnemyCount {
     EnemyCount(int enemiesNb, int spawnFrequency = 2): leftToSpawn(enemiesNb), spawnFrequency(spawnFrequency) {};
 };
 
+struct BossCount {
+    int leftToSpawn = 0;
+    bool isLastBossAlive = false;
+    BossCount(int enemiesNb): leftToSpawn(enemiesNb) {};
+};
+
 struct AlwaysShoot {
 	std::chrono::duration<float> delay;
 	std::chrono::steady_clock::time_point last_shoot;
@@ -137,4 +143,10 @@ struct ProjectileShooter {
 
 	ProjectileShooter(std::chrono::duration<float> del) : delay(del), lastShot(std::chrono::steady_clock::now())
 	{}
+};
+
+struct Score {
+    int score;
+
+    Score(int score): score(score) {};
 };
