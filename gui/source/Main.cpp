@@ -34,6 +34,7 @@ int main(int ac, char **av)
 
     factory.register_components();
     factory.create_background(ScreenWidth, ScreenHeight);
+    auto net_player_info = net_client.get_player_id();
     Entity player =
         factory.create_player(net_player_info.id, net_player_info.pos);
     reg.emplace_component<Current_Player>(player);
