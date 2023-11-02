@@ -1,4 +1,5 @@
 #include <cmath>
+#include <numbers>
 #include "Component.hpp"
 #include "Factory.hpp"
 #include "Systems.hpp"
@@ -18,8 +19,8 @@ void move(
 		pos->pos_X += x_offset * GetFrameTime();
 		pos->pos_Y += y_offset * GetFrameTime();
 #else
-        pos->pos_X += x_offset;
-        pos->pos_Y += y_offset;
+        pos->pos_X += x_offset * GetFrameTime();
+        pos->pos_Y += y_offset * GetFrameTime();
  #endif
     }
 }
@@ -44,9 +45,12 @@ void update_grace(Registry &r,
 sparse_array<SpawnGrace> &graces)
 {
     auto time = GetTimePoint();
+    auto graces_size = graces.size();
 
-    for (auto &&[ind, grace]: indexed_zipper(graces)) {
-        if (grace->creation_time + grace->time >= time) {
+	for (size_t ind = 0; ind != graces_size; ++ind) {
+        if (!graces[ind])
+            continue;
+        if (graces[ind]->creation_time + graces[ind]->time >= time) {
             r.remove_component<SpawnGrace>(ind);
         }
     }
@@ -54,29 +58,42 @@ sparse_array<SpawnGrace> &graces)
 
 void colision(Registry &r,
 sparse_array<Position> &positions, 
-sparse_array<Size> &size, 
+sparse_array<Size> &sizes,
 sparse_array<SpawnGrace> &grace, 
-sparse_array<Damages> &dam, 
-sparse_array<Health> &helth)
+sparse_array<Damages> &dmgs,
+sparse_array<Health> &healths)
 {
-    for (auto &&[ind, pos, siz, dama, halth]: indexed_zipper(positions, size, dam, helth)) {
+    auto pos_size = positions.size();
+	for (size_t ind = 0; ind != pos_size; ++ind) {
+        if (!(positions[ind] && sizes[ind] && dmgs[ind] && healths[ind]))
+            continue;
+
         if (grace[ind].has_value()) {
             continue;
         }
-        for (auto &&[ind2, pos2, siz2, dama2, halth2]: indexed_zipper(positions, size, dam, helth)) {
+		for (size_t ind2 = 0; ind2 != pos_size; ++ind2) {
+			if (!(positions[ind2] && sizes[ind2] && dmgs[ind2] && healths[ind2]))
+				continue;
             if (ind2 <= ind || grace[ind2].has_value()) {
                 continue;
             }
-            if (pos->pos_X > pos2->pos_X + siz2->size_X)
+            if (!positions[ind]) { // need to recheck because damages may have kill the entity
                 continue;
-            else if (pos->pos_Y > pos2->pos_Y + siz2->size_Y)
+            }
+            if (positions[ind]->pos_X >
+				positions[ind2]->pos_X + sizes[ind2]->size_X)
+				continue;
+            else if (
+                positions[ind]->pos_Y > positions[ind2]->pos_Y + sizes[ind2]->size_Y)
                 continue;
-            else if (pos2->pos_X > pos->pos_X + siz->size_X)
+            else if (
+                positions[ind2]->pos_X > positions[ind]->pos_X + sizes[ind]->size_X)
                 continue;
-            else if (pos2->pos_Y > pos->pos_Y + siz->size_Y)
+            else if (
+                positions[ind2]->pos_Y > positions[ind]->pos_Y + sizes[ind]->size_Y)
                 continue;
             else
-                damages(r, helth, dam, ind, ind2);
+                damages(r, healths, dmgs, ind, ind2);
         }
     }
 }
@@ -88,7 +105,7 @@ void enemyAlwaysShoot(
     Factory factory(r);
 
     auto now = std::chrono::steady_clock::now();
-    for (auto index = 0; index != always_shoot.size(); ++index) {
+    for (size_t index = 0; index != always_shoot.size(); ++index) {
         auto &shoot = always_shoot[index];
         const auto &pos = positions[index];
         const auto &size = sizes[index];
@@ -120,18 +137,13 @@ void spawn_enemy(Registry &r,
     for (auto &&[enemyCount]: zipper(enemiesCount)) {
         enemyCount->timeSinceLastSpawn += GetFrameTime();
         if (enemyCount->leftToSpawn > 0 && enemyCount->timeSinceLastSpawn > enemyCount->spawnFrequency) {
-            std::cout << enemyCount->timeSinceLastSpawn << " enemies left : " << enemyCount->leftToSpawn << std::endl;
-            const Entity ent = r.spawn_entity();
+            enemyCount->timeSinceLastSpawn = 0;
+            enemyCount->leftToSpawn--;
+            Factory f(r);
             float randomNumber = rand() % 1080;
             Utils::Vec2 pos = {1000, randomNumber + 50};
 
-            r.emplace_component<Position>(ent, pos);
-            r.emplace_component<Speed>(ent, 300);
-            r.emplace_component<Direction>(ent, 50, 0);
-            r.emplace_component<SpawnGrace>(ent, std::chrono::seconds(5));
-            // r.emplace_component<NetworkEntity>(ent, id);
-            enemyCount->timeSinceLastSpawn = 0;
-            enemyCount->leftToSpawn--;
+            f.create_enemy(pos);
         }
     }
 }
@@ -160,7 +172,7 @@ static void updateBossProjectiles(
     auto size = shooter.infos.size();
     auto radius = 80;
     // shift the next shot
-    for (auto i = 0; i != size; ++i) {
+    for (size_t i = 0; i != size; ++i) {
         double angle = 2 * std::numbers::pi * i / size + shooter.shotCount * 45;
         double x = cos(angle) * radius;
         double y = sin(angle) * radius;
@@ -190,8 +202,8 @@ void shootProjectiles(
     Factory factory(r);
 
     auto now = std::chrono::steady_clock::now();
-    for (auto index = 0; index != shooters.size(); ++index) {
-        if (!(shooters[index] && positions[index]) && sizes[index])
+    for (size_t index = 0; index != shooters.size(); ++index) {
+        if (!(shooters[index] && positions[index] && sizes[index]))
             continue;
         if (now > shooters[index]->lastShot + shooters[index]->delay) {
             shooters[index]->lastShot = now;

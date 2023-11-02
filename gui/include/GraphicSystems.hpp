@@ -10,7 +10,7 @@ void display(
     sparse_array<Rect> &rect, sparse_array<Color> &col,
     sparse_array<Text> &text);
 void handle_dir_inputs(
-    Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &players,
+    Registry &r, sparse_array<Direction> &dir, sparse_array<Current_Player> &players,
     sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds,
     sparse_array<Couleur> &colors);
 void hadle_text_inputs(
@@ -28,7 +28,7 @@ void do_animation(
     Registry &r, sparse_array<Sprite> &sprites, sparse_array<Couleur> &colors);
 void do_ship_animation(
     Registry &r, sparse_array<Sprite> &sprites, sparse_array<Couleur> &couleurs,
-    sparse_array<Weapon> &weapons);
+    sparse_array<Weapon> &weapons, sparse_array<Current_Player> &cur_player);
 void make_infinite_background(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &sizes,
     sparse_array<Backgrounds> &bg);

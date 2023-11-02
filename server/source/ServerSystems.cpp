@@ -4,6 +4,17 @@
 #include "../../shared/Registry.hpp"
 #include "../../shared/zipper.hpp"
 
+size_t getEntityWeapon(sparse_array<Weapon> &weapons, size_t playerId)
+{
+    size_t finded_weapon = -1;
+    for (auto&& [index, weapon] : indexed_zipper(weapons)) {
+        if ((size_t)weapon->owner_id == playerId) {
+            return index;
+        }
+    }
+    return finded_weapon;
+}
+
 void synchronize(
     Registry &reg, sparse_array<Direction> &directions,
     sparse_array<Speed> &spe, sparse_array<Position> &positions,
@@ -16,8 +27,8 @@ void synchronize(
         auto &dir = directions[player_cmds.first];
         const auto &posi = positions[player_cmds.first];
         const auto &sizo = sizes[player_cmds.first];
-        auto &weapon = weapons[player_cmds.first];
         auto &player = players[player_cmds.first];
+        auto &weapon = weapons[getEntityWeapon(weapons, player_cmds.first)];
         weapon->IsShooting = false;
         weapon->current_charge = 0;
         for (auto &cmds : player_cmds.second) {
@@ -41,20 +52,18 @@ void extract(
     sparse_array<Speed> &speeds, sparse_array<Weapon> &weapons,
     sparse_array<NetworkedEntity> &ents)
 {
-    for (auto &&[ind, pos] : indexed_zipper(positions)) {
-        auto &spe = speeds[ind];
-        if (!(pos && spe && ents[ind]))
-            continue;
+    for (auto &&[ind, pos, ent_id] : indexed_zipper(positions, ents)) {
         NetEnt tmp;
+        tmp.type = ents[ind]->_type;
         tmp.id = ind;
         tmp.pos.x = pos->pos_X;
         tmp.pos.y = pos->pos_Y;
-        auto &weapon = weapons[ind];
+        auto &weapon = weapons[getEntityWeapon(weapons, ind)];
         if (weapon) {
             tmp.attacking = weapon->IsShooting;
             tmp.attackState = weapon->current_charge;
-            reg._netent.push_back(tmp);
         }
+		reg._netent.push_back(tmp);
     }
 }
 

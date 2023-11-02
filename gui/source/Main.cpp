@@ -1,6 +1,7 @@
 #include <chrono>
 #include <climits>
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <semaphore>
 #include <raylib.h>
@@ -34,7 +35,11 @@ int main(int ac, char **av)
     factory.register_components();
     factory.create_background(ScreenWidth, ScreenHeight);
     Entity player =
-        factory.create_player(net_client.get_player_id(), Position(0, 0));
+        factory.create_player(net_player_info.id, net_player_info.pos);
+    reg.emplace_component<Current_Player>(player);
+    std::cout << "player pos id: " << net_player_info.id << std::endl;
+    std::cout << "player pos x: " << net_player_info.pos.x << std::endl;
+    std::cout << "player pos y: " << net_player_info.pos.y << std::endl;
     Entity weapon = factory.create_weapon(player);
     factory.create_hud(ScreenWidth, ScreenHeight, player, weapon);
     factory.create_boss(Position(100, 100), 0);
