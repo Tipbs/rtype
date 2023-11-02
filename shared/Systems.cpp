@@ -10,7 +10,6 @@ void move(
     Registry &r, sparse_array<Position> &positions, sparse_array<Speed> &speed,
     sparse_array<Direction> &dir)
 {
-
     for (auto &&[pos, spe, diro]: zipper(positions, speed, dir)) {
         double x_offset = spe->speed * diro->dir_X;
         double y_offset = spe->speed * diro->dir_Y;
@@ -131,19 +130,34 @@ void update_weapon_position(Registry &r, sparse_array<Weapon> &weapons, sparse_a
 }
 
 void spawn_enemy(Registry &r,
-    sparse_array<EnemyCount> &enemiesCount
+    sparse_array<EnemyCount> &enemiesCount,
+    sparse_array<BossCount> &bossCount
 )
 {
-    for (auto &&[enemyCount]: zipper(enemiesCount)) {
+    for (auto &&[ind, enemyCount]: indexed_zipper(enemiesCount)) {
         enemyCount->timeSinceLastSpawn += GetFrameTime();
+        Factory f(r);
         if (enemyCount->leftToSpawn > 0 && enemyCount->timeSinceLastSpawn > enemyCount->spawnFrequency) {
+            std::cout << enemyCount->timeSinceLastSpawn << " enemies left : " << enemyCount->leftToSpawn << std::endl;
             enemyCount->timeSinceLastSpawn = 0;
+            enemyCount->leftAlive++;
             enemyCount->leftToSpawn--;
-            Factory f(r);
-            float randomNumber = rand() % 1080;
-            Utils::Vec2 pos = {1000, randomNumber + 50};
+            float randomNumber = rand() % (580);
+            Position pos = {1280, randomNumber};
 
-            f.create_enemy(pos);
+            f.create_zorg(pos);
+        }
+        if (enemyCount->leftAlive <= 0 && enemyCount->leftToSpawn <= 0) {
+            auto &boss = bossCount[ind];
+            if (!(boss))
+                continue;
+            float randomNumber = rand() % (580);
+            Position pos = {1280, randomNumber};
+            if (boss->isLastBossAlive == false && boss->leftToSpawn > 0) {
+                boss->isLastBossAlive = true;
+                boss->leftToSpawn--;
+                f.create_boss(pos);
+            }
         }
     }
 }

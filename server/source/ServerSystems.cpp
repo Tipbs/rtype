@@ -76,3 +76,26 @@ void resetPlayersDir(
         diro->dir_Y = 0;
     }
 }
+
+void kill_zord(
+    Registry &r, sparse_array<EnemyCount> &enemyCount,
+    sparse_array<BossCount> &bosses, sparse_array<NetworkedEntity> &ents,
+    sparse_array<Position> &positions, sparse_array<Health> &healths)
+{
+    for (auto &&[ind, net, pos, hp]: indexed_zipper(ents, positions, healths)) {
+        if (net->_type == EntityType::Boss && hp->health <= 0) {
+            std::cout << "killing BOSS\n";
+            r.kill_entity(ind);
+            for (auto &&[bossCount]: zipper(bosses)) {
+                bossCount->isLastBossAlive = false;
+            }
+        }
+        if (net->_type == EntityType::Enemy && pos->pos_X < 0) {
+            for (auto &&[enemy]: zipper(enemyCount)) {
+                enemy->leftAlive--;
+            }
+            std::cout << "killing zorg\n";
+            r.kill_entity(ind);
+        }
+    }
+}

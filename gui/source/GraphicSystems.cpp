@@ -254,10 +254,12 @@ void updateWithSnapshots(
             continue;
         std::cout << "id: " << net.id << std::endl;
         auto pos = Position(net.pos.x, net.pos.y);
-        if (net.type == EntityType::Player) {
+        if (net.type == EntityType::Player)
             factory.create_player(net.id, pos);
-            std::cout << "Creating player\n";
-        }
+        if (net.type == EntityType::Enemy)
+            factory.create_zorg(net.id, pos);
+        if (net.type == EntityType::Boss)
+            factory.create_boss(pos, net.id);
         it = net_ents.erase(it);
         if (it == net_ents.end())
             break;

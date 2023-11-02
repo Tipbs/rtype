@@ -47,13 +47,16 @@ void Factory::register_components()
         Score,
         Backgrounds,
         AlwaysShoot,
-        EnemyCount
+        EnemyCount,
+        BossCount
     >();
 }
 
 void Factory::add_systems()
 {
 #ifdef SERVER
+    _reg.add_system<EnemyCount, BossCount>(spawn_enemy);
+    _reg.add_system<EnemyCount, BossCount, NetworkedEntity, Position, Health>(kill_zord);
     _reg.add_system<Direction, Speed, Position, Size, Weapon, Player>(synchronize); 
 #endif
     _reg.add_system<SpawnGrace>(update_grace);
@@ -136,30 +139,6 @@ const Entity Factory::create_weapon(Entity owner)
     return weapon;
 }
 
-const Entity Factory::create_enemy(Position pos)
-{
-    const Entity ent = _reg.spawn_entity();
-
-    _reg.emplace_component<Position>(ent, pos);
-    _reg.emplace_component<Speed>(ent, 100);
-    _reg.emplace_component<Direction>(ent, 50, 0);
-    _reg.emplace_component<SpawnGrace>(ent, std::chrono::seconds(5));
-    _reg.emplace_component<NetworkedEntity>(ent, (size_t)ent + 4, EntityType::Enemy);
-    return ent;
-}
-
-const Entity Factory::create_enemy(int id, Position pos)
-{
-    const Entity ent = _reg.spawn_entity();
-
-    _reg.emplace_component<Position>(ent, pos);
-    _reg.emplace_component<Speed>(ent, 100);
-    _reg.emplace_component<Direction>(ent, 50, 0);
-    _reg.emplace_component<SpawnGrace>(ent, std::chrono::seconds(5));
-     _reg.emplace_component<NetworkedEntity>(ent, id, EntityType::Enemy);
-    return ent;
-}
-
 const Entity Factory::create_ammo(
     Position pos, Direction diro, float damage_mult,
     int color_id)
@@ -203,7 +182,35 @@ const Entity Factory::create_ammo(Position pos, float damage_mult, int color_id)
     return new_entity;
 }
 
-const Entity Factory::create_zorg(Position pos, size_t net_id)
+const Entity Factory::create_zorg(Position pos)
+{
+    Entity const new_entity = _reg.spawn_entity();
+    Size Size(48, 48);
+    Speed speedo(100);
+    Direction diro(-0.1, 0);
+    SpawnGrace gra(std::chrono::seconds(1));
+    #ifndef SERVER
+    std::string path = "./gui/ressources/Sprites/Drone.png";
+    Sprite sprite(path.c_str(), 48, 48);
+    #endif
+
+    _reg.add_component(new_entity, std::move(pos));
+    _reg.add_component(new_entity, std::move(Size));
+    #ifndef SERVER
+    _reg.add_component(new_entity, std::move(sprite));
+    #endif
+    _reg.add_component(new_entity, std::move(speedo));
+    _reg.add_component(new_entity, std::move(diro));
+    _reg.emplace_component<AlwaysShoot>(
+        new_entity, std::chrono::milliseconds(750));
+    _reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
+    _reg.emplace_component<Health>(new_entity, 1);
+    _reg.emplace_component<NetworkedEntity>(new_entity, (size_t)new_entity + 3, EntityType::Enemy);
+
+    return (size_t) new_entity;
+}
+
+const Entity Factory::create_zorg(size_t net_id, Position pos)
 {
     Entity const new_entity = _reg.spawn_entity();
     Size Size(48, 48);
@@ -226,7 +233,7 @@ const Entity Factory::create_zorg(Position pos, size_t net_id)
         new_entity, std::chrono::milliseconds(750));
     _reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
     _reg.emplace_component<Health>(new_entity, 1);
-    //reg.emplace_component<NetworkedEntity>(new_entity, net_id);
+    _reg.emplace_component<NetworkedEntity>(new_entity, net_id, EntityType::Enemy);
 
     return (size_t) new_entity;
 }
@@ -356,6 +363,44 @@ const Entity Factory::create_boss_projectile(Position pos, Direction diro)
     return entity;
 }
 
+const Entity Factory::create_boss(Position pos)
+{
+    Entity const new_entity = _reg.spawn_entity();
+    Size Size(98, 100);
+    Speed speedo(300);
+    Direction diro(0, 0);
+    SpawnGrace gra(std::chrono::seconds(1));
+    ProjectileShooter proj_shooter(std::chrono::milliseconds(350));
+#ifndef SERVER
+    std::string path = "./gui/ressources/Sprites/boss.png";
+    Sprite sprite(path.c_str(), 97, 102, 10, 1);
+#endif
+
+    _reg.add_component(new_entity, std::move(pos));
+    _reg.add_component(new_entity, std::move(Size));
+#ifndef SERVER
+    _reg.add_component(new_entity, std::move(sprite));
+#endif
+    _reg.add_component(new_entity, std::move(speedo));
+    _reg.add_component(new_entity, std::move(diro));
+    // _reg.emplace_component<AlwaysShoot>(
+    //     new_entity, std::chrono::milliseconds(750));
+    _reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
+    _reg.emplace_component<Health>(new_entity, 1000);
+    auto &shooter = _reg.add_component<ProjectileShooter>(new_entity, std::move(proj_shooter));
+    auto radius = 80;
+    for (int i = 0; i <= 12; i++) {
+        double angle = 2 * std::numbers::pi * i / 12;
+        double x = cos(angle) * radius;
+        double y = sin(angle) * radius;
+        shooter->infos.push_back(
+            ProjectileInfo(Position(x, y), Direction(cos(angle) / 3, sin(angle) / 3)));
+    }
+     _reg.emplace_component<NetworkedEntity>(new_entity, (size_t)new_entity + 3, EntityType::Boss);
+
+    return (size_t) new_entity;
+}
+
 const Entity Factory::create_boss(Position pos, size_t net_id)
 {
     Entity const new_entity = _reg.spawn_entity();
@@ -389,7 +434,7 @@ const Entity Factory::create_boss(Position pos, size_t net_id)
         shooter->infos.push_back(
             ProjectileInfo(Position(x, y), Direction(cos(angle) / 3, sin(angle) / 3)));
     }
-     //_reg.emplace_component<NetworkedEntity>(new_entity, net_id);
+     _reg.emplace_component<NetworkedEntity>(new_entity, net_id, EntityType::Boss);
 
     return (size_t) new_entity;
 }

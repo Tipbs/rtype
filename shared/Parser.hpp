@@ -17,6 +17,7 @@ class Parser {
         void open_file(std::string file);
         const Entity create_player(std::size_t id);
         int get_enemy_count();
+        int get_boss_count();
     
     public:
         using ptree = pt::ptree;
