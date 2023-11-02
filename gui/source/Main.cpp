@@ -34,7 +34,6 @@ int main(int ac, char **av)
 
     factory.register_components();
     factory.create_background(ScreenWidth, ScreenHeight);
-    factory.create_hud(ScreenWidth, ScreenHeight);
     auto net_player_info = net_client.get_player_id();
     Entity player =
         factory.create_player(net_player_info.id, net_player_info.pos);
@@ -42,7 +41,8 @@ int main(int ac, char **av)
     std::cout << "player pos id: " << net_player_info.id << std::endl;
     std::cout << "player pos x: " << net_player_info.pos.x << std::endl;
     std::cout << "player pos y: " << net_player_info.pos.y << std::endl;
-    factory.create_weapon(player);
+    Entity weapon = factory.create_weapon(player);
+    factory.create_hud(ScreenWidth, ScreenHeight, player, weapon);
     factory.create_boss(Position(100, 100), 0);
     factory.add_systems();
 
