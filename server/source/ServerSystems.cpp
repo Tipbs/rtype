@@ -7,11 +7,9 @@
 size_t getEntityWeapon(sparse_array<Weapon> &weapons, size_t playerId)
 {
     size_t finded_weapon = -1;
-    for (auto&& [index, weapon] : indexed_zipper(weapons)) {
-        if ((size_t)weapon->owner_id == playerId) {
+    for (auto &&[index, weapon] : indexed_zipper(weapons))
+        if ((size_t) weapon->owner_id == playerId)
             return index;
-        }
-    }
     return finded_weapon;
 }
 
@@ -63,7 +61,7 @@ void extract(
             tmp.attacking = weapon->IsShooting;
             tmp.attackState = weapon->current_charge;
         }
-		reg._netent.push_back(tmp);
+        reg._netent.push_back(tmp);
     }
 }
 
@@ -82,18 +80,17 @@ void kill_zord(
     sparse_array<BossCount> &bosses, sparse_array<NetworkedEntity> &ents,
     sparse_array<Position> &positions, sparse_array<Health> &healths)
 {
-    for (auto &&[ind, net, pos, hp]: indexed_zipper(ents, positions, healths)) {
+    for (auto &&[ind, net, pos, hp] :
+         indexed_zipper(ents, positions, healths)) {
         if (net->_type == EntityType::Boss && hp->health <= 0) {
             std::cout << "killing BOSS\n";
             r.kill_entity(ind);
-            for (auto &&[bossCount]: zipper(bosses)) {
+            for (auto &&[bossCount] : zipper(bosses))
                 bossCount->isLastBossAlive = false;
-            }
         }
         if (net->_type == EntityType::Enemy && pos->pos_X < 0) {
-            for (auto &&[enemy]: zipper(enemyCount)) {
+            for (auto &&[enemy] : zipper(enemyCount))
                 enemy->leftAlive--;
-            }
             std::cout << "killing zorg\n";
             r.kill_entity(ind);
         }

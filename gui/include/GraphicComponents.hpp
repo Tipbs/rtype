@@ -69,12 +69,13 @@ struct Text {
 struct ScoreText {
     Entity from;
 
-    ScoreText(Entity from): from(from) {};
+    ScoreText(Entity from) : from(from) {};
 };
 
 struct ChargeRect {
     Entity from;
     double maxWidth;
 
-    ChargeRect(Entity from, double maxWidth): from(from), maxWidth(maxWidth) {};
+    ChargeRect(Entity from, double maxWidth)
+        : from(from), maxWidth(maxWidth) {};
 };
