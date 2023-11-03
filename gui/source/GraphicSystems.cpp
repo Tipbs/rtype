@@ -73,6 +73,8 @@ void do_animation(
                      ? -6 * sprite->width_padding
                      : sprite->width_padding);
         } else { // Looping sprites frames
+            if (sprite->width_max == 2 && sprite->height_max == 5)
+                continue;
             sprite->sprite.x =
                 (sprite->sprite.x / sprite->width_padding ==
                          sprite->width_max - 1
@@ -144,6 +146,20 @@ void handle_dir_inputs(
     }
 }
 
+size_t getSoundManager(sparse_array<SoundManager> &managers)
+{
+    for (auto &&[index, manager] : indexed_zipper(managers))
+        return index;
+    return -1;
+}
+
+void add_sound(std::string path, sparse_array<SoundManager> &sound)
+{
+    size_t ind = getSoundManager(sound);
+    Sound sfx = LoadSound("./gui/ressources/Audio/lazer.wav");
+    sound[ind]->sounds.push_back(sfx);
+};
+
 void handle_shoot_inputs(
     Registry &r, sparse_array<Couleur> &colors, sparse_array<Size> &sizes,
     sparse_array<Weapon> &weapons, sparse_array<Position> &positions)
@@ -168,6 +184,9 @@ void handle_shoot_inputs(
             r.currentCmd.mutex.lock();
             r.currentCmd.cmd.setAttack(weapons[ind]->current_charge);
             r.currentCmd.mutex.unlock();
+            add_sound(
+                "./gui/ressources/Audio/lazer.wav",
+                r.get_components<SoundManager>());
             weapons[ind]->current_charge = 1.;
         }
         break;
@@ -212,7 +231,7 @@ void hadle_text_inputs(
 void killDeadEntities(Registry &r, sparse_array<NetworkedEntity> &entities)
 {
     auto &net_ents = r.netEnts.ents;
-    auto size = entities.size();
+    // auto size = entities.size();
 
     for (auto &&[index, _] : indexed_zipper(entities)) {
         auto finded =
@@ -329,5 +348,25 @@ void update_charge_rect(
             (weapons[static_cast<size_t>(chargeRect->from)]->current_charge -
              1) *
             chargeRect->maxWidth;
+    }
+}
+
+void play_sound(Registry &r, sparse_array<SoundManager> &sounds)
+{
+    for (auto &&[sound] : zipper(sounds)) {
+        for (auto &sfx : sound->sounds)
+            PlaySound(sfx);
+        sound->sounds.clear();
+    }
+}
+
+void handle_music(Registry &r, sparse_array<MusicComponent> &musics)
+{
+    for (auto &&[ind, music] : indexed_zipper(musics)) {
+        auto &ost = music->musics[music->context];
+        if (IsSoundPlaying(ost) == false) {
+            SetSoundVolume(ost, 0.3);
+            PlaySound(ost);
+        }
     }
 }

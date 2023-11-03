@@ -28,6 +28,8 @@ void Factory::register_components()
         Text,
         ScoreText,
         ChargeRect,
+        MusicComponent,
+        SoundManager,
 #endif
         Player,
         Weapon,
@@ -80,8 +82,12 @@ void Factory::add_systems()
         handle_dir_inputs);
     _reg.add_system<Couleur, Size, Weapon, Position>(handle_shoot_inputs);
     //    _reg.add_system<InputField, Rectangle>(hadle_text_inputs);
-    _reg.add_system<Sprite, Couleur>(do_animation);
-    _reg.add_system<Position, Size, Backgrounds>(make_infinite_background);
+    _reg.add_system<Sprite, Couleur>(
+        do_animation);
+    _reg.add_system<Sprite, Couleur, Weapon, Current_Player>(
+        do_ship_animation);
+    _reg.add_system<Position, Size, Backgrounds>(
+        make_infinite_background);
     _reg.add_system<
         Position, NetworkedEntity, Speed, Current_Player, Size, Player>(
         updateWithSnapshots);
@@ -89,6 +95,8 @@ void Factory::add_systems()
     //     updateHUD);
     _reg.add_system<Score, ScoreText, Text>(update_score_text);
     _reg.add_system<Weapon, ChargeRect, Rect>(update_charge_rect);
+    _reg.add_system<MusicComponent>(handle_music);
+    _reg.add_system<SoundManager>(play_sound);
 #else
     _reg.add_system<Position, Speed, Weapon, NetworkedEntity, Direction>(extract);
     _reg.add_system<Player, Direction>(resetPlayersDir);
@@ -110,9 +118,50 @@ Factory::create_background(const int ScreenWidth, const int ScreenHeight)
     _reg.emplace_component<Sprite>(
         background, bgpath.c_str(), 3 * ScreenWidth, ScreenHeight);
 #endif
-    _reg.emplace_component<Speed>(background, 50);
+    _reg.emplace_component<Speed>(background, 20);
     _reg.emplace_component<Direction>(background, -1, 0);
     _reg.emplace_component<Backgrounds>(background);
+    _reg.emplace_component<Tags>(background, false, false, false, false, false, false, false, false);
+
+
+    Entity const background1 = _reg.spawn_entity();
+    std::string bgpath1 = "./gui/ressources/Backgrounds/Back_stars.png"; // temp > 2 > 3 > 1
+
+    _reg.emplace_component<Position>(background1, 0, 0);
+    _reg.emplace_component<Size>(background1, ScreenWidth, ScreenHeight);
+#ifndef SERVER
+    _reg.emplace_component<Sprite>(background1, bgpath1.c_str(), 3 * ScreenWidth, ScreenHeight);
+#endif
+    _reg.emplace_component<Speed>(background1, 50);
+    _reg.emplace_component<Direction>(background1, -1, 0);
+    _reg.emplace_component<Backgrounds>(background1);
+    _reg.emplace_component<Tags>(background1, false, false, false, false, false, false, false, false);
+
+    Entity const background2 = _reg.spawn_entity();
+    std::string bgpath2 = "./gui/ressources/Backgrounds/Back_planets.png"; // temp > 2 > 3 > 1
+
+    _reg.emplace_component<Position>(background2, 0, 0);
+    _reg.emplace_component<Size>(background2, ScreenWidth, ScreenHeight);
+#ifndef SERVER
+    _reg.emplace_component<Sprite>(background2, bgpath2.c_str(), 3 * ScreenWidth, ScreenHeight);
+#endif
+    _reg.emplace_component<Speed>(background2, 80);
+    _reg.emplace_component<Direction>(background2, -1, 0);
+    _reg.emplace_component<Backgrounds>(background2);
+    _reg.emplace_component<Tags>(background2, false, false, false, false, false, false, false, false);
+
+    Entity const background3 = _reg.spawn_entity();
+    std::string bgpath3 = "./gui/ressources/Backgrounds/Back_front.png"; // temp > 2 > 3 > 1
+
+    _reg.emplace_component<Position>(background3, 0, 0);
+    _reg.emplace_component<Size>(background3, ScreenWidth, ScreenHeight);
+#ifndef SERVER
+    _reg.emplace_component<Sprite>(background3, bgpath3.c_str(), 3 * ScreenWidth, ScreenHeight);
+#endif
+    _reg.emplace_component<Speed>(background3, 100);
+    _reg.emplace_component<Direction>(background3, -1, 0);
+    _reg.emplace_component<Backgrounds>(background3);
+    _reg.emplace_component<Tags>(background3, false, false, false, false, false, false, false, false);
     return background;
 }
 
@@ -134,6 +183,9 @@ const Entity Factory::create_player(Position pos, size_t net_id)
     _reg.emplace_component<Animation>(new_entity);
     _reg.emplace_component<Couleur>(new_entity, 0);
     _reg.emplace_component<Score>(new_entity, 0);
+    _reg.emplace_component<Health>(new_entity, 1000);
+    _reg.emplace_component<Damages>(new_entity, 1);
+    _reg.emplace_component<Tags>(new_entity, true, false, true, false, false, false, false, true);
     _reg.emplace_component<NetworkedEntity>(new_entity, net_id, EntityType::Player);
     return new_entity;
 }
@@ -145,6 +197,7 @@ const Entity Factory::create_weapon(Entity owner)
     std::cout << "owner: " << (size_t)owner << "\n";
     _reg.emplace_component<Weapon>(weapon, owner);
     _reg.emplace_component<Position>(weapon);
+    _reg.emplace_component<Tags>(weapon, true, false, false, false, false, false, false, false);
     return weapon;
 }
 
@@ -166,6 +219,10 @@ const Entity Factory::create_ammo(
     Entity const new_entity = _reg.spawn_entity();
     int hitwidth = 120 * (damage_mult / 2);
     int hitheight = 24 * (damage_mult / 2);
+    bool friendly = false;
+
+    if (diro.dir_X > 0)
+        friendly = true;
 
     _reg.emplace_component<Position>(
         new_entity, pos.pos_X - (float) hitwidth / 2,
@@ -182,6 +239,7 @@ const Entity Factory::create_ammo(
     _reg.emplace_component<Health>(new_entity, 1);
     _reg.emplace_component<Animation>(new_entity);
     _reg.emplace_component<Couleur>(new_entity, color_id);
+    _reg.emplace_component<Tags>(new_entity, friendly, !friendly, false, false, false, true, false, true);
     _reg.add_component(new_entity, std::move(diro));
     _reg.emplace_component<NetworkedEntity>(new_entity, net_id, EntityType::Ammo);
     return new_entity;
@@ -208,6 +266,7 @@ const Entity Factory::create_ammo(Position pos, float damage_mult, int color_id)
     _reg.emplace_component<Health>(new_entity, 1);
     _reg.emplace_component<Animation>(new_entity);
     _reg.emplace_component<Couleur>(new_entity, color_id);
+    _reg.emplace_component<Tags>(new_entity, true, false, false, false, false, true, false, true);
     return new_entity;
 }
 
@@ -234,7 +293,9 @@ const Entity Factory::create_zorg(Position pos, size_t net_id)
         new_entity, std::chrono::milliseconds(750));
     _reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
     _reg.emplace_component<Health>(new_entity, 1);
+    _reg.emplace_component<Damages>(new_entity, 1);
     _reg.emplace_component<NetworkedEntity>(new_entity, net_id, EntityType::Enemy);
+    _reg.emplace_component<Tags>(new_entity, false, true, false, true, false, false, false, true);
 
     return (size_t) new_entity;
 }
@@ -269,6 +330,8 @@ const Entity Factory::create_asteroids(Position pos, size_t net_id)
         new_entity, Direction {-1, (double) (((rand() % 21) - 10) / 10.)});
     _reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
     _reg.emplace_component<Health>(new_entity, 1);
+    _reg.emplace_component<Damages>(new_entity, 1);
+    _reg.emplace_component<Tags>(new_entity, false, true, false, true, false, false, false, true);
     // _reg.emplace_component<NetworkedEntity>(new_entity, net_id);
 
     return new_entity;
@@ -394,6 +457,7 @@ Factory::create_boss_projectile(Position pos, Direction diro, size_t net_id)
     _reg.add_component(entity, std::move(diro));
     _reg.emplace_component<Damages>(entity, 20);
     _reg.emplace_component<Health>(entity, 1);
+    _reg.emplace_component<Tags>(entity, false, true, false, false, false, true, false, true);
     _reg.emplace_component<NetworkedEntity>(entity, 1, EntityType::Projectile);
     return entity;
 }
@@ -422,6 +486,7 @@ const Entity Factory::create_boss(Position pos, size_t net_id)
     //     new_entity, std::chrono::milliseconds(750));
     _reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
     _reg.emplace_component<Health>(new_entity, 1000);
+    _reg.emplace_component<Damages>(new_entity, 1);
     auto &shooter = _reg.add_component<ProjectileShooter>(
         new_entity, std::move(proj_shooter));
     auto radius = 80;
