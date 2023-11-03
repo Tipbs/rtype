@@ -113,7 +113,7 @@ sparse_array<Colision> &colisions)
                 !colisions[ind] || !colisions[ind])
                 continue;
             else if (
-                colisions[ind]->bitset.test(Friendly) == colisions[ind2]->bitset.test(Friendly))
+                colisions[ind]->bitset.test(static_cast<size_t>(Tag::Friendly)) == colisions[ind2]->bitset.test(static_cast<size_t>(Tag::Friendly)))
                 continue;
             else
                 damages(r, healths, dmgs, ind, ind2);
@@ -140,7 +140,7 @@ void enemyAlwaysShoot(
                 Position(
                     pos->pos_X - (size->size_X / 2.),
                     pos->pos_Y + (size->size_Y / 2.)),
-                Direction(-1, 0), 1.0, 3, 0);
+                1.0, 3, 0, Direction(-1, 0));
         }
     }
 }

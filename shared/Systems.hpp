@@ -25,4 +25,4 @@ void shootProjectiles(
 void clear_entities(
     Registry &r, sparse_array<Position> &positions);
 void kill_outside_entities(
-    Registry &r, sparse_array<Position> &pos, sparse_array<Tags> &tag);
+    Registry &r, sparse_array<Position> &pos, sparse_array<Colision> &colisions);

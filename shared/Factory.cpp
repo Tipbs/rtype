@@ -62,7 +62,7 @@ void Factory::add_systems()
     _reg.add_system<Direction, Speed, Position, Size, Weapon, Player>(synchronize); 
 #endif
     _reg.add_system<SpawnGrace>(update_grace);
-    _reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
+    _reg.add_system<Position, Size, SpawnGrace, Damages, Health, Colision>(colision);
     _reg.add_system<Position, Colision>(kill_outside_entities);
     _reg.add_system<Position, Speed, Direction
         #ifdef SERVER
@@ -180,7 +180,8 @@ const Entity Factory::create_player(Position pos, size_t net_id)
     _reg.emplace_component<Score>(new_entity, 0);
     _reg.emplace_component<Health>(new_entity, 1000);
     _reg.emplace_component<Damages>(new_entity, 1);
-    _reg.emplace_component<Colision>(new_entity, {Friendly, Player});
+    Colision col(Tag::Friendly);
+    _reg.emplace_component<Colision>(new_entity, Tag::Friendly, Tag::Player);
     _reg.emplace_component<NetworkedEntity>(new_entity, net_id, EntityType::Player);
     return new_entity;
 }
@@ -207,7 +208,7 @@ const Entity Factory::create_enemy(Position pos, size_t net_id)
     return ent;
 }
 
-const Entity Factory::create_ammo(Position pos, float damage_mult, int color_id, Direction diro = {1, 0})
+const Entity Factory::create_ammo(Position pos, float damage_mult, int color_id, Direction diro)
 {
     Entity const new_entity = _reg.spawn_entity();
     int hitwidth = 120 * (damage_mult / 2);
@@ -228,13 +229,13 @@ const Entity Factory::create_ammo(Position pos, float damage_mult, int color_id,
     _reg.emplace_component<Health>(new_entity, 1);
     _reg.emplace_component<Animation>(new_entity);
     _reg.emplace_component<Couleur>(new_entity, color_id);
-    _reg.emplace_component<Colision>(new_entity, {Friendly, Ammo});
+    _reg.emplace_component<Colision>(new_entity, Tag::Friendly, Tag::Ammo);
     return new_entity;
 }
 
 
 const Entity Factory::create_ammo(
-    Position pos, float damage_mult, int color_id, size_t net_id, Direction diro = {1, 0})
+    Position pos, float damage_mult, int color_id, size_t net_id, Direction diro)
 {
     Entity const new_entity = create_ammo(pos, damage_mult, color_id, diro);
 
@@ -268,7 +269,7 @@ const Entity Factory::create_zorg(Position pos, size_t net_id)
     _reg.emplace_component<Damages>(new_entity, 1);
     _reg.emplace_component<NetworkedEntity>(new_entity, net_id, EntityType::Enemy);
     // _reg.emplace_component<Tags>(new_entity, false, true, false, true, false, false, false, true);
-    _reg.emplace_component<Colision>(new_entity, {Enemy});
+    _reg.emplace_component<Colision>(new_entity, Tag::Enemy);
 
     return (size_t) new_entity;
 }
@@ -305,7 +306,7 @@ const Entity Factory::create_asteroids(Position pos, size_t net_id)
     _reg.emplace_component<Health>(new_entity, 1);
     _reg.emplace_component<Damages>(new_entity, 1);
     // _reg.emplace_component<Tags>(new_entity, false, true, false, true, false, false, false, true);
-    _reg.emplace_component<Colision>(new_entity, {Enemy});
+    _reg.emplace_component<Colision>(new_entity, Tag::Enemy);
     // _reg.emplace_component<NetworkedEntity>(new_entity, net_id);
 
     return new_entity;
@@ -432,7 +433,7 @@ Factory::create_boss_projectile(Position pos, Direction diro, size_t net_id)
     _reg.emplace_component<Damages>(entity, 20);
     _reg.emplace_component<Health>(entity, 1);
     // _reg.emplace_component<Tags>(entity, false, true, false, false, false, true, false, true);
-    _reg.emplace_component<Colision>(entity, {Ammo});
+    _reg.emplace_component<Colision>(entity, Tag::Ammo);
     _reg.emplace_component<NetworkedEntity>(entity, 1, EntityType::Projectile);
     return entity;
 }
@@ -500,6 +501,8 @@ const Entity Factory::create_netent(
         case EntityType::Projectile:
             return create_boss_projectile(pos, dir, net_id);
         case EntityType::Ammo:
-            return create_ammo(pos, dir, 1.0, 1, net_id);
+            return create_ammo(pos, 1.0, 1, net_id, dir);
+        default:
+            throw std::exception();
     }
 }

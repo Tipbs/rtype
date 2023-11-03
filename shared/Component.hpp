@@ -152,8 +152,8 @@ struct Score {
     Score(int score): score(score) {};
 };
 
-enum Tag {
-    Friendly,
+enum class Tag: std::size_t {
+    Friendly = 0,
     Player,
     Enemy,
     Boss,
@@ -176,10 +176,9 @@ struct Colision {
 	// 	IsFriendly(IsFriendly), IsHostile(IsHostile), IsPlayer(IsPlayer), IsEnemy(IsEnemy),
 	// 	IsBoss(IsBoss), IsAmmo(IsAmmo), IsBonus(IsBonus), HasColision(HasColision) {};
 
-    Colision(std::vector<Tag> tags)
+    template <typename... Args>
+    Colision(Args &&...tags)
     {
-        for(auto tag: tags) {
-            bitset.set(tag);
-        }
+        bitset.set(static_cast<size_t>(tags)...);
     }
 };
