@@ -8,15 +8,26 @@
 
 void move(
     Registry &r, sparse_array<Position> &positions, sparse_array<Speed> &speed,
-    sparse_array<Direction> &dir)
+    sparse_array<Direction> &dir
+    #ifdef SERVER
+    , sparse_array<Player> &players
+    #endif
+)
 {
-    for (auto &&[pos, spe, diro]: zipper(positions, speed, dir)) {
+    for (auto &&[ind, pos, spe, diro]: indexed_zipper(positions, speed, dir)) {
         double x_offset = spe->speed * diro->dir_X;
         double y_offset = spe->speed * diro->dir_Y;
 
 #ifdef SERVER
 		pos->pos_X += x_offset * GetFrameTime();
 		pos->pos_Y += y_offset * GetFrameTime();
+		if (players[ind]) {
+			pos->pos_X += x_offset;
+			pos->pos_Y += y_offset;
+		} else {
+			pos->pos_X += x_offset * GetFrameTime();
+			pos->pos_Y += y_offset * GetFrameTime();
+		}
 #else
         pos->pos_X += x_offset * GetFrameTime();
         pos->pos_Y += y_offset * GetFrameTime();
@@ -131,7 +142,7 @@ void enemyAlwaysShoot(
                 Position(
                     pos->pos_X - (size->size_X / 2.),
                     pos->pos_Y + (size->size_Y / 2.)),
-                Direction(-1, 0), 1.0, 3);
+                Direction(-1, 0), 1.0, 3, 0);
         }
     }
 }
@@ -149,7 +160,10 @@ void spawn_enemy(Registry &r,
     sparse_array<BossCount> &bossCount
 )
 {
-    for (auto &&[ind, enemyCount]: indexed_zipper(enemiesCount)) {
+    for (auto index = 0; index != enemiesCount.size(); ++index) {
+        if (!enemiesCount[index])
+            continue;
+        auto &enemyCount = enemiesCount[index];
         enemyCount->timeSinceLastSpawn += GetFrameTime();
         Factory f(r);
         if (enemyCount->leftToSpawn > 0 && enemyCount->timeSinceLastSpawn > enemyCount->spawnFrequency) {
@@ -163,7 +177,7 @@ void spawn_enemy(Registry &r,
             f.create_zorg(pos);
         }
         if (enemyCount->leftAlive <= 0 && enemyCount->leftToSpawn <= 0) {
-            auto &boss = bossCount[ind];
+            auto &boss = bossCount[index];
             if (!(boss))
                 continue;
             float randomNumber = rand() % (580);
@@ -171,7 +185,7 @@ void spawn_enemy(Registry &r,
             if (boss->isLastBossAlive == false && boss->leftToSpawn > 0) {
                 boss->isLastBossAlive = true;
                 boss->leftToSpawn--;
-                f.create_boss(pos);
+                f.create_boss(pos, 0);
             }
         }
     }
@@ -240,13 +254,30 @@ void shootProjectiles(
                 Position(sizes[index]->size_X / 2., sizes[index]->size_Y / 2.);
             for (auto &proj : shooters[index]->infos) {
                 factory.create_boss_projectile(
-                    *positions[index] + size_as_pos + proj.offset, proj.dir);
+                    *positions[index] + size_as_pos + proj.offset, proj.dir, 0);
             }
             ++shooters[index]->shotCount;
             updateBossProjectiles(
                 *shooters[index], positions,
                 players); // atm called for each shooter but should check if
                           // it's the boss and the phase of the boss (health)
+        }
+    }
+}
+
+void clear_entities(
+    Registry &r,
+    sparse_array<Position> &positions
+)
+{
+    for (auto index = 0; index != positions.size(); ++index) {
+        auto &pos = positions[index];
+        if (!pos)
+            continue;
+
+        if (pos->pos_X < -200 || pos->pos_X > 2000 || pos->pos_Y < -200 || pos->pos_Y > 1000) {
+            std::cout << "x: " << pos->pos_X << " y: " << pos->pos_Y << "\n";
+            r.kill_entity(index);
         }
     }
 }

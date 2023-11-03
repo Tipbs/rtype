@@ -35,6 +35,8 @@ void do_ship_animation(
 void make_infinite_background(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &sizes,
     sparse_array<Backgrounds> &bg);
+void handle_music(Registry &r, sparse_array<MusicComponent> &sounds);
+void play_sound(Registry &r, sparse_array<SoundManager> &sounds);
 void update_score_text(
     Registry &r, sparse_array<Score> &scores,
     sparse_array<ScoreText> &scoreTexts, sparse_array<Text> &texts);

@@ -159,13 +159,27 @@ void handle_dir_inputs(
     }
 }
 
+size_t getSoundManager(sparse_array<SoundManager> &managers)
+{
+    for (auto &&[index, manager] : indexed_zipper(managers))
+        return index;
+    return -1;
+}
+
+void add_sound(std::string path, sparse_array<SoundManager> &sound)
+{
+    size_t ind = getSoundManager(sound);
+    Sound sfx = LoadSound("./gui/ressources/Audio/lazer.wav");
+    sound[ind]->sounds.push_back(sfx);
+};
+
 void handle_shoot_inputs(
     Registry &r, sparse_array<Couleur> &colors, sparse_array<Size> &sizes,
     sparse_array<Weapon> &weapons, sparse_array<Position> &positions)
 {
     Factory factory(r);
 
-    for (auto &&[weapon] : zipper(weapons)) {
+    for (auto &&[ind, weapon] : indexed_zipper(weapons)) {
         size_t owner_id = static_cast<size_t>(weapon->owner_id);
         if (IsKeyDown(KEY_SPACE)) {
             weapon->IsShooting = true;
@@ -181,9 +195,12 @@ void handle_shoot_inputs(
                         (float) sizes[owner_id]->size_Y / 2),
                 weapon->current_charge, colors[owner_id]->color_id);
             r.currentCmd.mutex.lock();
-            r.currentCmd.cmd.setAttack(weapon->current_charge);
+            r.currentCmd.cmd.setAttack(weapons[ind]->current_charge);
             r.currentCmd.mutex.unlock();
-            weapon->current_charge = 1.;
+            add_sound(
+                "./gui/ressources/Audio/lazer.wav",
+                r.get_components<SoundManager>());
+            weapons[ind]->current_charge = 1.;
         }
         break;
     }
@@ -289,12 +306,7 @@ void updateWithSnapshots(
             continue;
         std::cout << "id: " << net.id << std::endl;
         auto pos = Position(net.pos.x, net.pos.y);
-        if (net.type == EntityType::Player)
-            factory.create_player(net.id, pos);
-        if (net.type == EntityType::Enemy)
-            factory.create_zorg(net.id, pos);
-        if (net.type == EntityType::Boss)
-            factory.create_boss(pos, net.id);
+        factory.create_netent(net.type, net);
         it = net_ents.erase(it);
         if (it == net_ents.end())
             break;
@@ -369,5 +381,25 @@ void update_charge_rect(
             (weapons[static_cast<size_t>(chargeRect->from)]->current_charge -
              1) *
             chargeRect->maxWidth;
+    }
+}
+
+void play_sound(Registry &r, sparse_array<SoundManager> &sounds)
+{
+    for (auto &&[sound] : zipper(sounds)) {
+        for (auto &sfx : sound->sounds)
+            PlaySound(sfx);
+        sound->sounds.clear();
+    }
+}
+
+void handle_music(Registry &r, sparse_array<MusicComponent> &musics)
+{
+    for (auto &&[ind, music] : indexed_zipper(musics)) {
+        auto &ost = music->musics[music->context];
+        if (IsSoundPlaying(ost) == false) {
+            SetSoundVolume(ost, 0.3);
+            PlaySound(ost);
+        }
     }
 }
