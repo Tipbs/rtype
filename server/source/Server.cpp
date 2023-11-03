@@ -13,9 +13,9 @@
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/bind/bind.hpp>
-#include "../../shared/Bundle.hpp"
 #include "../../shared/Component.hpp"
-#include "ServerBundle.hpp"
+#include "../../shared/Factory.hpp"
+#include "ServerSystems.hpp"
 
 using boost::asio::ip::udp;
 std::binary_semaphore MainToThread {0};
@@ -113,7 +113,6 @@ void udp_server::handle_tick() // tick every seconds
         MainToThread.release();
         ThreadToMain.acquire();
         tick_timer.expires_from_now(boost::posix_time::millisec(50));
-        ResetFrameTime();
         tick_timer.wait();
     }
 }
@@ -127,7 +126,7 @@ void udp_server::deserialize(const std::size_t bytes_transferred)
         UserCmd tmp;
         archive >> tmp;
         cmd_mutex.lock();
-        cmd[clients[_remote_point]._id].push_back(tmp);
+        cmd[clients[_remote_point].player].push_back(tmp);
         cmd_mutex.unlock();
     } catch (boost::archive::archive_exception &e) {
         std::cerr << "deserialization failed: " << e.what() << std::endl;
@@ -141,13 +140,11 @@ void udp_server::handle_send(
 }
 
 void udp_server::send_playerId(
-    std::size_t playerId, udp::endpoint client_endpoint)
+    Utils::PlayerId playerId, udp::endpoint client_endpoint)
 {
-    Utils::PlayerId player;
-    player.id = playerId;
     std::ostringstream oss;
     boost::archive::binary_oarchive archive(oss);
-    archive << player;
+    archive << playerId;
     std::string serializedData = oss.str();
     _socket.async_send_to(
         boost::asio::buffer(serializedData.c_str(), serializedData.size()),
@@ -159,21 +156,33 @@ void udp_server::send_playerId(
 
 void udp_server::wait_for_connexion(std::size_t bytes_transferred)
 {
+    Factory factory(reg);
+
     if (bytes_transferred != 1 && clients.size() == 0)
         return;
     if (bytes_transferred == 1 && clients.count(_remote_point) == 0) {
-        size_t player = create_player_server(reg, Position(0, 0));
-        if (clients.size() == 0)
+        if (clients.size() == 0) {
             start_threads();
-        clients[_remote_point]._id = (size_t) player;
+            return;
+        }
+        Entity player = parser.create_player(netId);
+        clients[_remote_point]._id = (size_t) netId;
+        clients[_remote_point].player = (size_t) player;
+        netId++;
         clients[_remote_point].isClientConnected = false;
         clients[_remote_point]._timer =
             boost::posix_time::microsec_clock::universal_time();
-        send_playerId(clients[_remote_point]._id, _remote_point);
+        Utils::PlayerId p;
+        p.id = clients[_remote_point].player;
+        p.pos = parser.get_player_pos(p.id);
+        send_playerId(p, _remote_point);
     } else if (bytes_transferred == 1 && clients.count(_remote_point) != 0) {
         clients[_remote_point]._timer =
             boost::posix_time::microsec_clock::universal_time();
-        send_playerId(clients[_remote_point]._id, _remote_point);
+        Utils::PlayerId p;
+        p.id = clients[_remote_point].player;
+        p.pos = parser.get_player_pos(p.id);
+        send_playerId(p, _remote_point);
     } else {
         clients[_remote_point].isClientConnected = true;
         clients[_remote_point]._timer =
@@ -218,33 +227,24 @@ void udp_server::start_receive() // Receive function
             boost::asio::placeholders::bytes_transferred));
 }
 
-void synchronize(Registry &reg, sparse_array<Direction> &directions)
-{
-    for (auto &player : reg.user_cmds) {
-        auto &dir = directions[player.first];
-        for (auto &cmds : player.second) {
-            dir->dir_X += cmds.moved.x;
-            dir->dir_Y += cmds.moved.y;
-        }
-    }
-}
-
-void extract(Registry &reg, sparse_array<Position> &positions)
-{
-    for (size_t ind = 0; ind < positions.size(); ind++) {
-        auto &pos = positions[ind];
-        if (!pos)
-            continue;
-        NetEnt tmp;
-        tmp.id = ind;
-        tmp.pos.x = pos->pos_X;
-        tmp.pos.y = pos->pos_Y;
-        reg._netent.push_back(tmp);
-    }
-}
-
 void udp_server::start_threads()
 {
+    parser.open_file("./server/ressources/Maps/map_01.json");
+    Entity enemy_count = reg.spawn_entity();
+    reg.emplace_component<EnemyCount>(
+        enemy_count, parser.get_enemy_count(), 20);
+    reg.emplace_component<BossCount>(enemy_count, parser.get_boss_count());
+    Entity player = parser.create_player(netId);
+    clients[_remote_point]._id = (size_t) netId;
+    clients[_remote_point].player = (size_t) player;
+    netId++;
+    clients[_remote_point].isClientConnected = false;
+    clients[_remote_point]._timer =
+        boost::posix_time::microsec_clock::universal_time();
+    Utils::PlayerId p;
+    p.id = clients[_remote_point].player;
+    p.pos = parser.get_player_pos(p.id);
+    send_playerId(p, _remote_point);
     tick = std::thread(&udp_server::handle_tick, this); // Timer thread
     broadcasting =
         std::thread(&udp_server::start_snapshot, this); // Snapshot thread
@@ -255,20 +255,12 @@ void udp_server::start_threads()
 
 udp_server::udp_server(std::size_t port)
     : _svc(), _socket(_svc, udp::endpoint(udp::v4(), port)), tick_timer(_svc),
-      check_timer(_svc)
+      check_timer(_svc), parser(reg)
 {
-    reg.register_component<Size>();
-    reg.register_component<Position>();
-    reg.register_component<Speed>();
-    reg.register_component<Direction>();
-    reg.register_component<SpawnGrace>();
-    reg.register_component<Player>();
-    reg.register_component<Damages>();
-    reg.register_component<Health>();
-    reg.add_system<Direction>(synchronize);
-    reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
-    reg.add_system<Position, Speed, Direction>(move);
-    reg.add_system<Position>(extract);
+    Factory factory(reg);
+
+    factory.register_components();
+    factory.add_systems();
 
     _port = port;
 

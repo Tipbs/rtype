@@ -1,26 +1,22 @@
 #include <chrono>
 #include <climits>
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <semaphore>
-#include "../../shared/Bundle.hpp"
+#include <raylib.h>
+#include "../../shared/Parser.hpp"
 #include "../../shared/Registry.hpp"
 #include "Client.hpp"
 #include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
-#include "raylib.h"
-
-void logging_system(Registry &r, sparse_array<Position> const &positions)
-{
-    for (auto &pos : positions)
-        std::cout << "Position = { " << pos->pos_X << ", " << pos->pos_Y << " }"
-                  << std::endl;
-}
 
 int main(int ac, char **av)
 {
     const int ScreenWidth = 1280;
     const int ScreenHeight = 720;
+    // const int ScreenWidth = 900;
+    // const int ScreenHeight = 1000;
     boost::asio::io_context context;
     Registry reg;
     std::string port = "5000";
@@ -34,6 +30,29 @@ int main(int ac, char **av)
     InitWindow(ScreenWidth, ScreenHeight, "R-Type");
     SetTargetFPS(60);
 
+    Factory factory(reg);
+
+    factory.register_components();
+    factory.create_background(ScreenWidth, ScreenHeight);
+    auto net_player_info = net_client.get_player_id();
+    Entity player =
+        factory.create_player(net_player_info.id, net_player_info.pos);
+    reg.emplace_component<Current_Player>(player);
+    std::cout << "player pos id: " << net_player_info.id << std::endl;
+    std::cout << "player pos x: " << net_player_info.pos.x << std::endl;
+    std::cout << "player pos y: " << net_player_info.pos.y << std::endl;
+    // factory.create_weapon(player);
+    Entity weapon = factory.create_weapon(player);
+    factory.create_hud(ScreenWidth, ScreenHeight, player, weapon);
+    factory.add_systems();
+
+    while (!WindowShouldClose()) {
+        reg.run_systems();
+        context.poll();
+        context.reset();
+    }
+}
+/*
     Entity const background = reg.spawn_entity();
     Position bgPos(0, 0);
     Size bgSize(ScreenWidth, ScreenHeight);
@@ -95,11 +114,4 @@ int main(int ac, char **av)
     reg.add_system<Position, Size>(make_infinite_background);
     reg.add_system<Position, Player>(updateWithSnapshots);
     reg.add_system<MenuFields, Rectangle>(hadle_menu_inputs);
-
-    while (!WindowShouldClose()) {
-        reg.run_systems();
-        net_client.start_receive();
-        context.poll();
-        context.reset();
-    }
-}
+*/

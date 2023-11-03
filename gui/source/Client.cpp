@@ -51,8 +51,8 @@ void udp_client::handle_receive(
 {
     // std::osyncstream(std::cout) << "Received mais erreur\n";
     if (!error) {
-        // std::osyncstream(std::cout) << "Received " << bytes_transferred << "
-        // bytes" << std::endl;
+        std::osyncstream(std::cout)
+            << "Received " << bytes_transferred << " bytes" << std::endl;
         try {
             std::string seralizedData(_recv_buffer.data(), bytes_transferred);
             std::istringstream iss(seralizedData);
@@ -118,8 +118,9 @@ void udp_client::net_get_id(
             boost::archive::binary_iarchive archive(iss);
             Utils::PlayerId tmp;
             archive >> tmp;
-            _player_id = tmp.id;
-        } catch (std::exception err) {
+            _player_id.id = tmp.id;
+            _player_id.pos = tmp.pos;
+        } catch (const std::exception &err) {
             std::cerr << "serialization exception: " << err.what();
             throw err;
         }
@@ -140,7 +141,7 @@ void udp_client::fetch_player_id()
         boost::bind(
             &udp_client::net_get_id, this, boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred));
-    while (_player_id == -1) {
+    while (_player_id.id == static_cast<size_t>(-1)) {
         if (std::chrono::system_clock::now() - timeout >
             std::chrono::seconds(10)) {
             std::cerr << "Failed to get player id from server\n";
@@ -151,15 +152,16 @@ void udp_client::fetch_player_id()
         _svc.run();
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-    std::osyncstream(std::cout) << "player id: " << _player_id << "\n";
+    std::osyncstream(std::cout) << "player id: " << _player_id.id << "\n";
 }
 
 udp_client::udp_client(
     boost::asio::io_context &svc, const std::string &ip,
     const std::string &port, Registry &reg)
-    : _socket(svc), timer(svc), _reg(reg), _svc(svc)
+    : _reg(reg), _socket(svc), _svc(svc), timer(svc)
 {
     _socket.open(udp::v4());
+    _player_id.id = -1;
     udp::resolver resolver(svc);
     udp::resolver::query query(boost::asio::ip::udp::v4(), ip, port);
     udp::resolver::iterator iter = resolver.resolve(query);
@@ -183,20 +185,3 @@ udp_client::~udp_client()
     tick.std::thread::~thread();
     sending.std::thread::~thread();
 }
-
-// int main(int ac, char **av)
-// {
-//     try {
-//         boost::asio::io_context _svc;
-//         std::string port = "5000";
-//         std::string ip = "127.0.0.1";
-//         if (ac == 3 && std::stoi(av[2])) {
-//             ip = av[1];
-//             port = av[2];
-//         }
-//         udp_client client(_svc, ip, port);
-//         _svc.run();
-//     } catch (std::exception &e) {
-//         std::cerr << e.what() << std::endl;
-//     }
-// }
