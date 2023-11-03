@@ -62,6 +62,7 @@ void Factory::add_systems()
 #endif
     _reg.add_system<SpawnGrace>(update_grace);
     _reg.add_system<Position, Size, SpawnGrace, Damages, Health, Tags>(colision);
+    _reg.add_system<Position, Tags>(kill_outside_entities);
     _reg.add_system<Position, Speed, Direction>(move);
     _reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
     _reg.add_system<ProjectileShooter, Position, Size, Player>(shootProjectiles);
@@ -105,7 +106,7 @@ const Entity Factory::create_background(const int ScreenWidth, const int ScreenH
 #ifndef SERVER
     _reg.emplace_component<Sprite>(background, bgpath.c_str(), 3 * ScreenWidth, ScreenHeight);
 #endif
-    _reg.emplace_component<Speed>(background, 50);
+    _reg.emplace_component<Speed>(background, 20);
     _reg.emplace_component<Direction>(background, -1, 0);
     _reg.emplace_component<Backgrounds>(background);
     _reg.emplace_component<Tags>(background, false, false, false, false, false, false, false, false);
@@ -119,7 +120,7 @@ const Entity Factory::create_background(const int ScreenWidth, const int ScreenH
 #ifndef SERVER
     _reg.emplace_component<Sprite>(background1, bgpath1.c_str(), 3 * ScreenWidth, ScreenHeight);
 #endif
-    _reg.emplace_component<Speed>(background1, 0.5);
+    _reg.emplace_component<Speed>(background1, 50);
     _reg.emplace_component<Direction>(background1, -1, 0);
     _reg.emplace_component<Backgrounds>(background1);
     _reg.emplace_component<Tags>(background1, false, false, false, false, false, false, false, false);
@@ -132,7 +133,7 @@ const Entity Factory::create_background(const int ScreenWidth, const int ScreenH
 #ifndef SERVER
     _reg.emplace_component<Sprite>(background2, bgpath2.c_str(), 3 * ScreenWidth, ScreenHeight);
 #endif
-    _reg.emplace_component<Speed>(background2, 0.8);
+    _reg.emplace_component<Speed>(background2, 80);
     _reg.emplace_component<Direction>(background2, -1, 0);
     _reg.emplace_component<Backgrounds>(background2);
     _reg.emplace_component<Tags>(background2, false, false, false, false, false, false, false, false);
@@ -145,7 +146,7 @@ const Entity Factory::create_background(const int ScreenWidth, const int ScreenH
 #ifndef SERVER
     _reg.emplace_component<Sprite>(background3, bgpath3.c_str(), 3 * ScreenWidth, ScreenHeight);
 #endif
-    _reg.emplace_component<Speed>(background3, 2);
+    _reg.emplace_component<Speed>(background3, 100);
     _reg.emplace_component<Direction>(background3, -1, 0);
     _reg.emplace_component<Backgrounds>(background3);
     _reg.emplace_component<Tags>(background3, false, false, false, false, false, false, false, false);

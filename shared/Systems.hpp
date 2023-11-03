@@ -10,6 +10,7 @@ void colision(Registry &r, sparse_array<Position> &positions, sparse_array<Size>
 void update_grace(Registry &r, sparse_array<SpawnGrace> &grace);
 void update_weapon_position(Registry &r, sparse_array<Weapon> &weapons, sparse_array<Position> &postions);
 void spawn_enemy(Registry &r, sparse_array<EnemyCount> &enemiesCount, sparse_array<BossCount> &);
+void kill_outside_entities(Registry &r, sparse_array<Position> &pos, sparse_array<Tags> &tag);
 void enemyAlwaysShoot(
     Registry &r, sparse_array<AlwaysShoot> &always_shoot,
     sparse_array<Position> &positions, sparse_array<Size> &sizes);
