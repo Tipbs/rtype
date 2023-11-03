@@ -73,8 +73,7 @@ void do_animation(
                      ? -6 * sprite->width_padding
                      : sprite->width_padding);
         } else { // Looping sprites frames
-            if (sprite->width_max == 2 &&
-            sprite->height_max == 5)
+            if (sprite->width_max == 2 && sprite->height_max == 5)
                 continue;
             sprite->sprite.x =
                 (sprite->sprite.x / sprite->width_padding ==
