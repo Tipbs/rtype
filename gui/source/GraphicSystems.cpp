@@ -182,12 +182,12 @@ void handle_shoot_inputs(
                         (float) sizes[owner_id]->size_Y / 2),
                 weapon->current_charge, colors[owner_id]->color_id);
             r.currentCmd.mutex.lock();
-            r.currentCmd.cmd.setAttack(weapon->current_charge);
+            r.currentCmd.cmd.setAttack(weapons[ind]->current_charge);
             r.currentCmd.mutex.unlock();
-            weapon->current_charge = 1.;
             add_sound(
                 "./gui/ressources/Audio/lazer.wav",
                 r.get_components<SoundManager>());
+            weapons[ind]->current_charge = 1.;
         }
         break;
     }
@@ -273,12 +273,7 @@ void updateWithSnapshots(
             continue;
         std::cout << "id: " << net.id << std::endl;
         auto pos = Position(net.pos.x, net.pos.y);
-        if (net.type == EntityType::Player)
-            factory.create_player(net.id, pos);
-        if (net.type == EntityType::Enemy)
-            factory.create_zorg(net.id, pos);
-        if (net.type == EntityType::Boss)
-            factory.create_boss(pos, net.id);
+        factory.create_netent(net.type, net);
         it = net_ents.erase(it);
         if (it == net_ents.end())
             break;

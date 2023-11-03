@@ -13,16 +13,19 @@ class Factory {
         // template<typename ...Args>
         // const Entity create(size_t id, Args ...args);
         const Entity create_background(const int ScreenWidth, const int ScreenHeight);
-        const Entity create_player(int id, Position pos);
+        const Entity create_player(Position pos, size_t net_id);
         const Entity create_weapon(Entity owner);
+        const Entity create_enemy(Position pos, size_t net_id);
         const Entity create_ammo(Position pos, float damage_mult, int color_id);
-        const Entity create_ammo(Position pos, Direction diro, float damage_mult, int color_id);
-        const Entity create_zorg(size_t net_id, Position pos);
-        const Entity create_zorg(Position pos);
+        const Entity create_ammo(
+            Position pos, Direction diro, float damage_mult, int color_id,
+            size_t net_id);
+        const Entity create_zorg(Position pos, size_t net_id = 0);
+        const Entity create_netent(
+            EntityType type, NetEnt &ent);
         const Entity create_asteroids(Position pos, size_t net_id = 0);
-        const Entity create_boss_projectile(Position pos, Direction diro);
+        const Entity create_boss_projectile(Position pos, Direction diro, size_t net_id);
         const Entity create_boss(Position pos, size_t net_id);
-        const Entity create_boss(Position pos);
         void create_hud(const int ScreenWidth, const int ScreenHeight, Entity scoreFrom, Entity chargeFrom);
         void register_components();
         void add_systems();

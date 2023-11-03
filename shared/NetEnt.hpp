@@ -6,8 +6,11 @@
 
 enum class EntityType {
     Player,
-    Enemy,
+    Zorg,
     Boss,
+    Projectile,
+    Ammo,
+    Enemy,
     None
 };
 
@@ -16,6 +19,7 @@ public:
     int id;
 	EntityType type;
     Utils::Vec2 pos {};
+    Utils::Vec2 dir {};
 	uint8_t attacking = false;
 	float attackState;
 

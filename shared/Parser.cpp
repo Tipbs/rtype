@@ -26,9 +26,10 @@ const Entity Parser::create_player(std::size_t id)
         for (ptree::value_type &entity : _root.get_child("players")) {
             size_t _id = entity.second.get<int>("id");
             if (_id == id) {
-                Position pos = { entity.second.get<double>("pos.x"),
+                Position pos = {
+                    entity.second.get<double>("pos.x"),
                     entity.second.get<double>("pos.y")};
-                Entity player = _factory.create_player(id, pos);
+                Entity player = _factory.create_player(pos, id);
                 _factory.create_weapon(player);
                 return player;
             }

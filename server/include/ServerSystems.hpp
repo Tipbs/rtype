@@ -12,7 +12,7 @@ void synchronize(
 void extract(
     Registry &reg, sparse_array<Position> &positions,
     sparse_array<Speed> &speeds, sparse_array<Weapon> &weapons,
-    sparse_array<NetworkedEntity> &ents);
+    sparse_array<NetworkedEntity> &ents, sparse_array<Direction> &directions);
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
     sparse_array<NetworkedEntity> &entities, sparse_array<Speed> &speeds,
