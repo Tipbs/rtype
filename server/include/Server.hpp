@@ -11,6 +11,7 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include "../../shared/NetEnt.hpp"
+#include "../../shared/Parser.hpp"
 #include "../../shared/Registry.hpp"
 #include "../../shared/Systems.hpp"
 #include "../../shared/UserCmd.hpp"
@@ -18,6 +19,7 @@
 
 struct Clients {
     std::size_t _id;
+    std::size_t player;
     bool isClientConnected;
     boost::posix_time::ptime _timer;
 };
@@ -34,7 +36,8 @@ class udp_server {
     void handle_send(const boost::system::error_code &error, std::size_t);
 
     void start_snapshot();
-    void send_playerId(std::size_t playerId, boost::asio::ip::udp::endpoint);
+    void
+    send_playerId(Utils::PlayerId playerId, boost::asio::ip::udp::endpoint);
     void wait_for_connexion(std::size_t);
     void handle_broadcast(const boost::system::error_code &, std::size_t);
     void multiple_broadcast(
@@ -51,13 +54,14 @@ class udp_server {
     Registry reg;
 
     std::size_t _port;
+    std::size_t netId = 0;
 
     boost::asio::io_context _svc;
     boost::asio::ip::udp::socket _socket;
     boost::asio::deadline_timer tick_timer;
     boost::asio::deadline_timer check_timer;
     boost::asio::ip::udp::endpoint _remote_point;
-    boost::array<char, 512> _recv_buffer;
+    boost::array<char, 2048> _recv_buffer;
 
     std::map<boost::asio::ip::udp::endpoint, struct Clients> clients;
     std::map<std::size_t, std::vector<UserCmd>> cmd;
@@ -65,4 +69,6 @@ class udp_server {
     std::thread tick;
     std::thread broadcasting;
     std::mutex cmd_mutex;
+
+    Parser parser;
 };

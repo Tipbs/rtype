@@ -5,6 +5,7 @@
 #include <chrono>
 #include <vector>
 #include "Entity.hpp"
+#include "NetEnt.hpp"
 #include "Utils.hpp"
 
 #ifdef SERVER
@@ -24,8 +25,9 @@ struct Player {
 
 struct NetworkedEntity {
     int id;
+    EntityType _type;
 
-    NetworkedEntity(int id) : id(id) {}
+    NetworkedEntity(int id, EntityType type) : id(id), _type(type) {}
 };
 
 struct Position {
@@ -112,6 +114,12 @@ struct EnemyCount {
     EnemyCount(int enemiesNb, int spawnFrequency = 2): leftToSpawn(enemiesNb), spawnFrequency(spawnFrequency) {};
 };
 
+struct BossCount {
+    int leftToSpawn = 0;
+    bool isLastBossAlive = false;
+    BossCount(int enemiesNb): leftToSpawn(enemiesNb) {};
+};
+
 struct AlwaysShoot {
 	std::chrono::duration<float> delay;
 	std::chrono::steady_clock::time_point last_shoot;
@@ -135,4 +143,26 @@ struct ProjectileShooter {
 
 	ProjectileShooter(std::chrono::duration<float> del) : delay(del), lastShot(std::chrono::steady_clock::now())
 	{}
+};
+
+struct Score {
+    int score;
+
+    Score(int score): score(score) {};
+};
+
+struct Tags {
+	bool IsFriendly;
+	bool IsHostile;
+	bool IsPlayer;
+	bool IsEnemy;
+	bool IsBoss;
+	bool IsAmmo;
+	bool IsBonus;
+	bool HasCollision;
+
+	Tags(bool IsFriendly, bool IsHostile, bool IsPlayer, bool IsEnemy, bool IsBoss, bool IsAmmo, bool IsBonus, bool HasCollision) : 
+		IsFriendly(IsFriendly), IsHostile(IsHostile), IsPlayer(IsPlayer), IsEnemy(IsEnemy),
+		IsBoss(IsBoss), IsAmmo(IsAmmo), IsBonus(IsBonus), HasCollision(HasCollision) {};
+
 };

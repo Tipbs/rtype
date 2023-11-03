@@ -10,7 +10,6 @@ void move(
     Registry &r, sparse_array<Position> &positions, sparse_array<Speed> &speed,
     sparse_array<Direction> &dir)
 {
-
     for (auto &&[pos, spe, diro]: zipper(positions, speed, dir)) {
         double x_offset = spe->speed * diro->dir_X;
         double y_offset = spe->speed * diro->dir_Y;
@@ -19,8 +18,8 @@ void move(
 		pos->pos_X += x_offset * GetFrameTime();
 		pos->pos_Y += y_offset * GetFrameTime();
 #else
-        pos->pos_X += x_offset;
-        pos->pos_Y += y_offset;
+        pos->pos_X += x_offset * GetFrameTime();
+        pos->pos_Y += y_offset * GetFrameTime();
  #endif
     }
 }
@@ -45,9 +44,12 @@ void update_grace(Registry &r,
 sparse_array<SpawnGrace> &graces)
 {
     auto time = GetTimePoint();
+    auto graces_size = graces.size();
 
-    for (auto &&[ind, grace]: indexed_zipper(graces)) {
-        if (grace->creation_time + grace->time >= time) {
+	for (size_t ind = 0; ind != graces_size; ++ind) {
+        if (!graces[ind])
+            continue;
+        if (graces[ind]->creation_time + graces[ind]->time >= time) {
             r.remove_component<SpawnGrace>(ind);
         }
     }
@@ -55,36 +57,49 @@ sparse_array<SpawnGrace> &graces)
 
 void colision(Registry &r,
 sparse_array<Position> &positions, 
-sparse_array<Size> &size, 
+sparse_array<Size> &sizes,
 sparse_array<SpawnGrace> &grace, 
-sparse_array<Damages> &dam, 
-sparse_array<Health> &helth)
+sparse_array<Damages> &dmgs,
+sparse_array<Health> &healths,
+sparse_array<Tags> &tags)
 {
-    for (auto &&[ind, pos, siz, dama, halth]: indexed_zipper(positions, size, dam, helth)) {
+    auto pos_size = positions.size();
+	for (size_t ind = 0; ind != pos_size; ++ind) {
+        if (!(positions[ind] && sizes[ind] && dmgs[ind] && healths[ind]))
+            continue;
+
         if (grace[ind].has_value()) {
             continue;
         }
-        for (auto &&[ind2, pos2, siz2, dama2, halth2]: indexed_zipper(positions, size, dam, helth)) {
-            if (!positions[ind]) { // need to recheck because damages may have kill the entity
-                continue;
-            }
+		for (size_t ind2 = 0; ind2 != pos_size; ++ind2) {
+			if (!(positions[ind2] && sizes[ind2] && dmgs[ind2] && healths[ind2]))
+				continue;
             if (ind2 <= ind || grace[ind2].has_value()) {
                 continue;
             }
+            if (!positions[ind]) { // need to recheck because damages may have kill the entity
+                continue;
+            }
             if (positions[ind]->pos_X >
-				positions[ind2]->pos_X + size[ind2]->size_X)
+				positions[ind2]->pos_X + sizes[ind2]->size_X)
 				continue;
             else if (
-                positions[ind]->pos_Y > positions[ind2]->pos_Y + size[ind2]->size_Y)
+                positions[ind]->pos_Y > positions[ind2]->pos_Y + sizes[ind2]->size_Y)
                 continue;
             else if (
-                positions[ind2]->pos_X > positions[ind]->pos_X + size[ind]->size_X)
+                positions[ind2]->pos_X > positions[ind]->pos_X + sizes[ind]->size_X)
                 continue;
             else if (
-                positions[ind2]->pos_Y > positions[ind]->pos_Y + size[ind]->size_Y)
+                positions[ind2]->pos_Y > positions[ind]->pos_Y + sizes[ind]->size_Y)
+                continue;
+            else if (
+                !tags[ind]->HasCollision || !tags[ind]->HasCollision)
+                continue;
+            else if (
+                tags[ind]->IsFriendly == tags[ind2]->IsFriendly || tags[ind]->IsHostile == tags[ind2]->IsHostile)
                 continue;
             else
-                damages(r, helth, dam, ind, ind2);
+                damages(r, healths, dmgs, ind, ind2);
         }
     }
 }
@@ -122,24 +137,34 @@ void update_weapon_position(Registry &r, sparse_array<Weapon> &weapons, sparse_a
 }
 
 void spawn_enemy(Registry &r,
-    sparse_array<EnemyCount> &enemiesCount
+    sparse_array<EnemyCount> &enemiesCount,
+    sparse_array<BossCount> &bossCount
 )
 {
-    for (auto &&[enemyCount]: zipper(enemiesCount)) {
+    for (auto &&[ind, enemyCount]: indexed_zipper(enemiesCount)) {
         enemyCount->timeSinceLastSpawn += GetFrameTime();
+        Factory f(r);
         if (enemyCount->leftToSpawn > 0 && enemyCount->timeSinceLastSpawn > enemyCount->spawnFrequency) {
             std::cout << enemyCount->timeSinceLastSpawn << " enemies left : " << enemyCount->leftToSpawn << std::endl;
-            const Entity ent = r.spawn_entity();
-            float randomNumber = rand() % 1080;
-            Utils::Vec2 pos = {1000, randomNumber + 50};
-
-            r.emplace_component<Position>(ent, pos);
-            r.emplace_component<Speed>(ent, 300);
-            r.emplace_component<Direction>(ent, 50, 0);
-            r.emplace_component<SpawnGrace>(ent, std::chrono::seconds(5));
-            // r.emplace_component<NetworkEntity>(ent, id);
             enemyCount->timeSinceLastSpawn = 0;
+            enemyCount->leftAlive++;
             enemyCount->leftToSpawn--;
+            float randomNumber = rand() % (580);
+            Position pos = {1280, randomNumber};
+
+            f.create_zorg(pos);
+        }
+        if (enemyCount->leftAlive <= 0 && enemyCount->leftToSpawn <= 0) {
+            auto &boss = bossCount[ind];
+            if (!(boss))
+                continue;
+            float randomNumber = rand() % (580);
+            Position pos = {1280, randomNumber};
+            if (boss->isLastBossAlive == false && boss->leftToSpawn > 0) {
+                boss->isLastBossAlive = true;
+                boss->leftToSpawn--;
+                f.create_boss(pos);
+            }
         }
     }
 }
@@ -199,7 +224,7 @@ void shootProjectiles(
 
     auto now = std::chrono::steady_clock::now();
     for (size_t index = 0; index != shooters.size(); ++index) {
-        if (!(shooters[index] && positions[index]) && sizes[index])
+        if (!(shooters[index] && positions[index] && sizes[index]))
             continue;
         if (now > shooters[index]->lastShot + shooters[index]->delay) {
             shooters[index]->lastShot = now;

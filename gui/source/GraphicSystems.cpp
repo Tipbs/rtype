@@ -73,6 +73,9 @@ void do_animation(
                      ? -6 * sprite->width_padding
                      : sprite->width_padding);
         } else { // Looping sprites frames
+            if (sprite->width_max == 2 &&
+            sprite->height_max == 5)
+                continue;
             sprite->sprite.x =
                 (sprite->sprite.x / sprite->width_padding ==
                          sprite->width_max - 1
@@ -84,9 +87,11 @@ void do_animation(
 
 void do_ship_animation(
     Registry &r, sparse_array<Sprite> &sprites, sparse_array<Couleur> &couleurs,
-    sparse_array<Weapon> &weapons)
+    sparse_array<Weapon> &weapons, sparse_array<Current_Player> &cur_player)
 {
     for (auto &&[weapon] : zipper(weapons)) {
+        if (!cur_player[(size_t) weapon->owner_id])
+            continue;
         sprites[(size_t) weapon->owner_id]->sprite.y =
             couleurs[(size_t) weapon->owner_id]->color_id *
             sprites[(size_t) weapon->owner_id]->height_padding;
@@ -109,9 +114,9 @@ void make_infinite_background(
 }
 
 void handle_dir_inputs(
-    Registry &r, sparse_array<Direction> &dir, sparse_array<Player> &players,
-    sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds,
-    sparse_array<Couleur> &colors)
+    Registry &r, sparse_array<Direction> &dir,
+    sparse_array<Current_Player> &players, sparse_array<Sprite> &sprite,
+    sparse_array<Speed> &speeds, sparse_array<Couleur> &colors)
 {
     for (auto &&[diro, player, sprit, spe, color] :
          zipper(dir, players, sprite, speeds, colors)) {
@@ -154,8 +159,7 @@ void handle_shoot_inputs(
             weapon->IsShooting = true;
             weapon->current_charge +=
                 (weapon->current_charge >= 3) ? 0 : 5 * GetFrameTime();
-        }
-        if (IsKeyReleased(KEY_SPACE)) {
+        } else if (IsKeyReleased(KEY_SPACE)) {
             weapon->IsShooting = false;
             factory.create_ammo(
                 Position(
@@ -211,6 +215,7 @@ void hadle_text_inputs(
 void killDeadEntities(Registry &r, sparse_array<NetworkedEntity> &entities)
 {
     auto &net_ents = r.netEnts.ents;
+    auto size = entities.size();
 
     for (auto &&[index, _] : indexed_zipper(entities)) {
         auto finded =
@@ -218,6 +223,8 @@ void killDeadEntities(Registry &r, sparse_array<NetworkedEntity> &entities)
                 return ent.id == entities[index]->id;
             });
         if (finded == net_ents.end()) {
+            std::cout << "netent: " << net_ents[0].id << " "
+                      << entities[index]->id << std::endl;
             r.kill_entity(index);
             std::cout << "killing entity " << index << std::endl;
         }
@@ -234,6 +241,9 @@ void updateWithSnapshots(
     Factory factory(r);
 
     r.netEnts.mutex.lock();
+    if (!r.netEnts.ents.empty())
+        killDeadEntities(r, entities);
+    // std::cout << "r.netEnts size: " << r.netEnts.ents.size() << std::endl;
     for (auto it = net_ents.begin(); it != net_ents.end(); ++it) {
         auto &net = *it;
         auto finded = std::find_if(
@@ -247,8 +257,12 @@ void updateWithSnapshots(
             continue;
         std::cout << "id: " << net.id << std::endl;
         auto pos = Position(net.pos.x, net.pos.y);
-        factory.create_player(net.id, pos);
-        std::cout << "Creating player\n";
+        if (net.type == EntityType::Player)
+            factory.create_player(net.id, pos);
+        if (net.type == EntityType::Enemy)
+            factory.create_zorg(net.id, pos);
+        if (net.type == EntityType::Boss)
+            factory.create_boss(pos, net.id);
         it = net_ents.erase(it);
         if (it == net_ents.end())
             break;
@@ -267,10 +281,11 @@ void updateWithSnapshots(
             if (finded == net_ents.end())
                 continue;
             if (current && std::abs(finded->pos.x - pos.value().pos_X) < 30.0 &&
-                std::abs(finded->pos.y - pos.value().pos_Y) < 30.0)
+                std::abs(finded->pos.y - pos.value().pos_Y) <
+                    30.0) // doesn't rollback if the server pos is close enough
                 continue;
-            pos.value().pos_X = finded->pos.x;
-            pos.value().pos_Y = finded->pos.y;
+            pos->pos_X = finded->pos.x;
+            pos->pos_Y = finded->pos.y;
             if (!current && player && finded->attacking) {
                 factory.create_ammo(
                     Position(
@@ -299,3 +314,28 @@ void updateWithSnapshots(
 //         }
 //     }
 // }
+
+void update_score_text(
+    Registry &r, sparse_array<Score> &scores,
+    sparse_array<ScoreText> &scoreTexts, sparse_array<Text> &texts)
+{
+    for (auto &&[scoreText, text] : zipper(scoreTexts, texts)) {
+        text->text =
+            std::to_string(scores[static_cast<size_t>(scoreText->from)]->score);
+    }
+}
+
+void update_charge_rect(
+    Registry &r, sparse_array<Weapon> &weapons,
+    sparse_array<ChargeRect> &chargeRects, sparse_array<Rect> &rects)
+{
+    for (auto &&[chargeRect, rect] : zipper(chargeRects, rects)) {
+        std::cout
+            << weapons[static_cast<size_t>(chargeRect->from)]->current_charge
+            << std::endl;
+        rect->rect.width =
+            (weapons[static_cast<size_t>(chargeRect->from)]->current_charge -
+             1) *
+            chargeRect->maxWidth;
+    }
+}

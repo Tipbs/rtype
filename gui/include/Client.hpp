@@ -35,15 +35,15 @@ class udp_client {
     void handle_tick();
     void send_user();
 
-    size_t get_player_id() { return _player_id; }
+    Utils::PlayerId get_player_id() { return _player_id; }
 
   private:
     void fetch_player_id();
     void net_get_id(
         const boost::system::error_code &error, std::size_t bytes_transfered);
     Registry &_reg;
-    std::vector<char> _recv_buffer = std::vector<char>(512);
-    std::atomic_int _player_id = -1;
+    std::vector<char> _recv_buffer = std::vector<char>(2048);
+    Utils::PlayerId _player_id;
     boost::asio::ip::udp::socket _socket;
     boost::asio::ip::udp::endpoint _remote_point;
     boost::asio::io_context &_svc;
