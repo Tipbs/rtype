@@ -62,7 +62,7 @@ void Factory::add_systems()
     _reg.add_system<Direction, Speed, Position, Size, Weapon, Player>(synchronize); 
 #endif
     _reg.add_system<SpawnGrace>(update_grace);
-    _reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
+    _reg.add_system<Position, Size, SpawnGrace, Damages, Health, Tags>(colision);
     _reg.add_system<Position, Tags>(kill_outside_entities);
     _reg.add_system<Position, Speed, Direction
         #ifdef SERVER

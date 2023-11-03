@@ -11,7 +11,6 @@ void move(Registry &r, sparse_array<Position> &positions, sparse_array<Speed> &s
     , sparse_array<Player> &players
 #endif
 );
-void colision(Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size, sparse_array<SpawnGrace> &grace, sparse_array<Damages> &dam, sparse_array<Health> &helth);
 void update_grace(Registry &r, sparse_array<SpawnGrace> &grace);
 void update_weapon_position(Registry &r, sparse_array<Weapon> &weapons, sparse_array<Position> &postions);
 void spawn_enemy(Registry &r, sparse_array<EnemyCount> &enemiesCount, sparse_array<BossCount> &);
