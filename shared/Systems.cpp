@@ -40,6 +40,22 @@ void damages(
         r.kill_entity(r.entity_from_index(i2));
 }
 
+void kill_outside_entities(Registry &r, sparse_array<Position> &pos, sparse_array<Tags> &tag)
+{
+    for (auto &&[ind, position, tags]: indexed_zipper(pos, tag)) {
+        if (!tags->HasCollision)
+            continue;
+        if (position->pos_X > 1780)
+            r.kill_entity(r.entity_from_index(ind));
+        else if (position->pos_X < -500)
+            r.kill_entity(r.entity_from_index(ind));
+        else if (position->pos_Y > 1220)
+            r.kill_entity(r.entity_from_index(ind));
+        else if (position->pos_Y < -500)
+            r.kill_entity(r.entity_from_index(ind));
+    }
+}
+
 void update_grace(Registry &r,
 sparse_array<SpawnGrace> &graces)
 {
@@ -60,36 +76,35 @@ sparse_array<Position> &positions,
 sparse_array<Size> &sizes,
 sparse_array<SpawnGrace> &grace, 
 sparse_array<Damages> &dmgs,
-sparse_array<Health> &healths)
+sparse_array<Health> &healths,
+sparse_array<Tags> &tags)
 {
-    auto pos_size = positions.size();
-	for (size_t ind = 0; ind != pos_size; ++ind) {
-        if (!(positions[ind] && sizes[ind] && dmgs[ind] && healths[ind]))
+    for (auto &&[ind, pos1, siz1, dmg1, health1]: indexed_zipper(positions, sizes, dmgs, healths)) {
+        if (grace[ind].has_value())
             continue;
-
-        if (grace[ind].has_value()) {
-            continue;
-        }
-		for (size_t ind2 = 0; ind2 != pos_size; ++ind2) {
-			if (!(positions[ind2] && sizes[ind2] && dmgs[ind2] && healths[ind2]))
-				continue;
-            if (ind2 <= ind || grace[ind2].has_value()) {
+        for (auto &&[ind2, pos2, siz2, dmg2, health2]: indexed_zipper(positions, sizes, dmgs, healths)) {
+            if (ind2 <= ind || grace[ind2].has_value())
+                continue;
+            if (!pos1) { // need to recheck because damages may have kill the entity
                 continue;
             }
-            if (!positions[ind]) { // need to recheck because damages may have kill the entity
-                continue;
-            }
-            if (positions[ind]->pos_X >
-				positions[ind2]->pos_X + sizes[ind2]->size_X)
+            if (pos1->pos_X >
+				pos2->pos_X + siz2->size_X)
 				continue;
             else if (
-                positions[ind]->pos_Y > positions[ind2]->pos_Y + sizes[ind2]->size_Y)
+                pos1->pos_Y > pos2->pos_Y + siz2->size_Y)
                 continue;
             else if (
-                positions[ind2]->pos_X > positions[ind]->pos_X + sizes[ind]->size_X)
+                pos2->pos_X > pos1->pos_X + siz1->size_X)
                 continue;
             else if (
-                positions[ind2]->pos_Y > positions[ind]->pos_Y + sizes[ind]->size_Y)
+                pos2->pos_Y > pos1->pos_Y + siz1->size_Y)
+                continue;
+            else if (
+                !tags[ind]->HasCollision || !tags[ind]->HasCollision)
+                continue;
+            else if (
+                tags[ind]->IsFriendly == tags[ind2]->IsFriendly || tags[ind]->IsHostile == tags[ind2]->IsHostile)
                 continue;
             else
                 damages(r, healths, dmgs, ind, ind2);
@@ -114,8 +129,8 @@ void enemyAlwaysShoot(
             shoot->last_shoot = now;
             factory.create_ammo(
                 Position(
-                    pos->pos_X - (size->size_X / 2),
-                    pos->pos_Y + (size->size_Y / 2)),
+                    pos->pos_X - (size->size_X / 2.),
+                    pos->pos_Y + (size->size_Y / 2.)),
                 Direction(-1, 0), 1.0, 3);
         }
     }
@@ -222,7 +237,7 @@ void shootProjectiles(
         if (now > shooters[index]->lastShot + shooters[index]->delay) {
             shooters[index]->lastShot = now;
             auto size_as_pos =
-                Position(sizes[index]->size_X / 2, sizes[index]->size_Y / 2);
+                Position(sizes[index]->size_X / 2., sizes[index]->size_Y / 2.);
             for (auto &proj : shooters[index]->infos) {
                 factory.create_boss_projectile(
                     *positions[index] + size_as_pos + proj.offset, proj.dir);

@@ -51,8 +51,8 @@ void udp_client::handle_receive(
 {
     // std::osyncstream(std::cout) << "Received mais erreur\n";
     if (!error) {
-         std::osyncstream(std::cout) << "Received " << bytes_transferred <<
-         "bytes" << std::endl;
+        std::osyncstream(std::cout)
+            << "Received " << bytes_transferred << " bytes" << std::endl;
         try {
             std::string seralizedData(_recv_buffer.data(), bytes_transferred);
             std::istringstream iss(seralizedData);
@@ -141,7 +141,7 @@ void udp_client::fetch_player_id()
         boost::bind(
             &udp_client::net_get_id, this, boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred));
-    while (_player_id.id == -1) {
+    while (_player_id.id == static_cast<size_t>(-1)) {
         if (std::chrono::system_clock::now() - timeout >
             std::chrono::seconds(10)) {
             std::cerr << "Failed to get player id from server\n";

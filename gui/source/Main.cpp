@@ -46,7 +46,9 @@ int main(int ac, char **av)
     Entity player =
         factory.create_player(net_player_info.id, net_player_info.pos);
     reg.emplace_component<Current_Player>(player);
-    factory.create_weapon(player);
+    std::cout << "player pos id: " << net_player_info.id << std::endl;
+    std::cout << "player pos x: " << net_player_info.pos.x << std::endl;
+    std::cout << "player pos y: " << net_player_info.pos.y << std::endl;
     Entity weapon = factory.create_weapon(player);
     factory.create_hud(ScreenWidth, ScreenHeight, player, weapon);
     create_sounds(reg);

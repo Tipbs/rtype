@@ -29,6 +29,5 @@ void resetPlayersDir(
     sparse_array<Direction> &directions);
 void kill_zord(
     Registry &r, sparse_array<EnemyCount> &enemyCount,
-    sparse_array<BossCount> &bosses,
-    sparse_array<NetworkedEntity> &ents, sparse_array<Position> &positions,
-    sparse_array<Health> &);
+    sparse_array<BossCount> &bosses, sparse_array<NetworkedEntity> &ents,
+    sparse_array<Position> &positions, sparse_array<Health> &);

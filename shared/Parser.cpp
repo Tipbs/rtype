@@ -24,7 +24,7 @@ const Entity Parser::create_player(std::size_t id)
 {
     try {
         for (ptree::value_type &entity : _root.get_child("players")) {
-            int _id = entity.second.get<int>("id");
+            size_t _id = entity.second.get<int>("id");
             if (_id == id) {
                 Position pos = { entity.second.get<double>("pos.x"),
                     entity.second.get<double>("pos.y")};
@@ -43,7 +43,7 @@ Utils::Vec2 Parser::get_player_pos(std::size_t id)
 {
     try {
         for (ptree::value_type &entity : _root.get_child("players")) {
-            int _id = entity.second.get<int>("id");
+            size_t _id = entity.second.get<int>("id");
             if (_id == id) {
                 Utils::Vec2 pos;
                 pos.x = entity.second.get<double>("pos.x");

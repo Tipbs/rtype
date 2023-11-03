@@ -10,9 +10,9 @@ void display(
     sparse_array<Rect> &rect, sparse_array<Color> &col,
     sparse_array<Text> &text);
 void handle_dir_inputs(
-    Registry &r, sparse_array<Direction> &dir, sparse_array<Current_Player> &players,
-    sparse_array<Sprite> &sprite, sparse_array<Speed> &speeds,
-    sparse_array<Couleur> &colors);
+    Registry &r, sparse_array<Direction> &dir,
+    sparse_array<Current_Player> &players, sparse_array<Sprite> &sprite,
+    sparse_array<Speed> &speeds, sparse_array<Couleur> &colors);
 void hadle_text_inputs(
     Registry &r, sparse_array<InputField> &inputFields,
     sparse_array<Rectangle> &rectangles);
@@ -32,7 +32,11 @@ void do_ship_animation(
 void make_infinite_background(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &sizes,
     sparse_array<Backgrounds> &bg);
-void update_score_text(Registry &r, sparse_array<Score> &scores, sparse_array<ScoreText> &scoreTexts, sparse_array<Text> &texts);
-void update_charge_rect(Registry &r, sparse_array<Weapon> &weapons, sparse_array<ChargeRect> &chargeRects, sparse_array<Rect> &rects);
 void handle_music(Registry &r, sparse_array<MusicComponent> &sounds);
 void play_sound(Registry &r, sparse_array<SoundManager> &sounds);
+void update_score_text(
+    Registry &r, sparse_array<Score> &scores,
+    sparse_array<ScoreText> &scoreTexts, sparse_array<Text> &texts);
+void update_charge_rect(
+    Registry &r, sparse_array<Weapon> &weapons,
+    sparse_array<ChargeRect> &chargeRects, sparse_array<Rect> &rects);
