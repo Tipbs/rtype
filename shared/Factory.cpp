@@ -44,7 +44,6 @@ void Factory::add_systems()
     _reg.add_system<
         Position, Size, SpawnGrace, Damages, Health, Colision, Point, Score>(
         colision);
-    _reg.add_system<Position, Tags>(kill_outside_entities);
     _reg.add_system<Position, Speed, Direction
         #ifdef SERVER
         , Player

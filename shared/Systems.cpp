@@ -40,6 +40,13 @@ void damages(
     size_t i1, size_t i2)
 {
     std::cout << "y a collision\n";
+    if (!dama[i1] || !dama[i2]) {
+        for (auto i = 0; i != 10; ++i) {
+            std::cerr << "ne devrait jamais arriver, un des damages est pas "
+                         "set aaaaa\n";
+        }
+        return;
+    }
     healt[i1]->health -= dama[i2]->damages;
     // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
     // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
