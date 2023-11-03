@@ -34,3 +34,5 @@ void make_infinite_background(
     sparse_array<Backgrounds> &bg);
 void update_score_text(Registry &r, sparse_array<Score> &scores, sparse_array<ScoreText> &scoreTexts, sparse_array<Text> &texts);
 void update_charge_rect(Registry &r, sparse_array<Weapon> &weapons, sparse_array<ChargeRect> &chargeRects, sparse_array<Rect> &rects);
+void handle_music(Registry &r, sparse_array<MusicComponent> &sounds);
+void play_sound(Registry &r, sparse_array<SoundManager> &sounds);
