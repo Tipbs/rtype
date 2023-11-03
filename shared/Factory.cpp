@@ -29,6 +29,8 @@ void Factory::register_components()
         Text,
         ScoreText,
         ChargeRect,
+        MusicComponent,
+        SoundManager,
 #endif
         Player,
         Weapon,
@@ -86,6 +88,8 @@ void Factory::add_systems()
     //     updateHUD);
     _reg.add_system<Score, ScoreText, Text>(update_score_text);
     _reg.add_system<Weapon, ChargeRect, Rect>(update_charge_rect);
+    _reg.add_system<MusicComponent>(handle_music);
+    _reg.add_system<SoundManager>(play_sound);
 #else
     _reg.add_system<Position, Speed, Weapon, NetworkedEntity>(extract); 
     _reg.add_system<Player, Direction>(resetPlayersDir);
