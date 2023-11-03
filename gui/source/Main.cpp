@@ -11,14 +11,6 @@
 #include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
 
-void create_sounds(Registry &reg)
-{
-    Entity sounds = reg.spawn_entity();
-    reg.emplace_component<SoundManager>(sounds);
-    reg.emplace_component<MusicComponent>(
-        sounds, "./gui/ressources/Audio/battle_ost.mp3", MusicFx::Battle);
-}
-
 int main(int ac, char **av)
 {
     const int ScreenWidth = 1280;
@@ -44,6 +36,7 @@ int main(int ac, char **av)
     factory.register_components();
     factory.create_background(ScreenWidth, ScreenHeight);
     auto net_player_info = net_client.get_player_id();
+    factory.create_points(Position(200, 200), 10, 10);
     Entity player =
         factory.create_player(net_player_info.pos, net_player_info.id);
     reg.emplace_component<Current_Player>(player);
@@ -52,7 +45,7 @@ int main(int ac, char **av)
     std::cout << "player pos y: " << net_player_info.pos.y << std::endl;
     Entity weapon = factory.create_weapon(player);
     factory.create_hud(ScreenWidth, ScreenHeight, player, weapon);
-    create_sounds(reg);
+    factory.create_sounds(reg);
     factory.add_systems();
 
     while (!WindowShouldClose()) {

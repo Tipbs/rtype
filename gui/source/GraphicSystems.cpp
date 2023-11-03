@@ -37,21 +37,18 @@ void draw_text(
 }
 
 void display(
-    Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
-    sparse_array<Sprite> &sprite, sparse_array<Player> &anim,
-    sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields,
-    sparse_array<Rect> &rect, sparse_array<Color> &col,
-    sparse_array<Text> &text)
+    Registry &r, sparse_array<Position> &positions,
+    sparse_array<Sprite> &sprite, sparse_array<Rectangle> &rectangles,
+    sparse_array<InputField> &inputFields, sparse_array<Rect> &rect,
+    sparse_array<Color> &col, sparse_array<Text> &text)
 {
     BeginDrawing();
-    for (auto &&[ind, pos, siz, spri] :
-         indexed_zipper(positions, size, sprite)) {
+    for (auto &&[ind, pos, spri] : indexed_zipper(positions, sprite)) {
         Vector2 Rectpos = {
             (float) (positions[ind].value().pos_X),
             (float) positions[ind].value().pos_Y};
         DrawTextureRec(
-            sprite[ind].value().spritesheet, sprite[ind].value().sprite,
-            Rectpos, WHITE);
+            sprite[ind]->spritesheet, sprite[ind]->sprite, Rectpos, WHITE);
     }
 
     draw_rectangle(rect, col);
@@ -146,16 +143,21 @@ void handle_dir_inputs(
     }
 }
 
-size_t getSoundManager(sparse_array<SoundManager> &managers)
+static size_t getSoundManager(sparse_array<SoundManager> &managers)
 {
     for (auto &&[index, manager] : indexed_zipper(managers))
         return index;
-    return -1;
+    throw std::out_of_range("Cannot find sound");
 }
 
-void add_sound(std::string path, sparse_array<SoundManager> &sound)
+static void add_sound(std::string path, sparse_array<SoundManager> &sound)
 {
-    size_t ind = getSoundManager(sound);
+    size_t ind = 0;
+    try {
+        ind = getSoundManager(sound);
+    } catch (std::out_of_range &e) {
+       return; 
+    }
     Sound sfx = LoadSound("./gui/ressources/Audio/lazer.wav");
     sound[ind]->sounds.push_back(sfx);
 };
@@ -184,10 +186,10 @@ void handle_shoot_inputs(
             r.currentCmd.mutex.lock();
             r.currentCmd.cmd.setAttack(weapons[ind]->current_charge);
             r.currentCmd.mutex.unlock();
+            weapons[ind]->current_charge = 1.;
             add_sound(
                 "./gui/ressources/Audio/lazer.wav",
                 r.get_components<SoundManager>());
-            weapons[ind]->current_charge = 1.;
         }
         break;
     }

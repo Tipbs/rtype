@@ -4,11 +4,10 @@
 #include "GraphicComponents.hpp"
 
 void display(
-    Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
-    sparse_array<Sprite> &sprite, sparse_array<Player> &anim,
-    sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields,
-    sparse_array<Rect> &rect, sparse_array<Color> &col,
-    sparse_array<Text> &text);
+    Registry &r, sparse_array<Position> &positions,
+    sparse_array<Sprite> &sprite, sparse_array<Rectangle> &rectangles,
+    sparse_array<InputField> &inputFields, sparse_array<Rect> &rect,
+    sparse_array<Color> &col, sparse_array<Text> &text);
 void handle_dir_inputs(
     Registry &r, sparse_array<Direction> &dir,
     sparse_array<Current_Player> &players, sparse_array<Sprite> &sprite,

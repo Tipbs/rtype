@@ -4,6 +4,7 @@
 #include "Component.hpp"
 #include "Factory.hpp"
 #include "indexed_zipper.hpp"
+#include "Utils.hpp"
 #include "zipper.hpp"
 
 void move(
@@ -54,11 +55,9 @@ void damages(
 }
 
 void kill_outside_entities(
-    Registry &r, sparse_array<Position> &pos, sparse_array<Tags> &tag)
+    Registry &r, sparse_array<Position> &pos, sparse_array<Colision> &colisions)
 {
-    for (auto &&[ind, position, tags] : indexed_zipper(pos, tag)) {
-        if (!tags->HasCollision)
-            continue;
+    for (auto &&[ind, position, colision] : indexed_zipper(pos, colisions)) {
         if (position->pos_X > 1780)
             r.kill_entity(r.entity_from_index(ind));
         else if (position->pos_X < -500)
@@ -101,41 +100,65 @@ void update_grace(Registry &r, sparse_array<SpawnGrace> &graces)
     }
 }
 
+static void
+collect_points(Registry &reg, Score &score, Point &point, Entity pointIndex)
+{
+    std::cout << "dslkfjsldfqkj" << std::endl;
+    score.score += point.point;
+    reg.kill_entity(pointIndex);
+}
+
+static bool
+check_colision(Position &pos1, Position &pos2, Size &size1, Size &size2)
+{
+    if (pos1.pos_X > pos2.pos_X + size2.size_X)
+        return false;
+    else if (pos1.pos_Y > pos2.pos_Y + size2.size_Y)
+        return false;
+    else if (pos2.pos_X > pos1.pos_X + size1.size_X)
+        return false;
+    else if (pos2.pos_Y > pos1.pos_Y + size1.size_Y)
+        return false;
+    else
+        return true;
+}
+
 void colision(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &sizes,
     sparse_array<SpawnGrace> &grace, sparse_array<Damages> &dmgs,
-    sparse_array<Health> &healths, sparse_array<Tags> &tags)
+    sparse_array<Health> &healths, sparse_array<Colision> &colisions,
+    sparse_array<Point> &points, sparse_array<Score> &scores)
 {
-    for (auto &&[ind, pos1, siz1, dmg1, health1] :
-         indexed_zipper(positions, sizes, dmgs, healths)) {
-        if (grace[ind].has_value())
+    auto pos_size = positions.size();
+    for (size_t ind1 = 0; ind1 != pos_size; ++ind1) {
+        if (!colisions[ind1] || grace[ind1])
             continue;
-        for (auto &&[ind2, pos2, siz2, dmg2, health2] :
-             indexed_zipper(positions, sizes, dmgs, healths)) {
-            if (ind2 <= ind || grace[ind2].has_value())
+        if (!positions[ind1]) // need to recheck because damages may have
+                              // kill the entity
+            continue;
+        for (size_t ind2 = 0; ind2 != pos_size; ++ind2) {
+            if (!colisions[ind2] || grace[ind2])
                 continue;
-            if (!pos1) { // need to recheck because damages may have kill the
-                         // entity
+            if (ind2 <= ind1)
                 continue;
-            }
-            if (pos1->pos_X > pos2->pos_X + siz2->size_X)
+            if (!check_colision(
+                    positions[ind1].value(), positions[ind2].value(),
+                    sizes[ind1].value(), sizes[ind2].value()))
                 continue;
-            else if (pos1->pos_Y > pos2->pos_Y + siz2->size_Y)
-                continue;
-            else if (pos2->pos_X > pos1->pos_X + siz1->size_X)
-                continue;
-            else if (pos2->pos_Y > pos1->pos_Y + siz1->size_Y)
-                continue;
-            else if (!tags[ind] || !tags[ind]->HasCollision) // todo! !tags[ind]
-                                                             // should be
-                                                             // removed if
-                                                             // collision work
-                                                             // fine
-                continue;
-            else if (tags[ind]->IsFriendly == tags[ind2]->IsFriendly)
-                continue;
-            else
-                damages(r, healths, dmgs, ind, ind2);
+
+            if (colisions[ind1]->check(Tag::Damages) ||
+                colisions[ind2]->check(Tag::Damages))
+                damages(r, healths, dmgs, ind1, ind2);
+            else if (
+                colisions[ind1]->check(Tag::Player) &&
+                colisions[ind2]->check(Tag::Point))
+                collect_points(
+                    r, scores[ind1].value(), points[ind2].value(), ind2);
+            else if (
+                colisions[ind2]->check(Tag::Player) &&
+                colisions[ind1]->check(Tag::Point))
+                collect_points(
+                    r, scores[ind2].value(), points[ind1].value(), ind1);
         }
     }
 }
@@ -159,7 +182,7 @@ void enemyAlwaysShoot(
                 Position(
                     pos->pos_X - (size->size_X / 2.),
                     pos->pos_Y + (size->size_Y / 2.)),
-                Direction(-2, 0), 1.0, 3, 0);
+                1.0, 3, 0, Direction(-2, 0));
         }
     }
 }
