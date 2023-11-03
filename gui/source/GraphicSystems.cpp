@@ -37,20 +37,20 @@ void draw_text(
 }
 
 void display(
-    Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
+    Registry &r, sparse_array<Position> &positions,
     sparse_array<Sprite> &sprite, sparse_array<Player> &anim,
     sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields,
     sparse_array<Rect> &rect, sparse_array<Color> &col,
     sparse_array<Text> &text)
 {
     BeginDrawing();
-    for (auto &&[ind, pos, siz, spri] :
-         indexed_zipper(positions, size, sprite)) {
+    for (auto &&[ind, pos, spri] :
+         indexed_zipper(positions, sprite)) {
         Vector2 Rectpos = {
             (float) (positions[ind].value().pos_X),
             (float) positions[ind].value().pos_Y};
         DrawTextureRec(
-            sprite[ind].value().spritesheet, sprite[ind].value().sprite,
+            sprite[ind]->spritesheet, sprite[ind]->sprite,
             Rectpos, WHITE);
     }
 

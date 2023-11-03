@@ -3,12 +3,12 @@
 #include <map>
 #include "Component.hpp"
 #include "Entity.hpp"
-#include "Registry.hpp"
 #include "NetEnt.hpp"
+#include "Registry.hpp"
 
 class Factory {
-    public:
-        Factory(Registry &reg);
+  public:
+    Factory(Registry &reg);
 
         // template<typename ...Args>
         // const Entity create(size_t id, Args ...args);
@@ -27,11 +27,12 @@ class Factory {
         const Entity create_boss_projectile(Position pos, Direction diro, size_t net_id);
         const Entity create_boss(Position pos, size_t net_id);
         void create_hud(const int ScreenWidth, const int ScreenHeight, Entity scoreFrom, Entity chargeFrom);
+        void create_points(Position pos, int nbr, int points);
         void register_components();
         void add_systems();
 
-    private:
-        Registry &_reg;
+  private:
+    Registry &_reg;
 };
 
 // template<typename ...Args>
@@ -42,6 +43,7 @@ class Factory {
 //     } else if (id > 0 && id < 5) {
 //         return _create_player(id, args...);
 //     }
-//     std::string error = std::string("Factory: component") + std::to_string(id) + std::string("not register");
-//     throw std::invalid_argument(error);
+//     std::string error = std::string("Factory: component") +
+//     std::to_string(id) + std::string("not register"); throw
+//     std::invalid_argument(error);
 // }

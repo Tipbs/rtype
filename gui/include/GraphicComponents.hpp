@@ -58,7 +58,7 @@ struct Sprite {
 
     Sprite(
         const char *path, int width, int height, double width_multiplier = 1,
-        double height_multiplier = 1)
+        double height_multiplier = 1, int offset_x = 0, int offset_y = 0)
     {
         Image sprit = LoadImage(path);
         ImageResizeNN(
@@ -70,8 +70,8 @@ struct Sprite {
         height_max = height_multiplier;
         sprite.height = (spritesheet.height) / height_multiplier;
         sprite.width = (spritesheet.width) / width_multiplier;
-        sprite.x = 0;
-        sprite.y = 0;
+        sprite.x = offset_x * width;
+        sprite.y = offset_y * width;
     };
 };
 
