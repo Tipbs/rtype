@@ -143,16 +143,21 @@ void handle_dir_inputs(
     }
 }
 
-size_t getSoundManager(sparse_array<SoundManager> &managers)
+static size_t getSoundManager(sparse_array<SoundManager> &managers)
 {
     for (auto &&[index, manager] : indexed_zipper(managers))
         return index;
-    return -1;
+    throw std::out_of_range("Cannot find sound");
 }
 
-void add_sound(std::string path, sparse_array<SoundManager> &sound)
+static void add_sound(std::string path, sparse_array<SoundManager> &sound)
 {
-    size_t ind = getSoundManager(sound);
+    size_t ind = 0;
+    try {
+        ind = getSoundManager(sound);
+    } catch (std::out_of_range &e) {
+       return; 
+    }
     Sound sfx = LoadSound("./gui/ressources/Audio/lazer.wav");
     sound[ind]->sounds.push_back(sfx);
 };
@@ -181,10 +186,10 @@ void handle_shoot_inputs(
             r.currentCmd.mutex.lock();
             r.currentCmd.cmd.setAttack(weapons[ind]->current_charge);
             r.currentCmd.mutex.unlock();
+            weapons[ind]->current_charge = 1.;
             add_sound(
                 "./gui/ressources/Audio/lazer.wav",
                 r.get_components<SoundManager>());
-            weapons[ind]->current_charge = 1.;
         }
         break;
     }

@@ -526,3 +526,15 @@ void Factory::create_points(Position pos, int nbr, int points)
 #endif
     }
 }
+
+
+#ifndef SERVER
+void Factory::create_sounds(Registry &reg)
+{
+    Entity sounds = reg.spawn_entity();
+    reg.emplace_component<SoundManager>(sounds);
+    reg.emplace_component<MusicComponent>(
+        sounds, "./gui/ressources/Audio/battle_ost.mp3", MusicFx::Battle);
+}
+#endif
+

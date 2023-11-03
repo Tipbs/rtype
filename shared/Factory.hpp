@@ -32,6 +32,9 @@ class Factory {
         const int ScreenWidth, const int ScreenHeight, Entity scoreFrom,
         Entity chargeFrom);
     void create_points(Position pos, int nbr, int points);
+#ifndef SERVER
+    void create_sounds(Registry &reg);
+#endif
     void register_components();
     void add_systems();
 
