@@ -150,7 +150,7 @@ void handle_shoot_inputs(
 {
     Factory factory(r);
 
-    for (auto &&[weapon] : zipper(weapons)) {
+    for (auto &&[ind, weapon] : indexed_zipper(weapons)) {
         size_t owner_id = static_cast<size_t>(weapon->owner_id);
         if (IsKeyDown(KEY_SPACE)) {
             weapon->IsShooting = true;
@@ -166,9 +166,9 @@ void handle_shoot_inputs(
                         (float) sizes[owner_id]->size_Y / 2),
                 weapon->current_charge, colors[owner_id]->color_id);
             r.currentCmd.mutex.lock();
-            r.currentCmd.cmd.setAttack(weapon->current_charge);
+            r.currentCmd.cmd.setAttack(weapons[ind]->current_charge);
             r.currentCmd.mutex.unlock();
-            weapon->current_charge = 1.;
+            weapons[ind]->current_charge = 1.;
         }
         break;
     }

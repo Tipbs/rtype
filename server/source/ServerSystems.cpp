@@ -48,16 +48,18 @@ void synchronize(
 void extract(
     Registry &reg, sparse_array<Position> &positions,
     sparse_array<Speed> &speeds, sparse_array<Weapon> &weapons,
-    sparse_array<NetworkedEntity> &ents)
+    sparse_array<NetworkedEntity> &ents, sparse_array<Direction> &directions)
 {
-    for (auto &&[ind, pos, ent_id] : indexed_zipper(positions, ents)) {
+    for (auto &&[ind, pos, ent_id, dir] : indexed_zipper(positions, ents, directions)) {
         NetEnt tmp;
         tmp.type = ents[ind]->_type;
         tmp.id = ind;
         tmp.pos.x = pos->pos_X;
         tmp.pos.y = pos->pos_Y;
-        auto &weapon = weapons[getEntityWeapon(weapons, ind)];
-        if (weapon) {
+        tmp.dir = {dir->dir_X, dir->dir_Y};
+        auto weapon_ind = getEntityWeapon(weapons, ind);
+        if (weapon_ind != -1) {
+            auto &weapon = weapons[weapon_ind];
             tmp.attacking = weapon->IsShooting;
             tmp.attackState = weapon->current_charge;
         }
