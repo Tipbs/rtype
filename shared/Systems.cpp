@@ -51,11 +51,9 @@ void damages(
         r.kill_entity(r.entity_from_index(i2));
 }
 
-void kill_outside_entities(Registry &r, sparse_array<Position> &pos, sparse_array<Tags> &tag)
+void kill_outside_entities(Registry &r, sparse_array<Position> &pos, sparse_array<Colision> &colisions)
 {
-    for (auto &&[ind, position, tags]: indexed_zipper(pos, tag)) {
-        if (!tags->HasCollision)
-            continue;
+    for (auto &&[ind, position, colision]: indexed_zipper(pos, colisions)) {
         if (position->pos_X > 1780)
             r.kill_entity(r.entity_from_index(ind));
         else if (position->pos_X < -500)
@@ -88,7 +86,7 @@ sparse_array<Size> &sizes,
 sparse_array<SpawnGrace> &grace, 
 sparse_array<Damages> &dmgs,
 sparse_array<Health> &healths,
-sparse_array<Tags> &tags)
+sparse_array<Colision> &colisions)
 {
     for (auto &&[ind, pos1, siz1, dmg1, health1]: indexed_zipper(positions, sizes, dmgs, healths)) {
         if (grace[ind].has_value())
@@ -112,10 +110,10 @@ sparse_array<Tags> &tags)
                 pos2->pos_Y > pos1->pos_Y + siz1->size_Y)
                 continue;
             else if (
-                !tags[ind]->HasCollision || !tags[ind]->HasCollision)
+                !colisions[ind] || !colisions[ind])
                 continue;
             else if (
-                tags[ind]->IsFriendly == tags[ind2]->IsFriendly || tags[ind]->IsHostile == tags[ind2]->IsHostile)
+                colisions[ind]->bitset.test(Friendly) == colisions[ind2]->bitset.test(Friendly))
                 continue;
             else
                 damages(r, healths, dmgs, ind, ind2);

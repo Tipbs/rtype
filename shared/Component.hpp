@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bitset>
 #include <string>
 #include <utility>
 #include <chrono>
@@ -151,18 +152,34 @@ struct Score {
     Score(int score): score(score) {};
 };
 
-struct Tags {
-	bool IsFriendly;
-	bool IsHostile;
-	bool IsPlayer;
-	bool IsEnemy;
-	bool IsBoss;
-	bool IsAmmo;
-	bool IsBonus;
-	bool HasCollision;
+enum Tag {
+    Friendly,
+    Player,
+    Enemy,
+    Boss,
+    Ammo,
+    Bonus
+};
 
-	Tags(bool IsFriendly, bool IsHostile, bool IsPlayer, bool IsEnemy, bool IsBoss, bool IsAmmo, bool IsBonus, bool HasCollision) : 
-		IsFriendly(IsFriendly), IsHostile(IsHostile), IsPlayer(IsPlayer), IsEnemy(IsEnemy),
-		IsBoss(IsBoss), IsAmmo(IsAmmo), IsBonus(IsBonus), HasCollision(HasCollision) {};
+struct Colision {
+	// bool IsFriendly;
+	// bool IsHostile;
+	// bool IsPlayer;
+	// bool IsEnemy;
+	// bool IsBoss;
+	// bool IsAmmo;
+	// bool IsBonus;
+	// bool HasColision;
+    std::bitset<6> bitset;
 
+	// Colision(bool IsFriendly, bool IsHostile, bool IsPlayer, bool IsEnemy, bool IsBoss, bool IsAmmo, bool IsBonus, bool HasColision) : 
+	// 	IsFriendly(IsFriendly), IsHostile(IsHostile), IsPlayer(IsPlayer), IsEnemy(IsEnemy),
+	// 	IsBoss(IsBoss), IsAmmo(IsAmmo), IsBonus(IsBonus), HasColision(HasColision) {};
+
+    Colision(std::vector<Tag> tags)
+    {
+        for(auto tag: tags) {
+            bitset.set(tag);
+        }
+    }
 };
