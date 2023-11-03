@@ -222,6 +222,23 @@ static void updateBossProjectiles(
     shooter.infos.push_back(ProjectileInfo(Position(0, 0), dir_to_player));
 }
 
+void kill_outside_entities(
+    Registry &r, sparse_array<Position> &pos, sparse_array<Tags> &tag)
+{
+    for (auto &&[ind, position, tags] : indexed_zipper(pos, tag)) {
+        if (!tags->HasCollision)
+            continue;
+        if (position->pos_X > 1780)
+            r.kill_entity(r.entity_from_index(ind));
+        else if (position->pos_X < -500)
+            r.kill_entity(r.entity_from_index(ind));
+        else if (position->pos_Y > 1220)
+            r.kill_entity(r.entity_from_index(ind));
+        else if (position->pos_Y < -500)
+            r.kill_entity(r.entity_from_index(ind));
+    }
+}
+
 void shootProjectiles(
     Registry &r, sparse_array<ProjectileShooter> &shooters,
     sparse_array<Position> &positions, sparse_array<Size> &sizes,

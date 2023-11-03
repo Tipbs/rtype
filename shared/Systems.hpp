@@ -22,3 +22,5 @@ void shootProjectiles(
     sparse_array<Player> &players);
 void clear_entities(
     Registry &r, sparse_array<Position> &positions);
+void kill_outside_entities(
+    Registry &r, sparse_array<Position> &pos, sparse_array<Tags> &tag);

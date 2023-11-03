@@ -47,7 +47,8 @@ void Factory::register_components()
         Backgrounds,
         AlwaysShoot,
         EnemyCount,
-        BossCount
+        BossCount,
+        Tags
     >();
 }
 
@@ -58,9 +59,9 @@ void Factory::add_systems()
     _reg.add_system<EnemyCount, BossCount, NetworkedEntity, Position, Health>(kill_zord);
     _reg.add_system<Direction, Speed, Position, Size, Weapon, Player>(synchronize); 
 #endif
-    _reg.add_system<Position>(clear_entities);
     _reg.add_system<SpawnGrace>(update_grace);
     _reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
+    _reg.add_system<Position, Tags>(kill_outside_entities);
     _reg.add_system<Position, Speed, Direction
         #ifdef SERVER
         , Player
