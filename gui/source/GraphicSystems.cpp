@@ -239,8 +239,6 @@ void killDeadEntities(Registry &r, sparse_array<NetworkedEntity> &entities)
                 return ent.id == entities[index]->id;
             });
         if (finded == net_ents.end()) {
-            std::cout << "netent: " << net_ents[0].id << " "
-                      << entities[index]->id << std::endl;
             r.kill_entity(index);
             std::cout << "killing entity " << index << std::endl;
         }
@@ -259,7 +257,6 @@ void updateWithSnapshots(
     r.netEnts.mutex.lock();
     if (!r.netEnts.ents.empty())
         killDeadEntities(r, entities);
-    // std::cout << "r.netEnts size: " << r.netEnts.ents.size() << std::endl;
     for (auto it = net_ents.begin(); it != net_ents.end(); ++it) {
         auto &net = *it;
         auto finded = std::find_if(
@@ -271,7 +268,6 @@ void updateWithSnapshots(
             });
         if (finded != entities.end())
             continue;
-        std::cout << "id: " << net.id << std::endl;
         auto pos = Position(net.pos.x, net.pos.y);
         factory.create_netent(net.type, net);
         it = net_ents.erase(it);
@@ -286,9 +282,9 @@ void updateWithSnapshots(
         auto const &player = players[i];
         if (pos && entity) {
             auto finded = std::find_if(
-                net_ents.begin(), net_ents.end(), [&](NetEnt &net_ent) {
-                    return net_ent.id == entity.value().id;
-                });
+				net_ents.begin(), net_ents.end(), [&](NetEnt &net_ent) {
+					return net_ent.id == entity.value().id;
+			});
             if (finded == net_ents.end())
                 continue;
             if (current && std::abs(finded->pos.x - pos.value().pos_X) < 30.0 &&
@@ -341,9 +337,6 @@ void update_charge_rect(
     sparse_array<ChargeRect> &chargeRects, sparse_array<Rect> &rects)
 {
     for (auto &&[chargeRect, rect] : zipper(chargeRects, rects)) {
-        std::cout
-            << weapons[static_cast<size_t>(chargeRect->from)]->current_charge
-            << std::endl;
         rect->rect.width =
             (weapons[static_cast<size_t>(chargeRect->from)]->current_charge -
              1) *

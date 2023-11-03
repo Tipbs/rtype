@@ -69,6 +69,7 @@ void Factory::add_systems()
         , Player
         #endif
     >(move);
+    _reg.add_system<Player, Position, Direction, Size>(block_player_in_map);
 #ifdef SERVER
 	_reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
 	_reg.add_system<ProjectileShooter, Position, Size, Player>(
