@@ -18,7 +18,7 @@
     }
   ],
   "enemies": {
-    "count": 5
+    "count": 20
   },
   "boss": {
     "count": 1

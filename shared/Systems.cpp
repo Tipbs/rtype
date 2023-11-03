@@ -126,10 +126,13 @@ void colision(
                 continue;
             else if (pos2->pos_Y > pos1->pos_Y + siz1->size_Y)
                 continue;
-            else if (!tags[ind] || !tags[ind]->HasCollision) // todo! !tags[ind] should be removed if collision work fine
+            else if (!tags[ind] || !tags[ind]->HasCollision) // todo! !tags[ind]
+                                                             // should be
+                                                             // removed if
+                                                             // collision work
+                                                             // fine
                 continue;
-            else if (
-                tags[ind]->IsFriendly == tags[ind2]->IsFriendly)
+            else if (tags[ind]->IsFriendly == tags[ind2]->IsFriendly)
                 continue;
             else
                 damages(r, healths, dmgs, ind, ind2);
@@ -180,28 +183,27 @@ void spawn_enemy(
     for (auto index = 0; index != enemiesCount.size(); ++index) {
         if (!enemiesCount[index])
             continue;
-        auto &enemyCount = enemiesCount[index];
         Factory f(r);
         auto now = std::chrono::steady_clock::now();
-        if (enemyCount->leftToSpawn > 0 &&
-            now > enemyCount->timeSinceLastSpawn + enemyCount->delay) {
-            std::cout << "enemies left : " << enemyCount->leftToSpawn
-                      << std::endl;
-            enemyCount->timeSinceLastSpawn = std::chrono::steady_clock::now();
-            enemyCount->leftAlive++;
-            enemyCount->leftToSpawn--;
+        if (enemiesCount[index]->leftToSpawn > 0 &&
+            now > enemiesCount[index]->timeSinceLastSpawn +
+                      enemiesCount[index]->delay) {
+            enemiesCount[index]->timeSinceLastSpawn =
+                std::chrono::steady_clock::now();
+            enemiesCount[index]->leftAlive++;
+            enemiesCount[index]->leftToSpawn--;
             float randomNumber = rand() % (580);
             Position pos = {1280, randomNumber};
 
             f.create_zorg(pos);
         }
-        if (enemyCount->leftAlive <= 0 && enemyCount->leftToSpawn <= 0) {
+        if (enemiesCount[index]->leftAlive <= 0 &&
+            enemiesCount[index]->leftToSpawn <= 0) {
             auto &boss = bossCount[index];
             if (!(boss))
                 continue;
             float randomNumber = rand() % (580);
             Position pos = {1280, randomNumber};
-            std::cout << "ouaiouaiouai\n";
             if (boss->isLastBossAlive == false && boss->leftToSpawn > 0) {
                 boss->isLastBossAlive = true;
                 boss->leftToSpawn--;

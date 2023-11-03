@@ -465,6 +465,7 @@ Factory::create_boss_projectile(Position pos, Direction diro, size_t net_id)
 
 const Entity Factory::create_boss(Position pos, size_t net_id)
 {
+    std::cout << "create boss: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n";
     Entity const new_entity = _reg.spawn_entity();
     Size Size(98, 100);
     Speed speedo(300);
