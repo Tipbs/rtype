@@ -1,8 +1,8 @@
+#include "Systems.hpp"
 #include <cmath>
 #include <numbers>
 #include "Component.hpp"
 #include "Factory.hpp"
-#include "Systems.hpp"
 #include "indexed_zipper.hpp"
 #include "zipper.hpp"
 
@@ -10,17 +10,17 @@ void move(
     Registry &r, sparse_array<Position> &positions, sparse_array<Speed> &speed,
     sparse_array<Direction> &dir)
 {
-    for (auto &&[pos, spe, diro]: zipper(positions, speed, dir)) {
+    for (auto &&[pos, spe, diro] : zipper(positions, speed, dir)) {
         double x_offset = spe->speed * diro->dir_X;
         double y_offset = spe->speed * diro->dir_Y;
 
 #ifdef SERVER
-		pos->pos_X += x_offset * GetFrameTime();
-		pos->pos_Y += y_offset * GetFrameTime();
+        pos->pos_X += x_offset * GetFrameTime();
+        pos->pos_Y += y_offset * GetFrameTime();
 #else
         pos->pos_X += x_offset * GetFrameTime();
         pos->pos_Y += y_offset * GetFrameTime();
- #endif
+#endif
     }
 }
 
@@ -31,68 +31,84 @@ void damages(
     std::cout << "y a collision\n";
     std::cout << "Hello world" << std::endl;
     healt[i1]->health -= dama[i2]->damages;
-    // std::osyncstream(std::cout) << "User " << i1 << " has taken " << dama[i2]->damages << " damages. He now have " << healt[i1]->health << " HP." << std::endl;
+    // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
+    // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
+    // HP." << std::endl;
     healt[i2]->health -= dama[i1]->damages;
-    // std::osyncstream(std::cout) << "User " << i2 << " has taken " << dama[i1]->damages << " damages. He now have " << healt[i2]->health << " HP." << std::endl;
+    // std::osyncstream(std::cout) << "User " << i2 << " has taken " <<
+    // dama[i1]->damages << " damages. He now have " << healt[i2]->health << "
+    // HP." << std::endl;
     if (healt[i1]->health <= 0)
         r.kill_entity(r.entity_from_index(i1));
     if (healt[i2]->health <= 0)
         r.kill_entity(r.entity_from_index(i2));
 }
 
-void update_grace(Registry &r,
-sparse_array<SpawnGrace> &graces)
+void update_grace(Registry &r, sparse_array<SpawnGrace> &graces)
 {
     auto time = GetTimePoint();
     auto graces_size = graces.size();
 
-	for (size_t ind = 0; ind != graces_size; ++ind) {
+    for (size_t ind = 0; ind != graces_size; ++ind) {
         if (!graces[ind])
             continue;
-        if (graces[ind]->creation_time + graces[ind]->time >= time) {
+        if (graces[ind]->creation_time + graces[ind]->time >= time)
             r.remove_component<SpawnGrace>(ind);
-        }
     }
 }
 
-void colision(Registry &r,
-sparse_array<Position> &positions, 
-sparse_array<Size> &sizes,
-sparse_array<SpawnGrace> &grace, 
-sparse_array<Damages> &dmgs,
-sparse_array<Health> &healths)
+static void collect_points(
+    Registry &reg, Score &score, Point &point, Entity pointIndex)
+{
+    score.score += point.point;
+    reg.kill_entity(pointIndex);
+}
+
+static bool check_colision(Position &pos1, Position &pos2, Size &size1, Size &size2)
+{
+    if (pos1.pos_X > pos2.pos_X + size2.size_X)
+        return false;
+    else if (pos1.pos_Y > pos2.pos_Y + size2.size_Y)
+        return false;
+    else if (pos2.pos_X > pos1.pos_X + size1.size_X)
+        return false;
+    else if (pos2.pos_Y > pos1.pos_Y + size1.size_Y)
+        return false;
+    else
+        return true;
+}
+
+void colision(
+    Registry &r, sparse_array<Position> &positions, sparse_array<Size> &sizes,
+    sparse_array<SpawnGrace> &grace, sparse_array<Damages> &dmgs,
+    sparse_array<Health> &healths, sparse_array<Point> &points,
+    sparse_array<Score> &scores)
 {
     auto pos_size = positions.size();
-	for (size_t ind = 0; ind != pos_size; ++ind) {
-        if (!(positions[ind] && sizes[ind] && dmgs[ind] && healths[ind]))
+    for (size_t ind1 = 0; ind1 != pos_size; ++ind1) {
+        if (!(positions[ind1] && sizes[ind1]) || grace[ind1])
             continue;
+        for (size_t ind2 = 0; ind2 != pos_size; ++ind2) {
+            if (!(positions[ind2] && sizes[ind2]) || grace[ind2])
+                continue;
+            if (ind2 <= ind1)
+                continue;
+            if (!positions[ind1]) // need to recheck because damages may have
+                                  // kill the entity
+                continue;
 
-        if (grace[ind].has_value()) {
-            continue;
-        }
-		for (size_t ind2 = 0; ind2 != pos_size; ++ind2) {
-			if (!(positions[ind2] && sizes[ind2] && dmgs[ind2] && healths[ind2]))
-				continue;
-            if (ind2 <= ind || grace[ind2].has_value()) {
-                continue;
+            if (check_colision(
+                    positions[ind1].value(), positions[ind2].value(),
+                    sizes[ind1].value(), sizes[ind2].value())) {
+                if (dmgs[ind1] && healths[ind1] && dmgs[ind2] && healths[ind2])
+                    damages(r, healths, dmgs, ind1, ind2);
+                else if ((scores[ind1] && points[ind2]))
+                    collect_points(
+                        r, scores[ind1].value(), points[ind2].value(), ind2);
+                else if ((points[ind1] && scores[ind2]))
+                    collect_points(
+                        r, scores[ind2].value(), points[ind1].value(), ind1);
             }
-            if (!positions[ind]) { // need to recheck because damages may have kill the entity
-                continue;
-            }
-            if (positions[ind]->pos_X >
-				positions[ind2]->pos_X + sizes[ind2]->size_X)
-				continue;
-            else if (
-                positions[ind]->pos_Y > positions[ind2]->pos_Y + sizes[ind2]->size_Y)
-                continue;
-            else if (
-                positions[ind2]->pos_X > positions[ind]->pos_X + sizes[ind]->size_X)
-                continue;
-            else if (
-                positions[ind2]->pos_Y > positions[ind]->pos_Y + sizes[ind]->size_Y)
-                continue;
-            else
-                damages(r, healths, dmgs, ind, ind2);
         }
     }
 }
@@ -121,24 +137,30 @@ void enemyAlwaysShoot(
     }
 }
 
-void update_weapon_position(Registry &r, sparse_array<Weapon> &weapons, sparse_array<Position> &positions)
+void update_weapon_position(
+    Registry &r, sparse_array<Weapon> &weapons,
+    sparse_array<Position> &positions)
 {
-    for (auto &&[weapon, position]: zipper(weapons, positions)) {
-        position->pos_X =  positions[static_cast<size_t>(weapon->owner_id)]->pos_X + 5;
-        position->pos_Y =  positions[static_cast<size_t>(weapon->owner_id)]->pos_Y + 5;
+    for (auto &&[weapon, position] : zipper(weapons, positions)) {
+        position->pos_X =
+            positions[static_cast<size_t>(weapon->owner_id)]->pos_X + 5;
+        position->pos_Y =
+            positions[static_cast<size_t>(weapon->owner_id)]->pos_Y + 5;
     }
 }
 
-void spawn_enemy(Registry &r,
-    sparse_array<EnemyCount> &enemiesCount,
-    sparse_array<BossCount> &bossCount
-)
+void spawn_enemy(
+    Registry &r, sparse_array<EnemyCount> &enemiesCount,
+    sparse_array<BossCount> &bossCount)
 {
-    for (auto &&[ind, enemyCount]: indexed_zipper(enemiesCount)) {
+    for (auto &&[ind, enemyCount] : indexed_zipper(enemiesCount)) {
         enemyCount->timeSinceLastSpawn += GetFrameTime();
         Factory f(r);
-        if (enemyCount->leftToSpawn > 0 && enemyCount->timeSinceLastSpawn > enemyCount->spawnFrequency) {
-            std::cout << enemyCount->timeSinceLastSpawn << " enemies left : " << enemyCount->leftToSpawn << std::endl;
+        if (enemyCount->leftToSpawn > 0 &&
+            enemyCount->timeSinceLastSpawn > enemyCount->spawnFrequency) {
+            std::cout << enemyCount->timeSinceLastSpawn
+                      << " enemies left : " << enemyCount->leftToSpawn
+                      << std::endl;
             enemyCount->timeSinceLastSpawn = 0;
             enemyCount->leftAlive++;
             enemyCount->leftToSpawn--;

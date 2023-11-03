@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
-#include <boost/serialization/vector.hpp>
 #include <mutex>
+#include <boost/serialization/vector.hpp>
 #include "Utils.hpp"
 
 enum class EntityType {
@@ -12,12 +12,12 @@ enum class EntityType {
 };
 
 class NetEnt {
-public:
+  public:
     int id;
-	EntityType type;
+    EntityType type;
     Utils::Vec2 pos {};
-	uint8_t attacking = false;
-	float attackState;
+    uint8_t attacking = false;
+    float attackState;
 
     NetEnt()
     {
@@ -25,10 +25,12 @@ public:
         type = EntityType::None;
         attackState = 0;
     }
+
     NetEnt &operator=(const NetEnt &) = default;
 
     template<class Archive>
-    void serialize(Archive &ar, const unsigned int version) {
+    void serialize(Archive &ar, const unsigned int version)
+    {
         ar &id;
         ar &type;
         ar &pos;
