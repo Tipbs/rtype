@@ -20,8 +20,6 @@ void move(
         double y_offset = spe->speed * diro->dir_Y;
 
 #ifdef SERVER
-        pos->pos_X += x_offset * GetFrameTime();
-        pos->pos_Y += y_offset * GetFrameTime();
         if (players[ind]) {
             pos->pos_X += x_offset;
             pos->pos_Y += y_offset;
@@ -128,11 +126,10 @@ void colision(
                 continue;
             else if (pos2->pos_Y > pos1->pos_Y + siz1->size_Y)
                 continue;
-            else if (!tags[ind]->HasCollision || !tags[ind]->HasCollision)
+            else if (!tags[ind] || !tags[ind]->HasCollision) // todo! !tags[ind] should be removed if collision work fine
                 continue;
             else if (
-                tags[ind]->IsFriendly == tags[ind2]->IsFriendly ||
-                tags[ind]->IsHostile == tags[ind2]->IsHostile)
+                tags[ind]->IsFriendly == tags[ind2]->IsFriendly)
                 continue;
             else
                 damages(r, healths, dmgs, ind, ind2);
@@ -159,7 +156,7 @@ void enemyAlwaysShoot(
                 Position(
                     pos->pos_X - (size->size_X / 2.),
                     pos->pos_Y + (size->size_Y / 2.)),
-                Direction(-1, 0), 1.0, 3, 0);
+                Direction(-2, 0), 1.0, 3, 0);
         }
     }
 }
@@ -204,6 +201,7 @@ void spawn_enemy(
                 continue;
             float randomNumber = rand() % (580);
             Position pos = {1280, randomNumber};
+            std::cout << "ouaiouaiouai\n";
             if (boss->isLastBossAlive == false && boss->leftToSpawn > 0) {
                 boss->isLastBossAlive = true;
                 boss->leftToSpawn--;
