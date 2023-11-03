@@ -21,8 +21,6 @@ void move(
         double y_offset = spe->speed * diro->dir_Y;
 
 #ifdef SERVER
-        pos->pos_X += x_offset * GetFrameTime();
-        pos->pos_Y += y_offset * GetFrameTime();
         if (players[ind]) {
             pos->pos_X += x_offset;
             pos->pos_Y += y_offset;
@@ -42,7 +40,13 @@ void damages(
     size_t i1, size_t i2)
 {
     std::cout << "y a collision\n";
-    std::cout << "Hello world" << std::endl;
+    if (!dama[i1] || !dama[i2]) {
+        for (auto i = 0; i != 10; ++i) {
+            std::cerr << "ne devrait jamais arriver, un des damages est pas "
+                         "set aaaaa\n";
+        }
+        return;
+    }
     healt[i1]->health -= dama[i2]->damages;
     // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
     // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
@@ -60,7 +64,7 @@ void damages(
 void kill_outside_entities(
     Registry &r, sparse_array<Position> &pos, sparse_array<Colision> &colisions)
 {
-    for (auto &&[ind, position, colision] : indexed_zipper(pos, colisions))
+    for (auto &&[ind, position, colision] : indexed_zipper(pos, colisions)) {
         if (position->pos_X > 1780)
             r.kill_entity(r.entity_from_index(ind));
         else if (position->pos_X < -500)
@@ -69,6 +73,25 @@ void kill_outside_entities(
             r.kill_entity(r.entity_from_index(ind));
         else if (position->pos_Y < -500)
             r.kill_entity(r.entity_from_index(ind));
+    }
+}
+
+void block_player_in_map(
+    Registry &r, sparse_array<Player> &players,
+    sparse_array<Position> &positions, sparse_array<Direction> &directions,
+    sparse_array<Size> &sizes)
+{
+    for (auto &&[_, pos, size, dir] :
+         zipper(players, positions, sizes, directions)) {
+        if (pos->pos_X + dir->dir_X < 0)
+            pos->pos_X = 0;
+        if (pos->pos_X + size->size_X > 1280)
+            pos->pos_X = 1280 - size->size_X;
+        if (pos->pos_Y < 0)
+            pos->pos_Y = 0;
+        if (pos->pos_Y + size->size_Y > 780 - 130) // 130 for hud..
+            pos->pos_Y = 780 - 130 - size->size_Y;
+    }
 }
 
 void update_grace(Registry &r, sparse_array<SpawnGrace> &graces)
@@ -166,7 +189,7 @@ void enemyAlwaysShoot(
                 Position(
                     pos->pos_X - (size->size_X / 2.),
                     pos->pos_Y + (size->size_Y / 2.)),
-                1.0, 3, 0, Direction(-1, 0));
+                1.0, 3, 0, Direction(-2, 0));
         }
     }
 }
@@ -190,23 +213,22 @@ void spawn_enemy(
     for (auto index = 0; index != enemiesCount.size(); ++index) {
         if (!enemiesCount[index])
             continue;
-        auto &enemyCount = enemiesCount[index];
-        enemyCount->timeSinceLastSpawn += GetFrameTime();
         Factory f(r);
-        if (enemyCount->leftToSpawn > 0 &&
-            enemyCount->timeSinceLastSpawn > enemyCount->spawnFrequency) {
-            std::cout << enemyCount->timeSinceLastSpawn
-                      << " enemies left : " << enemyCount->leftToSpawn
-                      << std::endl;
-            enemyCount->timeSinceLastSpawn = 0;
-            enemyCount->leftAlive++;
-            enemyCount->leftToSpawn--;
+        auto now = std::chrono::steady_clock::now();
+        if (enemiesCount[index]->leftToSpawn > 0 &&
+            now > enemiesCount[index]->timeSinceLastSpawn +
+                      enemiesCount[index]->delay) {
+            enemiesCount[index]->timeSinceLastSpawn =
+                std::chrono::steady_clock::now();
+            enemiesCount[index]->leftAlive++;
+            enemiesCount[index]->leftToSpawn--;
             float randomNumber = rand() % (580);
             Position pos = {1280, randomNumber};
 
             f.create_zorg(pos);
         }
-        if (enemyCount->leftAlive <= 0 && enemyCount->leftToSpawn <= 0) {
+        if (enemiesCount[index]->leftAlive <= 0 &&
+            enemiesCount[index]->leftToSpawn <= 0) {
             auto &boss = bossCount[index];
             if (!(boss))
                 continue;
@@ -291,21 +313,6 @@ void shootProjectiles(
                 *shooters[index], positions,
                 players); // atm called for each shooter but should check if
                           // it's the boss and the phase of the boss (health)
-        }
-    }
-}
-
-void clear_entities(Registry &r, sparse_array<Position> &positions)
-{
-    for (auto index = 0; index != positions.size(); ++index) {
-        auto &pos = positions[index];
-        if (!pos)
-            continue;
-
-        if (pos->pos_X < -200 || pos->pos_X > 2000 || pos->pos_Y < -200 ||
-            pos->pos_Y > 1000) {
-            std::cout << "x: " << pos->pos_X << " y: " << pos->pos_Y << "\n";
-            r.kill_entity(index);
         }
     }
 }

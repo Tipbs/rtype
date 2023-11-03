@@ -44,14 +44,13 @@ void Factory::add_systems()
     _reg.add_system<
         Position, Size, SpawnGrace, Damages, Health, Colision, Point, Score>(
         colision);
+    _reg.add_system<Position, Speed, Direction
+        #ifdef SERVER
+        , Player
+        #endif
+    >(move);
+    _reg.add_system<Player, Position, Direction, Size>(block_player_in_map);
     _reg.add_system<Position, Colision>(kill_outside_entities);
-    _reg.add_system<
-        Position, Speed, Direction
-#ifdef SERVER
-        ,
-        Player
-#endif
-        >(move);
 #ifdef SERVER
     _reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
     _reg.add_system<ProjectileShooter, Position, Size, Player>(
@@ -439,6 +438,7 @@ Factory::create_boss_projectile(Position pos, Direction diro, size_t net_id)
 
 const Entity Factory::create_boss(Position pos, size_t net_id)
 {
+    std::cout << "create boss: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n";
     Entity const new_entity = _reg.spawn_entity();
     Size Size(98, 100);
     Speed speedo(300);

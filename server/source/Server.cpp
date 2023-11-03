@@ -233,7 +233,7 @@ void udp_server::start_threads()
     parser.open_file("./server/ressources/Maps/map_01.json");
     Entity enemy_count = reg.spawn_entity();
     reg.emplace_component<EnemyCount>(
-        enemy_count, parser.get_enemy_count(), 20);
+        enemy_count, parser.get_enemy_count(), std::chrono::seconds(2));
     reg.emplace_component<BossCount>(enemy_count, parser.get_boss_count());
     Entity player = parser.create_player(netId);
     clients[_remote_point]._id = (size_t) netId;

@@ -35,7 +35,9 @@ void shootProjectiles(
     Registry &r, sparse_array<ProjectileShooter> &shooters,
     sparse_array<Position> &positions, sparse_array<Size> &sizes,
     sparse_array<Player> &players);
-void clear_entities(Registry &r, sparse_array<Position> &positions);
+void block_player_in_map(
+    Registry &r, sparse_array<Player> &players,
+    sparse_array<Position> &positions, sparse_array<Direction> &sizes, sparse_array<Size> &directions);
 void kill_outside_entities(
     Registry &r, sparse_array<Position> &pos,
     sparse_array<Colision> &colisions);
