@@ -4,30 +4,32 @@
 #include "Component.hpp"
 #include "Factory.hpp"
 #include "indexed_zipper.hpp"
+#include "Utils.hpp"
 #include "zipper.hpp"
 
 void move(
     Registry &r, sparse_array<Position> &positions, sparse_array<Speed> &speed,
     sparse_array<Direction> &dir
-    #ifdef SERVER
-    , sparse_array<Player> &players
-    #endif
+#ifdef SERVER
+    ,
+    sparse_array<Player> &players
+#endif
 )
 {
-    for (auto &&[ind, pos, spe, diro]: indexed_zipper(positions, speed, dir)) {
+    for (auto &&[ind, pos, spe, diro] : indexed_zipper(positions, speed, dir)) {
         double x_offset = spe->speed * diro->dir_X;
         double y_offset = spe->speed * diro->dir_Y;
 
 #ifdef SERVER
-		pos->pos_X += x_offset * GetFrameTime();
-		pos->pos_Y += y_offset * GetFrameTime();
-		if (players[ind]) {
-			pos->pos_X += x_offset;
-			pos->pos_Y += y_offset;
-		} else {
-			pos->pos_X += x_offset * GetFrameTime();
-			pos->pos_Y += y_offset * GetFrameTime();
-		}
+        pos->pos_X += x_offset * GetFrameTime();
+        pos->pos_Y += y_offset * GetFrameTime();
+        if (players[ind]) {
+            pos->pos_X += x_offset;
+            pos->pos_Y += y_offset;
+        } else {
+            pos->pos_X += x_offset * GetFrameTime();
+            pos->pos_Y += y_offset * GetFrameTime();
+        }
 #else
         pos->pos_X += x_offset * GetFrameTime();
         pos->pos_Y += y_offset * GetFrameTime();
@@ -55,9 +57,10 @@ void damages(
         r.kill_entity(r.entity_from_index(i2));
 }
 
-void kill_outside_entities(Registry &r, sparse_array<Position> &pos, sparse_array<Colision> &colisions)
+void kill_outside_entities(
+    Registry &r, sparse_array<Position> &pos, sparse_array<Colision> &colisions)
 {
-    for (auto &&[ind, position, colision]: indexed_zipper(pos, colisions)) {
+    for (auto &&[ind, position, colision] : indexed_zipper(pos, colisions))
         if (position->pos_X > 1780)
             r.kill_entity(r.entity_from_index(ind));
         else if (position->pos_X < -500)
@@ -66,11 +69,9 @@ void kill_outside_entities(Registry &r, sparse_array<Position> &pos, sparse_arra
             r.kill_entity(r.entity_from_index(ind));
         else if (position->pos_Y < -500)
             r.kill_entity(r.entity_from_index(ind));
-    }
 }
 
-void update_grace(Registry &r,
-sparse_array<SpawnGrace> &graces)
+void update_grace(Registry &r, sparse_array<SpawnGrace> &graces)
 {
     auto time = GetTimePoint();
     auto graces_size = graces.size();
@@ -83,14 +84,16 @@ sparse_array<SpawnGrace> &graces)
     }
 }
 
-static void collect_points(
-    Registry &reg, Score &score, Point &point, Entity pointIndex)
+static void
+collect_points(Registry &reg, Score &score, Point &point, Entity pointIndex)
 {
+    std::cout << "dslkfjsldfqkj" << std::endl;
     score.score += point.point;
     reg.kill_entity(pointIndex);
 }
 
-static bool check_colision(Position &pos1, Position &pos2, Size &size1, Size &size2)
+static bool
+check_colision(Position &pos1, Position &pos2, Size &size1, Size &size2)
 {
     if (pos1.pos_X > pos2.pos_X + size2.size_X)
         return false;
@@ -107,34 +110,39 @@ static bool check_colision(Position &pos1, Position &pos2, Size &size1, Size &si
 void colision(
     Registry &r, sparse_array<Position> &positions, sparse_array<Size> &sizes,
     sparse_array<SpawnGrace> &grace, sparse_array<Damages> &dmgs,
-    sparse_array<Health> &healths, sparse_array<Point> &points,
-    sparse_array<Score> &scores)
+    sparse_array<Health> &healths, sparse_array<Colision> &colisions,
+    sparse_array<Point> &points, sparse_array<Score> &scores)
 {
     auto pos_size = positions.size();
     for (size_t ind1 = 0; ind1 != pos_size; ++ind1) {
-        if (!(positions[ind1] && sizes[ind1]) || grace[ind1])
+        if (!colisions[ind1] || grace[ind1])
+            continue;
+        if (!positions[ind1]) // need to recheck because damages may have
+                              // kill the entity
             continue;
         for (size_t ind2 = 0; ind2 != pos_size; ++ind2) {
-            if (!(positions[ind2] && sizes[ind2]) || grace[ind2])
+            if (!colisions[ind2] || grace[ind2])
                 continue;
             if (ind2 <= ind1)
                 continue;
-            if (!positions[ind1]) // need to recheck because damages may have
-                                  // kill the entity
+            if (!check_colision(
+                    positions[ind1].value(), positions[ind2].value(),
+                    sizes[ind1].value(), sizes[ind2].value()))
                 continue;
 
-            if (check_colision(
-                    positions[ind1].value(), positions[ind2].value(),
-                    sizes[ind1].value(), sizes[ind2].value())) {
-                if (dmgs[ind1] && healths[ind1] && dmgs[ind2] && healths[ind2])
-                    damages(r, healths, dmgs, ind1, ind2);
-                else if ((scores[ind1] && points[ind2]))
-                    collect_points(
-                        r, scores[ind1].value(), points[ind2].value(), ind2);
-                else if ((points[ind1] && scores[ind2]))
-                    collect_points(
-                        r, scores[ind2].value(), points[ind1].value(), ind1);
-            }
+            if (colisions[ind1]->check(Tag::Damages) ||
+                colisions[ind2]->check(Tag::Damages))
+                damages(r, healths, dmgs, ind1, ind2);
+            else if (
+                colisions[ind1]->check(Tag::Player) &&
+                colisions[ind2]->check(Tag::Point))
+                collect_points(
+                    r, scores[ind1].value(), points[ind2].value(), ind2);
+            else if (
+                colisions[ind2]->check(Tag::Player) &&
+                colisions[ind1]->check(Tag::Point))
+                collect_points(
+                    r, scores[ind2].value(), points[ind1].value(), ind1);
         }
     }
 }
@@ -287,17 +295,15 @@ void shootProjectiles(
     }
 }
 
-void clear_entities(
-    Registry &r,
-    sparse_array<Position> &positions
-)
+void clear_entities(Registry &r, sparse_array<Position> &positions)
 {
     for (auto index = 0; index != positions.size(); ++index) {
         auto &pos = positions[index];
         if (!pos)
             continue;
 
-        if (pos->pos_X < -200 || pos->pos_X > 2000 || pos->pos_Y < -200 || pos->pos_Y > 1000) {
+        if (pos->pos_X < -200 || pos->pos_X > 2000 || pos->pos_Y < -200 ||
+            pos->pos_Y > 1000) {
             std::cout << "x: " << pos->pos_X << " y: " << pos->pos_Y << "\n";
             r.kill_entity(index);
         }

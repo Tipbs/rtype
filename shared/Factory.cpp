@@ -6,8 +6,8 @@
 #include <stdlib.h> /* srand, rand */
 #include "Component.hpp"
 #include "Entity.hpp"
-#include "Systems.hpp"
 #include "NetEnt.hpp"
+#include "Systems.hpp"
 
 #ifndef SERVER
 #include <raylib.h>
@@ -23,36 +23,12 @@ void Factory::register_components()
 #ifndef SERVER
         Sprite, InputField, Rectangle,
         // HUD,
-        Rect,
-        Color,
-        Text,
-        ScoreText,
-        ChargeRect,
-        MusicComponent,
-        SoundManager,
+        Rect, Color, Text, ScoreText, ChargeRect, MusicComponent, SoundManager,
 #endif
-        Player,
-        Weapon,
-        Current_Player,
-        Position,
-        Damages,
-        Size,
-        Health,
-        Speed,
-        Direction,
-        SpawnGrace,
-        NetworkedEntity,
-        Animation,
-        Couleur,
-        ProjectileShooter,
-        Score,
-        Backgrounds,
-        AlwaysShoot,
-        EnemyCount,
-        BossCount,
-        Colision,
-        Point
-    >();
+        Player, Weapon, Current_Player, Position, Damages, Size, Health, Speed,
+        Direction, SpawnGrace, NetworkedEntity, Animation, Couleur,
+        ProjectileShooter, Score, Backgrounds, AlwaysShoot, EnemyCount,
+        BossCount, Colision, Point>();
 }
 
 void Factory::add_systems()
@@ -65,32 +41,32 @@ void Factory::add_systems()
         synchronize);
 #endif
     _reg.add_system<SpawnGrace>(update_grace);
-    _reg.add_system<Position, Size, SpawnGrace, Damages, Health, Colision, Point, Score>(colision);
+    _reg.add_system<
+        Position, Size, SpawnGrace, Damages, Health, Colision, Point, Score>(
+        colision);
     _reg.add_system<Position, Colision>(kill_outside_entities);
-    _reg.add_system<Position, Speed, Direction
-        #ifdef SERVER
-        , Player
-        #endif
-    >(move);
+    _reg.add_system<
+        Position, Speed, Direction
 #ifdef SERVER
-	_reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
-	_reg.add_system<ProjectileShooter, Position, Size, Player>(
-		shootProjectiles);
+        ,
+        Player
+#endif
+        >(move);
+#ifdef SERVER
+    _reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
+    _reg.add_system<ProjectileShooter, Position, Size, Player>(
+        shootProjectiles);
 #endif
 #ifndef SERVER
-    _reg.add_system<
-        Position, Size, Sprite, Player, Rectangle, InputField, Rect, Color,
-        Text>(display);
+    _reg.add_system<Position, Sprite, Rectangle, InputField, Rect, Color, Text>(
+        display);
     _reg.add_system<Direction, Current_Player, Sprite, Speed, Couleur>(
         handle_dir_inputs);
     _reg.add_system<Couleur, Size, Weapon, Position>(handle_shoot_inputs);
     //    _reg.add_system<InputField, Rectangle>(hadle_text_inputs);
-    _reg.add_system<Sprite, Couleur>(
-        do_animation);
-    _reg.add_system<Sprite, Couleur, Weapon, Current_Player>(
-        do_ship_animation);
-    _reg.add_system<Position, Size, Backgrounds>(
-        make_infinite_background);
+    _reg.add_system<Sprite, Couleur>(do_animation);
+    _reg.add_system<Sprite, Couleur, Weapon, Current_Player>(do_ship_animation);
+    _reg.add_system<Position, Size, Backgrounds>(make_infinite_background);
     _reg.add_system<
         Position, NetworkedEntity, Speed, Current_Player, Size, Player>(
         updateWithSnapshots);
@@ -101,7 +77,8 @@ void Factory::add_systems()
     _reg.add_system<MusicComponent>(handle_music);
     _reg.add_system<SoundManager>(play_sound);
 #else
-    _reg.add_system<Position, Speed, Weapon, NetworkedEntity, Direction>(extract);
+    _reg.add_system<Position, Speed, Weapon, NetworkedEntity, Direction>(
+        extract);
     _reg.add_system<Player, Direction>(resetPlayersDir);
 #endif
 }
@@ -126,36 +103,42 @@ Factory::create_background(const int ScreenWidth, const int ScreenHeight)
     _reg.emplace_component<Backgrounds>(background);
 
     Entity const background1 = _reg.spawn_entity();
-    std::string bgpath1 = "./gui/ressources/Backgrounds/Back_stars.png"; // temp > 2 > 3 > 1
+    std::string bgpath1 =
+        "./gui/ressources/Backgrounds/Back_stars.png"; // temp > 2 > 3 > 1
 
     _reg.emplace_component<Position>(background1, 0, 0);
     _reg.emplace_component<Size>(background1, ScreenWidth, ScreenHeight);
 #ifndef SERVER
-    _reg.emplace_component<Sprite>(background1, bgpath1.c_str(), 3 * ScreenWidth, ScreenHeight);
+    _reg.emplace_component<Sprite>(
+        background1, bgpath1.c_str(), 3 * ScreenWidth, ScreenHeight);
 #endif
     _reg.emplace_component<Speed>(background1, 50);
     _reg.emplace_component<Direction>(background1, -1, 0);
     _reg.emplace_component<Backgrounds>(background1);
 
     Entity const background2 = _reg.spawn_entity();
-    std::string bgpath2 = "./gui/ressources/Backgrounds/Back_planets.png"; // temp > 2 > 3 > 1
+    std::string bgpath2 =
+        "./gui/ressources/Backgrounds/Back_planets.png"; // temp > 2 > 3 > 1
 
     _reg.emplace_component<Position>(background2, 0, 0);
     _reg.emplace_component<Size>(background2, ScreenWidth, ScreenHeight);
 #ifndef SERVER
-    _reg.emplace_component<Sprite>(background2, bgpath2.c_str(), 3 * ScreenWidth, ScreenHeight);
+    _reg.emplace_component<Sprite>(
+        background2, bgpath2.c_str(), 3 * ScreenWidth, ScreenHeight);
 #endif
     _reg.emplace_component<Speed>(background2, 80);
     _reg.emplace_component<Direction>(background2, -1, 0);
     _reg.emplace_component<Backgrounds>(background2);
 
     Entity const background3 = _reg.spawn_entity();
-    std::string bgpath3 = "./gui/ressources/Backgrounds/Back_front.png"; // temp > 2 > 3 > 1
+    std::string bgpath3 =
+        "./gui/ressources/Backgrounds/Back_front.png"; // temp > 2 > 3 > 1
 
     _reg.emplace_component<Position>(background3, 0, 0);
     _reg.emplace_component<Size>(background3, ScreenWidth, ScreenHeight);
 #ifndef SERVER
-    _reg.emplace_component<Sprite>(background3, bgpath3.c_str(), 3 * ScreenWidth, ScreenHeight);
+    _reg.emplace_component<Sprite>(
+        background3, bgpath3.c_str(), 3 * ScreenWidth, ScreenHeight);
 #endif
     _reg.emplace_component<Speed>(background3, 100);
     _reg.emplace_component<Direction>(background3, -1, 0);
@@ -183,9 +166,9 @@ const Entity Factory::create_player(Position pos, size_t net_id)
     _reg.emplace_component<Score>(new_entity, 0);
     _reg.emplace_component<Health>(new_entity, 1000);
     _reg.emplace_component<Damages>(new_entity, 1);
-    Colision col(Tag::Friendly);
-    _reg.emplace_component<Colision>(new_entity, Tag::Friendly, Tag::Player);
-    _reg.emplace_component<NetworkedEntity>(new_entity, net_id, EntityType::Player);
+    _reg.emplace_component<Colision>(new_entity, Tag::Player);
+    _reg.emplace_component<NetworkedEntity>(
+        new_entity, net_id, EntityType::Player);
     return new_entity;
 }
 
@@ -193,7 +176,7 @@ const Entity Factory::create_weapon(Entity owner)
 {
     Entity weapon = _reg.spawn_entity();
 
-    std::cout << "owner: " << (size_t)owner << "\n";
+    std::cout << "owner: " << (size_t) owner << "\n";
     _reg.emplace_component<Weapon>(weapon, owner);
     _reg.emplace_component<Position>(weapon);
     return weapon;
@@ -212,7 +195,7 @@ const Entity Factory::create_enemy(Position pos, size_t net_id)
 }
 
 const Entity Factory::create_ammo(
-    Position pos, Direction diro, float damage_mult, int color_id)
+    Position pos, float damage_mult, int color_id, Direction diro)
 {
     Entity const new_entity = _reg.spawn_entity();
     int hitwidth = 120 * (damage_mult / 2);
@@ -228,67 +211,23 @@ const Entity Factory::create_ammo(
         hitheight, 8, 5);
 #endif
     _reg.emplace_component<Speed>(new_entity, 300);
-    _reg.emplace_component<Direction>(new_entity, 1, 0);
+    _reg.add_component(new_entity, std::move(diro));
     _reg.emplace_component<Damages>(new_entity, damage_mult);
     _reg.emplace_component<Health>(new_entity, 1);
     _reg.emplace_component<Animation>(new_entity);
     _reg.emplace_component<Couleur>(new_entity, color_id);
-    _reg.add_component(new_entity, std::move(diro));
+    _reg.emplace_component<Colision>(new_entity, Tag::Damages, Tag::Ammo);
     return new_entity;
 }
 
-const Entity Factory::create_ammo(Position pos, float damage_mult, int color_id)
+const Entity Factory::create_ammo(
+    Position pos, float damage_mult, int color_id, size_t net_id,
+    Direction diro)
 {
-    Entity const new_entity = _reg.spawn_entity();
-    int hitwidth = 120 * (damage_mult / 2);
-    int hitheight = 24 * (damage_mult / 2);
+    Entity const new_entity = create_ammo(pos, damage_mult, color_id, diro);
 
-    _reg.emplace_component<Position>(
-        new_entity, pos.pos_X - (float) hitwidth / 2,
-        pos.pos_Y - (float) hitheight / 2);
-    _reg.emplace_component<Size>(new_entity, hitwidth, hitheight);
-#ifndef SERVER
-    _reg.emplace_component<Sprite>(
-        new_entity, "./gui/ressources/Sprites/shoot_ammo.png", hitwidth,
-        hitheight, 8, 5);
-#endif
-    _reg.emplace_component<Speed>(new_entity, 300);
-    _reg.emplace_component<Direction>(new_entity, 1, 0);
-    _reg.emplace_component<Damages>(new_entity, damage_mult);
-    _reg.emplace_component<Health>(new_entity, 1);
-    _reg.emplace_component<Animation>(new_entity);
-    _reg.emplace_component<Couleur>(new_entity, color_id);
-    return new_entity;
-}
-
-
-const Entity Factory::create_zorg(Position pos)
-{
-    Entity const new_entity = _reg.spawn_entity();
-    Size Size(48, 48);
-    Speed speedo(100);
-    Direction diro(-0.1, 0);
-    SpawnGrace gra(std::chrono::seconds(1));
-#ifndef SERVER
-    std::string path = "./gui/ressources/Sprites/Drone.png";
-    Sprite sprite(path.c_str(), 48, 48);
-#endif
-
-    _reg.add_component(new_entity, std::move(pos));
-    _reg.add_component(new_entity, std::move(Size));
-#ifndef SERVER
-    _reg.add_component(new_entity, std::move(sprite));
-#endif
-    _reg.add_component(new_entity, std::move(speedo));
-    _reg.add_component(new_entity, std::move(diro));
-    _reg.emplace_component<AlwaysShoot>(
-        new_entity, std::chrono::milliseconds(750));
-    _reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
-    _reg.emplace_component<Health>(new_entity, 1);
     _reg.emplace_component<NetworkedEntity>(
-        new_entity, (size_t) new_entity + 3, EntityType::Enemy);
-
-    _reg.emplace_component<NetworkedEntity>(new_entity, net_id, EntityType::Ammo);
+        new_entity, net_id, EntityType::Ammo);
     return new_entity;
 }
 
@@ -318,7 +257,6 @@ const Entity Factory::create_zorg(Position pos, size_t net_id)
     _reg.emplace_component<NetworkedEntity>(
         new_entity, net_id, EntityType::Enemy);
     _reg.emplace_component<Colision>(new_entity, Tag::Enemy);
-
 
     return (size_t) new_entity;
 }
@@ -354,7 +292,8 @@ const Entity Factory::create_asteroids(Position pos, size_t net_id)
     _reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
     _reg.emplace_component<Health>(new_entity, 1);
     _reg.emplace_component<Damages>(new_entity, 1);
-    // _reg.emplace_component<Tags>(new_entity, false, true, false, true, false, false, false, true);
+    // _reg.emplace_component<Tags>(new_entity, false, true, false, true, false,
+    // false, false, true);
     _reg.emplace_component<Colision>(new_entity, Tag::Enemy);
     // _reg.emplace_component<NetworkedEntity>(new_entity, net_id);
 
@@ -491,7 +430,8 @@ Factory::create_boss_projectile(Position pos, Direction diro, size_t net_id)
     _reg.add_component(entity, std::move(diro));
     _reg.emplace_component<Damages>(entity, 20);
     _reg.emplace_component<Health>(entity, 1);
-    // _reg.emplace_component<Tags>(entity, false, true, false, false, false, true, false, true);
+    // _reg.emplace_component<Tags>(entity, false, true, false, false, false,
+    // true, false, true);
     _reg.emplace_component<Colision>(entity, Tag::Ammo);
     _reg.emplace_component<NetworkedEntity>(entity, 1, EntityType::Projectile);
     return entity;
@@ -532,13 +472,13 @@ const Entity Factory::create_boss(Position pos, size_t net_id)
         shooter->infos.push_back(ProjectileInfo(
             Position(x, y), Direction(cos(angle) / 3, sin(angle) / 3)));
     }
-    _reg.emplace_component<NetworkedEntity>(new_entity, net_id, EntityType::Boss);
+    _reg.emplace_component<NetworkedEntity>(
+        new_entity, net_id, EntityType::Boss);
 
     return (size_t) new_entity;
 }
 
-const Entity Factory::create_netent(
-    EntityType type, NetEnt &net_ent)
+const Entity Factory::create_netent(EntityType type, NetEnt &net_ent)
 {
     // static std::vector<std::pair<EntityType, std::function<const
     // Entity(Position pos, size_t net_id)>>> pairs = {
@@ -547,12 +487,11 @@ const Entity Factory::create_netent(
         std::make_pair(
             EntityType::Player, std::mem_fn(&Factory::create_player)),
         std::make_pair(EntityType::Zorg, std::mem_fn(&Factory::create_zorg)),
-        std::make_pair(EntityType::Enemy, std::mem_fn(&Factory::create_zorg))
-    };
+        std::make_pair(EntityType::Enemy, std::mem_fn(&Factory::create_zorg))};
     auto &pos = net_ent.pos;
     auto net_id = net_ent.id;
     auto dir = Direction(net_ent.dir.x, net_ent.dir.y);
-    std::cout << "creating: " << (size_t)net_ent.type << "\n";
+    std::cout << "creating: " << (size_t) net_ent.type << "\n";
     for (auto &pair : pairs)
         if (type == pair.first)
             return pair.second(this, pos, net_id);
@@ -568,16 +507,22 @@ const Entity Factory::create_netent(
 
 void Factory::create_points(Position pos, int nbr, int points)
 {
+    int width = 32;
+    int height = 32;
+
     for (int i = 0; i < nbr; i++) {
         Entity const entity = _reg.spawn_entity();
         int x = pos.pos_X + (rand() % 100 - 50);
         int y = pos.pos_Y + (rand() % 100 - 50);
 
         _reg.emplace_component<Position>(entity, x, y);
+        _reg.emplace_component<Size>(entity, width, height);
+        _reg.emplace_component<Colision>(entity, Tag::Point);
         _reg.add_component<Point>(entity, points);
 #ifndef SERVER
         _reg.emplace_component<Sprite>(
-            entity, "./gui/ressources/Sprites/points.png", 32, 32, 7, 1, rand() % 7);
+            entity, "./gui/ressources/Sprites/points.png", width, height, 7, 1,
+            rand() % 7);
 #endif
     }
 }

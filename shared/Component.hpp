@@ -169,33 +169,21 @@ struct Point {
     Point(double point) : point(point) {};
 };
 
-enum class Tag: std::size_t {
-    Friendly = 0,
+enum class Tag : std::size_t {
+    Damages,
     Player,
     Enemy,
     Boss,
     Ammo,
-    Bonus
+    Point
 };
 
-struct Colision {
-	// bool IsFriendly;
-	// bool IsHostile;
-	// bool IsPlayer;
-	// bool IsEnemy;
-	// bool IsBoss;
-	// bool IsAmmo;
-	// bool IsBonus;
-	// bool HasColision;
-    std::bitset<6> bitset;
-
-	// Colision(bool IsFriendly, bool IsHostile, bool IsPlayer, bool IsEnemy, bool IsBoss, bool IsAmmo, bool IsBonus, bool HasColision) : 
-	// 	IsFriendly(IsFriendly), IsHostile(IsHostile), IsPlayer(IsPlayer), IsEnemy(IsEnemy),
-	// 	IsBoss(IsBoss), IsAmmo(IsAmmo), IsBonus(IsBonus), HasColision(HasColision) {};
-
-    template <typename... Args>
+struct Colision : public std::bitset<6> {
+    template<typename... Args>
     Colision(Args &&...tags)
     {
-        bitset.set(static_cast<size_t>(tags)...);
+        set(static_cast<size_t>(tags)...);
     }
+
+    bool check(Tag tag) const { return test(static_cast<std::size_t>(tag)); }
 };

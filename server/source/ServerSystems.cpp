@@ -50,7 +50,8 @@ void extract(
     sparse_array<Speed> &speeds, sparse_array<Weapon> &weapons,
     sparse_array<NetworkedEntity> &ents, sparse_array<Direction> &directions)
 {
-    for (auto &&[ind, pos, ent_id, dir] : indexed_zipper(positions, ents, directions)) {
+    for (auto &&[ind, pos, ent_id, dir] :
+         indexed_zipper(positions, ents, directions)) {
         NetEnt tmp;
         tmp.type = ents[ind]->_type;
         tmp.id = ind;

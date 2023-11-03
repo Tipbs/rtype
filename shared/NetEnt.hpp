@@ -20,8 +20,8 @@ class NetEnt {
     EntityType type;
     Utils::Vec2 pos {};
     Utils::Vec2 dir {};
-	uint8_t attacking = false;
-	float attackState;
+    uint8_t attacking = false;
+    float attackState;
 
     NetEnt()
     {

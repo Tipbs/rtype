@@ -3,6 +3,13 @@
 #include <boost/serialization/serialization.hpp>
 
 namespace Utils {
+
+template<typename T>
+constexpr auto get(T value)
+{
+    return static_cast<std::underlying_type_t<T>>(value);
+}
+
 struct Vec2 {
     double x, y;
 
