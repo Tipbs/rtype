@@ -148,9 +148,8 @@ void handle_dir_inputs(
 
 size_t getSoundManager(sparse_array<SoundManager> &managers)
 {
-    for (auto &&[index, manager]: indexed_zipper(managers)) {
+    for (auto &&[index, manager] : indexed_zipper(managers))
         return index;
-    }
     return -1;
 }
 
@@ -186,12 +185,13 @@ void handle_shoot_inputs(
             r.currentCmd.cmd.setAttack(weapon->current_charge);
             r.currentCmd.mutex.unlock();
             weapon->current_charge = 1.;
-            add_sound("./gui/ressources/Audio/lazer.wav", r.get_components<SoundManager>());
+            add_sound(
+                "./gui/ressources/Audio/lazer.wav",
+                r.get_components<SoundManager>());
         }
         break;
     }
 }
-
 
 void hadle_text_inputs(
     Registry &r, sparse_array<InputField> &inputFields,
@@ -356,20 +356,18 @@ void update_charge_rect(
     }
 }
 
-void play_sound(
-    Registry &r, sparse_array<SoundManager> &sounds)
+void play_sound(Registry &r, sparse_array<SoundManager> &sounds)
 {
-    for (auto &&[sound]: zipper(sounds)) {
-        for (auto &sfx: sound->sounds) {
+    for (auto &&[sound] : zipper(sounds)) {
+        for (auto &sfx : sound->sounds)
             PlaySound(sfx);
-        }
         sound->sounds.clear();
     }
 }
 
 void handle_music(Registry &r, sparse_array<MusicComponent> &musics)
 {
-    for (auto &&[ind, music]: indexed_zipper(musics)) {
+    for (auto &&[ind, music] : indexed_zipper(musics)) {
         auto &ost = music->musics[music->context];
         if (IsSoundPlaying(ost) == false) {
             SetSoundVolume(ost, 0.3);

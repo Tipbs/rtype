@@ -14,11 +14,14 @@ struct MusicComponent {
     std::map<MusicFx, Sound> musics;
     MusicFx context = Battle;
 
-    MusicComponent(std::vector<std::pair<std::string, MusicFx>> paths) {
-        for (auto &path: paths)
+    MusicComponent(std::vector<std::pair<std::string, MusicFx>> paths)
+    {
+        for (auto &path : paths)
             musics[path.second] = LoadSound(path.first.c_str());
     }
-    MusicComponent(std::string path, MusicFx type) {
+
+    MusicComponent(std::string path, MusicFx type)
+    {
         musics[type] = LoadSound(path.c_str());
     }
 };
@@ -26,7 +29,6 @@ struct MusicComponent {
 struct SoundManager {
     std::vector<Sound> sounds;
 };
-
 
 struct Sprite {
     Texture2D spritesheet;
