@@ -215,7 +215,7 @@ void hadle_text_inputs(
 void killDeadEntities(Registry &r, sparse_array<NetworkedEntity> &entities)
 {
     auto &net_ents = r.netEnts.ents;
-    auto size = entities.size();
+    // auto size = entities.size();
 
     for (auto &&[index, _] : indexed_zipper(entities)) {
         auto finded =

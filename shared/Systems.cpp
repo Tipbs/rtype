@@ -129,8 +129,8 @@ void enemyAlwaysShoot(
             shoot->last_shoot = now;
             factory.create_ammo(
                 Position(
-                    pos->pos_X - (size->size_X / 2),
-                    pos->pos_Y + (size->size_Y / 2)),
+                    pos->pos_X - (size->size_X / 2.),
+                    pos->pos_Y + (size->size_Y / 2.)),
                 Direction(-1, 0), 1.0, 3);
         }
     }
@@ -237,7 +237,7 @@ void shootProjectiles(
         if (now > shooters[index]->lastShot + shooters[index]->delay) {
             shooters[index]->lastShot = now;
             auto size_as_pos =
-                Position(sizes[index]->size_X / 2, sizes[index]->size_Y / 2);
+                Position(sizes[index]->size_X / 2., sizes[index]->size_Y / 2.);
             for (auto &proj : shooters[index]->infos) {
                 factory.create_boss_projectile(
                     *positions[index] + size_as_pos + proj.offset, proj.dir);
