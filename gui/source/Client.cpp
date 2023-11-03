@@ -52,7 +52,7 @@ void udp_client::handle_receive(
     // std::osyncstream(std::cout) << "Received mais erreur\n";
     if (!error) {
         std::osyncstream(std::cout)
-            << "Received " << bytes_transferred << "bytes" << std::endl;
+            << "Received " << bytes_transferred << " bytes" << std::endl;
         try {
             std::string seralizedData(_recv_buffer.data(), bytes_transferred);
             std::istringstream iss(seralizedData);

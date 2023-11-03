@@ -73,6 +73,8 @@ void do_animation(
                      ? -6 * sprite->width_padding
                      : sprite->width_padding);
         } else { // Looping sprites frames
+            if (sprite->width_max == 2 && sprite->height_max == 5)
+                continue;
             sprite->sprite.x =
                 (sprite->sprite.x / sprite->width_padding ==
                          sprite->width_max - 1
@@ -212,7 +214,7 @@ void hadle_text_inputs(
 void killDeadEntities(Registry &r, sparse_array<NetworkedEntity> &entities)
 {
     auto &net_ents = r.netEnts.ents;
-    auto size = entities.size();
+    // auto size = entities.size();
 
     for (auto &&[index, _] : indexed_zipper(entities)) {
         auto finded =
