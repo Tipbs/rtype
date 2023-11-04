@@ -23,9 +23,10 @@
 class udp_client {
   public:
     udp_client(
-        boost::asio::io_context &, const std::string &ip,
-        const std::string &port, Registry &reg);
+        boost::asio::io_context &svc, Registry &reg);
     ~udp_client();
+
+    void connect(const std::string &ip, const std::string &port);
 
     void send();
     void start_receive();

@@ -152,17 +152,19 @@ struct Score {
 };
 
 struct Tags {
-	bool IsFriendly;
-	bool IsHostile;
-	bool IsPlayer;
-	bool IsEnemy;
-	bool IsBoss;
-	bool IsAmmo;
-	bool IsBonus;
-	bool HasCollision;
+    bool IsFriendly;
+    bool IsHostile;
+    bool IsPlayer;
+    bool IsEnemy;
+    bool IsBoss;
+    bool IsAmmo;
+    bool IsBonus;
+    bool HasCollision;
 
-	Tags(bool IsFriendly, bool IsHostile, bool IsPlayer, bool IsEnemy, bool IsBoss, bool IsAmmo, bool IsBonus, bool HasCollision) : 
-		IsFriendly(IsFriendly), IsHostile(IsHostile), IsPlayer(IsPlayer), IsEnemy(IsEnemy),
-		IsBoss(IsBoss), IsAmmo(IsAmmo), IsBonus(IsBonus), HasCollision(HasCollision) {};
-
+    Tags(
+        bool IsFriendly, bool IsHostile, bool IsPlayer, bool IsEnemy,
+        bool IsBoss, bool IsAmmo, bool IsBonus, bool HasCollision)
+        : IsFriendly(IsFriendly), IsHostile(IsHostile), IsPlayer(IsPlayer),
+          IsEnemy(IsEnemy), IsBoss(IsBoss), IsAmmo(IsAmmo), IsBonus(IsBonus),
+          HasCollision(HasCollision) {};
 };

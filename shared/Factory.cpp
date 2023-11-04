@@ -30,6 +30,9 @@ void Factory::register_components()
         ChargeRect,
         MusicComponent,
         SoundManager,
+        MenuFields,
+        CustomText,
+        CanBeSelected,
 #endif
         Player,
         Weapon,
@@ -57,13 +60,12 @@ void Factory::register_components()
 void Factory::add_systems()
 {
 #ifdef SERVER
-    _reg.add_system<EnemyCount, BossCount>(spawn_enemy);
-    _reg.add_system<EnemyCount, BossCount, NetworkedEntity, Position, Health>(kill_zord);
-    _reg.add_system<Direction, Speed, Position, Size, Weapon, Player>(synchronize); 
+//_reg.add_system<EnemyCount, BossCount>(spawn_enemy);
+//_reg.add_system<EnemyCount, BossCount, NetworkedEntity, Position, Health>(kill_zord);
+//_reg.add_system<Direction, Speed, Position, Size, Weapon, Player>(synchronize); 
 #endif
-    _reg.add_system<Position>(clear_entities);
     _reg.add_system<SpawnGrace>(update_grace);
-    _reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
+    _reg.add_system<Position, Size, SpawnGrace, Damages, Health, Tags>(colision);
     _reg.add_system<Position, Tags>(kill_outside_entities);
     _reg.add_system<Position, Speed, Direction
         #ifdef SERVER
@@ -71,33 +73,35 @@ void Factory::add_systems()
         #endif
     >(move);
 #ifdef SERVER
-	_reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
-	_reg.add_system<ProjectileShooter, Position, Size, Player>(
-		shootProjectiles);
+//_reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
+//_reg.add_system<ProjectileShooter, Position, Size, Player>(
+//	shootProjectiles);
 #endif
 #ifndef SERVER
     _reg.add_system<
         Position, Size, Sprite, Player, Rectangle, InputField, Rect, Color,
-        Text>(display);
-    _reg.add_system<Direction, Current_Player, Sprite, Speed, Couleur>(
-        handle_dir_inputs);
-    _reg.add_system<Couleur, Size, Weapon, Position>(handle_shoot_inputs);
+        Text, MenuFields, CustomText, CanBeSelected>(display);
+//_reg.add_system<Direction, Current_Player, Sprite, Speed, Couleur>(
+//    handle_dir_inputs);
+//_reg.add_system<Couleur, Size, Weapon, Position>(handle_shoot_inputs);
     //    _reg.add_system<InputField, Rectangle>(hadle_text_inputs);
-    _reg.add_system<Sprite, Couleur>(
-        do_animation);
-    _reg.add_system<Sprite, Couleur, Weapon, Current_Player>(
-        do_ship_animation);
-    _reg.add_system<Position, Size, Backgrounds>(
-        make_infinite_background);
-    _reg.add_system<
-        Position, NetworkedEntity, Speed, Current_Player, Size, Player>(
-        updateWithSnapshots);
+//_reg.add_system<Sprite, Couleur>(
+//    do_animation);
+//_reg.add_system<Sprite, Couleur, Weapon, Current_Player>(
+//    do_ship_animation);
+//_reg.add_system<Position, Size, Backgrounds>(
+//    make_infinite_background);
+//_reg.add_system<
+//    Position, NetworkedEntity, Speed, Current_Player, Size, Player>(
+//    updateWithSnapshots);
     // _reg.add_system<Weapon, Couleur, HUD>(
     //     updateHUD);
-    _reg.add_system<Score, ScoreText, Text>(update_score_text);
-    _reg.add_system<Weapon, ChargeRect, Rect>(update_charge_rect);
-    _reg.add_system<MusicComponent>(handle_music);
-    _reg.add_system<SoundManager>(play_sound);
+//_reg.add_system<Score, ScoreText, Text>(update_score_text);
+//_reg.add_system<Weapon, ChargeRect, Rect>(update_charge_rect);
+//_reg.add_system<MusicComponent>(handle_music);
+//_reg.add_system<SoundManager>(play_sound);
+    _reg.add_system<MenuFields, Rectangle, CustomText>(handle_menu_inputs);
+    _reg.add_system<CustomText, Position, CanBeSelected>(selectable_text);
 #else
     _reg.add_system<Position, Speed, Weapon, NetworkedEntity, Direction>(extract);
     _reg.add_system<Player, Direction>(resetPlayersDir);
@@ -163,6 +167,20 @@ Factory::create_background(const int ScreenWidth, const int ScreenHeight)
     _reg.emplace_component<Direction>(background3, -1, 0);
     _reg.emplace_component<Backgrounds>(background3);
     _reg.emplace_component<Tags>(background3, false, false, false, false, false, false, false, false);
+
+#ifndef SERVER
+    for (auto &i : (std::pair<std::string, std::size_t>[])
+        { {"PLAY", 0}, {"EXIT", 1}, {"test3", 2}, }) {
+        Entity const text = _reg.spawn_entity();
+        _reg.emplace_component<CustomText>(text, i.first, i.second);
+        _reg.emplace_component<Position>(text, 1280.f / 2, 200 + 150 * i.second);
+        _reg.emplace_component<CanBeSelected>(text, i.second == 0);        
+    }
+
+    Entity const menuFields = _reg.spawn_entity();
+    _reg.emplace_component<MenuFields>(menuFields);
+    _reg.emplace_component<Rectangle>(menuFields, ScreenWidth / 2.0f - 200, 180, 400, 50);
+#endif
     return background;
 }
 

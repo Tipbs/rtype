@@ -1,5 +1,10 @@
 #pragma once
 
+#include <cstddef>
+#include <functional>
+#include <functional>
+#include <functional>
+#include <functional>
 #include <map>
 #include <vector>
 #include <raylib.h>
@@ -77,14 +82,6 @@ struct Sprite {
 
 struct InputField {
     std::string field;
-    int letterCount = 0;
-    bool mouseOnText = false;
-};
-
-struct MenuFields {
-    std::size_t nb_fields = 4;
-    std::size_t actual_field = 0;
-    bool mouseOnText = false;
 };
 
 struct Rect {
@@ -114,4 +111,27 @@ struct ChargeRect {
 
     ChargeRect(Entity from, double maxWidth)
         : from(from), maxWidth(maxWidth) {};
+};
+
+struct MenuFields {
+    std::size_t nb_fields = 4;
+    std::size_t actual_field = 0;
+    bool mouseOnText = false;
+};
+
+struct CustomText {
+    std::string str = "";
+    Font font = LoadFontEx("gui/ressources/Fonts/Summer_Dream_Sans.ttf", 200, 0, 250);
+    Texture texture = LoadTexture("gui/ressources/Sprites/text_background.png");
+    std::size_t index = 0;
+    ssize_t current = 0;
+
+    CustomText(const std::string &string, std::size_t idx) : str(string), index(idx) {};
+};
+
+struct CanBeSelected {
+    bool isSelected = false;
+
+    CanBeSelected(bool isSelectedByDefault):
+        isSelected(isSelectedByDefault) {};
 };
