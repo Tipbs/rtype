@@ -32,14 +32,24 @@ We are a group of 3rd Year students at Epitech aiming to hone our skills in Netw
     - The server sends asynchronously a serialized vector of "NetEnd" structures and is waiting to receive a serialized "UserCmd" structure from every clients.
     - The clients must send a serialized "UserCmd" structure to the server and asynchronously receive a serialized vector of "NetEnd" structures.
 
-## 3. Message Types
+## 3. Message Types and Structures
+    The server communicates with its clients using multiple serialized structures.
     1. UserCmd
         - Sent by clients to provide user input commands for the game.
-        - The structure is provided in the "shared" folder located at the root of the project. It contains the relative position of the client sending the structure and its state.
+        - The UserCmd structure contains all the data of a client's own player. It contains the relative position of the player in the vector "moved", a boolean attacking state "attacking", and a float containing the scale of the attack "attackState".
+        - The clients must send the UserCmd structure every "tick" to update its players position in the server. It must also be serialized using the Boost.Serialization method.
+        - The structure is provided in the "shared" folder located at the root of the project.
     2. NetEnt
         - Sent by the server to the clients to synchronize the ECS' game entities.
-        - The structure is provided in the "shared folder located at the root of the project. It contains the ID of the entity, its relative position and its state.
-    3. PlayerId
+        - The NetEnt structure contains all the data of an entity from the server-side ECS. It contains the ID of the entity "id", an enum containing the type of the entity "EntityType", the position of the entity in a vector "pos", and a bool containing the attacking state of an entity.
+        - The server sends a vector of NetEnt containing all the game entities to the client. The clients must be able to receive a vector of NetEnt structures from the Boost.Serialization method.
+        - The structure is provided in the "shared" folder located at the root of the project.
+    3. EntityType
+        - Enum providing the type of an entity for the NetEnt structure.
+        - "Player": is the type of a player entity.
+        - "Enemy": is the type of an Enemy entity.
+        - "Win" and "Lose": When a level is finished, the server send a single NetEnt structure to all clients, containing the EntityType "Win" or "Lose", indicating the end of the game.
+    4. PlayerId
         - Sent by the server when a client first makes contact with it. The client has to send a 1 byte message indicating to the server that it wants to receive the PlayerId structure. 
         - The structure is provided in the "shared" folder located at the root of the project. It contains the ID of the client's own player entity.
 
