@@ -218,8 +218,7 @@ void spawn_enemy(
 
             f.create_zorg(pos);
         }
-        if (enemiesCount[index]->leftAlive <= 0 &&
-            enemiesCount[index]->leftToSpawn <= 0) {
+        if (enemiesCount[index]->leftToSpawn <= 0) {
             auto &boss = bossCount[index];
             if (!(boss))
                 continue;
