@@ -10,17 +10,23 @@ There is a r-type_client and a r-type_server. You can play from 1 to 4 player on
 
 ### Installation
 
+```sh
 conan install . --build=missing --profile=default
+```
 
 ### Quickstart
 
+```sh
 cd build && cmake .. --preset=conan-release
 cd .. && cmake --build --preset conan-release
+```
 
 ### Usage
 
+```sh
 ./build/r-type_client
 ./build/r-type_server
+```
 
 ## Our team :heart:
 
