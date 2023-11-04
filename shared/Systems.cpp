@@ -35,24 +35,6 @@ void move(
     }
 }
 
-<<<<<<< HEAD
-void damages(
-    Registry &r, sparse_array<Health> &healt, sparse_array<Damages> &dama,
-    size_t i1, size_t i2)
-{
-    std::cout << "y a collision\n";
-    if (dama[i2])
-		healt[i1]->health -= dama[i2]->damages;
-    if (dama[i1])
-		healt[i2]->health -= dama[i1]->damages;
-#ifdef SERVER
-    if (healt[i1]->health <= 0)
-        r.kill_entity(r.entity_from_index(i1));
-    if (healt[i2]->health <= 0)
-        r.kill_entity(r.entity_from_index(i2));
-#endif
-}
-
 void kill_outside_entities(
     Registry &r, sparse_array<Position> &pos, sparse_array<Colision> &colisions)
 {

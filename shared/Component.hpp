@@ -179,7 +179,7 @@ struct Colision : public std::bitset<4> {
     template<typename... Args>
     Colision(Args &&...tags)
     {
-        set(static_cast<size_t>(tags)...);
+        (... , set(static_cast<size_t>(tags)));
         // set(static_cast<size_t>(Tag::Player));
         // set(static_cast<size_t>(Tag::Enemy));
 
