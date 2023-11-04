@@ -8,7 +8,7 @@ enum class EntityType {
     Player,
     Zorg,
     Boss,
-    Projectile,
+    ProjectileShooter,
     Ammo,
     Enemy,
     None

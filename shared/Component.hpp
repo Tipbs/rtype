@@ -109,6 +109,8 @@ struct Animation {
     Animation() {};
 };
 
+struct Boss {};
+
 struct Backgrounds {
     Backgrounds() {};
 };

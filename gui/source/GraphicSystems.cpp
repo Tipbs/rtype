@@ -1,6 +1,7 @@
 #include "GraphicSystems.hpp"
 #include <cstddef>
 #include <cstdlib>
+#include <numbers>
 #include <syncstream>
 #include <raylib.h>
 #include "../../shared/Factory.hpp"
@@ -156,7 +157,7 @@ static void add_sound(std::string path, sparse_array<SoundManager> &sound)
     try {
         ind = getSoundManager(sound);
     } catch (std::out_of_range &e) {
-       return; 
+        return;
     }
     Sound sfx = LoadSound("./gui/ressources/Audio/lazer.wav");
     sound[ind]->sounds.push_back(sfx);
@@ -247,11 +248,44 @@ void killDeadEntities(Registry &r, sparse_array<NetworkedEntity> &entities)
     }
 }
 
+static void insertProjectileShooter(
+    Registry &r, sparse_array<Boss> &bosses,
+    sparse_array<ProjectileShooter> &shooters, NetEnt &ent)
+{
+    auto size = bosses.size();
+    size_t boss_index = -1;
+    for (size_t index = 0; index != size; ++index) {
+        if (bosses[index]) {
+            boss_index = index;
+            break;
+        }
+    }
+    if (boss_index == -1)
+        throw std::exception("Failed to insert a projectileShooter to boss, "
+                             "the boss is not found");
+    if (shooters[boss_index]) {
+        shooters[boss_index]->shotCount = static_cast<int>(ent.pos.x);
+    } else {
+        auto &shooter = r.emplace_component<ProjectileShooter>(
+            boss_index, std::chrono::milliseconds(500));
+        shooter->shotCount = static_cast<int>(ent.pos.x); // hardcoded
+        auto radius = 80;
+        for (int i = 0; i <= 12; i++) {
+            double angle = 2 * std::numbers::pi * i / 12 + shooter->shotCount * 45;
+            double x = cos(angle) * radius;
+            double y = sin(angle) * radius;
+            shooter->infos.push_back(ProjectileInfo(
+                Position(x, y), Direction(cos(angle) / 3, sin(angle) / 3)));
+        }
+    }
+}
+
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
     sparse_array<NetworkedEntity> &entities, sparse_array<Speed> &speeds,
     sparse_array<Current_Player> &currents, sparse_array<Size> &sizes,
-    sparse_array<Player> &players)
+    sparse_array<Player> &players, sparse_array<Boss> &bosses,
+    sparse_array<ProjectileShooter> &shooters)
 {
     auto &net_ents = r.netEnts.ents;
     Factory factory(r);
@@ -270,7 +304,6 @@ void updateWithSnapshots(
             });
         if (finded != entities.end())
             continue;
-        auto pos = Position(net.pos.x, net.pos.y);
         factory.create_netent(net.type, net);
         it = net_ents.erase(it);
         if (it == net_ents.end())
@@ -284,11 +317,15 @@ void updateWithSnapshots(
         auto const &player = players[i];
         if (pos && entity) {
             auto finded = std::find_if(
-				net_ents.begin(), net_ents.end(), [&](NetEnt &net_ent) {
-					return net_ent.id == entity.value().id;
-			});
+                net_ents.begin(), net_ents.end(), [&](NetEnt &net_ent) {
+                    return net_ent.id == entity.value().id;
+                });
             if (finded == net_ents.end())
                 continue;
+            if (bosses[i] && finded->type == EntityType::ProjectileShooter) {
+                insertProjectileShooter(r, bosses, shooters, *finded);
+                continue;
+            }
             if (current && std::abs(finded->pos.x - pos.value().pos_X) < 30.0 &&
                 std::abs(finded->pos.y - pos.value().pos_Y) <
                     30.0) // doesn't rollback if the server pos is close enough

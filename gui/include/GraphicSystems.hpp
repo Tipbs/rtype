@@ -22,7 +22,8 @@ void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
     sparse_array<NetworkedEntity> &entities, sparse_array<Speed> &speeds,
     sparse_array<Current_Player> &currents, sparse_array<Size> &sizes,
-    sparse_array<Player> &players);
+    sparse_array<Player> &players, sparse_array<Boss> &bosses,
+    sparse_array<ProjectileShooter> &shooters);
 void do_animation(
     Registry &r, sparse_array<Sprite> &sprites, sparse_array<Couleur> &colors);
 void do_ship_animation(
