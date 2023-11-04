@@ -184,5 +184,9 @@ struct Colision : public std::bitset<6> {
         set(static_cast<size_t>(tags)...);
     }
 
-    bool check(Tag tag) const { return test(static_cast<std::size_t>(tag)); }
+    template<typename... Args>
+    bool check(Args &&...tags) const
+    {
+        return test(static_cast<std::size_t>(tags)...);
+    }
 };
