@@ -40,14 +40,14 @@ void damages(
     size_t i1, size_t i2)
 {
     std::cout << "y a collision\n";
-    if (dama[i2])
+    if (healt[i1] && dama[i2])
 		healt[i1]->health -= dama[i2]->damages;
-    if (dama[i1])
+    if (healt[i2] && dama[i1])
 		healt[i2]->health -= dama[i1]->damages;
 #ifdef SERVER
-    if (healt[i1]->health <= 0)
+    if (healt[i1] && healt[i1]->health <= 0) // il ne devrait pas y avoir autant de checks dans damage, à fix todo!
         r.kill_entity(r.entity_from_index(i1));
-    if (healt[i2]->health <= 0)
+    if (healt[i2] && healt[i2]->health <= 0)
         r.kill_entity(r.entity_from_index(i2));
 #endif
 }
@@ -135,7 +135,7 @@ void colision(
                               // kill the entity
             continue;
         for (size_t ind2 = 0; ind2 != pos_size; ++ind2) {
-            if (!colisions[ind2] || grace[ind2])
+            if (!colisions[ind2] || grace[ind2] || !sizes[ind2] || !sizes[ind1])
                 continue;
             if (ind2 <= ind1)
                 continue;
