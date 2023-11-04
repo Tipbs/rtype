@@ -169,24 +169,25 @@ struct Point {
 };
 
 enum class Tag : std::size_t {
-    Damages,
     Player,
     Enemy,
-    Boss,
-    Ammo,
-    Point
+    Damages,
+    Collactable
 };
 
-struct Colision : public std::bitset<6> {
+struct Colision : public std::bitset<4> {
     template<typename... Args>
     Colision(Args &&...tags)
     {
         set(static_cast<size_t>(tags)...);
+        // set(static_cast<size_t>(Tag::Player));
+        // set(static_cast<size_t>(Tag::Enemy));
+
     }
 
-    template<typename... Args>
+    template<std::same_as<Tag>... Args>
     bool check(Args &&...tags) const
     {
-        return test(static_cast<std::size_t>(tags)...);
+        return (... && test(static_cast<std::size_t>(tags)));
     }
 };

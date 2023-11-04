@@ -37,7 +37,7 @@ void synchronize(
                     Position(
                         posi->pos_X + (float) sizo->size_X,
                         posi->pos_Y + (float) sizo->size_Y / 2),
-                    cmds.attackScale, player->color_id);
+                    cmds.attackScale, player->color_id, Tag::Player);
                 weapon->IsShooting = cmds.attacking;
                 weapon->current_charge = cmds.attackScale;
             }
