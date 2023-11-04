@@ -44,11 +44,13 @@ void Factory::add_systems()
     _reg.add_system<
         Position, Size, SpawnGrace, Damages, Health, Colision, Point, Score>(
         colision);
-    _reg.add_system<Position, Speed, Direction
-        #ifdef SERVER
-        , Player
-        #endif
-    >(move);
+    _reg.add_system<
+        Position, Speed, Direction
+#ifdef SERVER
+        ,
+        Player
+#endif
+        >(move);
     _reg.add_system<Player, Position, Direction, Size>(block_player_in_map);
     _reg.add_system<Position, Colision>(kill_outside_entities);
 #ifdef SERVER
@@ -220,10 +222,11 @@ const Entity Factory::create_ammo(
 }
 
 const Entity Factory::create_ammo(
-    Position pos, float damage_mult, int color_id, size_t net_id,
-    Tag type, Direction diro)
+    Position pos, float damage_mult, int color_id, size_t net_id, Tag type,
+    Direction diro)
 {
-    Entity const new_entity = create_ammo(pos, damage_mult, color_id, type, diro);
+    Entity const new_entity =
+        create_ammo(pos, damage_mult, color_id, type, diro);
 
     _reg.emplace_component<NetworkedEntity>(
         new_entity, net_id, EntityType::Ammo);
@@ -527,7 +530,6 @@ void Factory::create_points(Position pos, int nbr, int points)
     }
 }
 
-
 #ifndef SERVER
 void Factory::create_sounds(Registry &reg)
 {
@@ -537,4 +539,3 @@ void Factory::create_sounds(Registry &reg)
         sounds, "./gui/ressources/Audio/battle_ost.mp3", MusicFx::Battle);
 }
 #endif
-

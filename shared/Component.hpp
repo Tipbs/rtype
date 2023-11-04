@@ -118,7 +118,8 @@ struct EnemyCount {
     int leftAlive = 0;
     std::chrono::steady_clock::time_point timeSinceLastSpawn;
     std::chrono::steady_clock::duration delay;
-    EnemyCount(int enemiesNb, std::chrono::steady_clock::duration del): leftToSpawn(enemiesNb), delay(del) {};
+    EnemyCount(int enemiesNb, std::chrono::steady_clock::duration del)
+        : leftToSpawn(enemiesNb), delay(del) {};
 };
 
 struct BossCount {
@@ -179,15 +180,21 @@ struct Colision : public std::bitset<4> {
     template<typename... Args>
     Colision(Args &&...tags)
     {
-        (... , set(static_cast<size_t>(tags)));
-        // set(static_cast<size_t>(Tag::Player));
-        // set(static_cast<size_t>(Tag::Enemy));
-
+        (..., set(static_cast<size_t>(tags)));
     }
 
     template<std::same_as<Tag>... Args>
     bool check(Args &&...tags) const
     {
         return (... && test(static_cast<std::size_t>(tags)));
+    }
+
+    template<std::same_as<Tag>... Args>
+    bool check_only(Args &&...tags) const
+    {
+        std::bitset<4> temp = *this;
+
+        (..., temp.set(static_cast<std::size_t>(tags), false));
+        return temp.none();
     }
 };

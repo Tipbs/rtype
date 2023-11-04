@@ -18,10 +18,11 @@ class Factory {
     const Entity create_weapon(Entity owner);
     const Entity create_enemy(Position pos, size_t net_id);
     const Entity create_ammo(
-        Position pos, float damage_mult, int color_id, Tag type, Direction diro = {1, 0});
+        Position pos, float damage_mult, int color_id, Tag type,
+        Direction diro = {1, 0});
     const Entity create_ammo(
-        Position pos, float damage_mult, int color_id, size_t net_id,
-        Tag type, Direction diro = {1, 0});
+        Position pos, float damage_mult, int color_id, size_t net_id, Tag type,
+        Direction diro = {1, 0});
     const Entity create_zorg(Position pos, size_t net_id = 0);
     const Entity create_netent(EntityType type, NetEnt &ent);
     const Entity create_asteroids(Position pos, size_t net_id = 0);

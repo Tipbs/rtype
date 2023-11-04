@@ -156,7 +156,7 @@ static void add_sound(std::string path, sparse_array<SoundManager> &sound)
     try {
         ind = getSoundManager(sound);
     } catch (std::out_of_range &e) {
-       return; 
+        return;
     }
     Sound sfx = LoadSound("./gui/ressources/Audio/lazer.wav");
     sound[ind]->sounds.push_back(sfx);
@@ -285,9 +285,9 @@ void updateWithSnapshots(
         auto const &player = players[i];
         if (pos && entity) {
             auto finded = std::find_if(
-				net_ents.begin(), net_ents.end(), [&](NetEnt &net_ent) {
-					return net_ent.id == entity.value().id;
-			});
+                net_ents.begin(), net_ents.end(), [&](NetEnt &net_ent) {
+                    return net_ent.id == entity.value().id;
+                });
             if (finded == net_ents.end())
                 continue;
             if (current && std::abs(finded->pos.x - pos.value().pos_X) < 30.0 &&

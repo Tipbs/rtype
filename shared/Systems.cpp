@@ -38,7 +38,7 @@ void move(
 void kill_outside_entities(
     Registry &r, sparse_array<Position> &pos, sparse_array<Colision> &colisions)
 {
-    for (auto &&[ind, position, colision] : indexed_zipper(pos, colisions)) {
+    for (auto &&[ind, position, colision] : indexed_zipper(pos, colisions))
         if (position->pos_X > 1780)
             r.kill_entity(r.entity_from_index(ind));
         else if (position->pos_X < -500)
@@ -47,7 +47,6 @@ void kill_outside_entities(
             r.kill_entity(r.entity_from_index(ind));
         else if (position->pos_Y < -500)
             r.kill_entity(r.entity_from_index(ind));
-    }
 }
 
 void block_player_in_map(
@@ -92,6 +91,14 @@ void damages(
     // HP." << std::endl;
     if (healt[i1]->health <= 0)
         r.kill_entity(r.entity_from_index(i1));
+
+    std::cout << "damages" << std::endl;
+    healt[i2]->health -= dama[i1]->damages;
+    // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
+    // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
+    // HP." << std::endl;
+    if (healt[i2]->health <= 0)
+        r.kill_entity(r.entity_from_index(i2));
 }
 
 static void
@@ -129,7 +136,7 @@ void colision(
             continue;
         for (size_t ind2 = 0; ind2 != pos_size; ++ind2) {
             if (!colisions[ind2] || grace[ind2])
-                continue; 
+                continue;
             if (!colisions[ind1]) // need to recheck because damages may have
                                   // kill the entity
                 continue;
@@ -142,18 +149,21 @@ void colision(
             std::cout << colisions[ind1]->to_string() << std::endl;
             std::cout << colisions[ind2]->to_string() << std::endl;
 
-            if (colisions[ind1]->check(Tag::Player) &&
+            if (colisions[ind1]->check_only(Tag::Player) &&
                 colisions[ind2]->check(Tag::Damages, Tag::Enemy))
                 damages(r, healths, dmgs, ind1, ind2);
-            else if (colisions[ind1]->check(Tag::Damages, Tag::Enemy) &&
-                colisions[ind2]->check(Tag::Player))
-                damages(r, healths, dmgs, ind2, ind1);
-            else if (colisions[ind1]->check(Tag::Damages, Tag::Player) &&
-                colisions[ind2]->check(Tag::Enemy))
-                damages(r, healths, dmgs, ind2, ind1);
-            else if (colisions[ind1]->check(Tag::Damages, Tag::Player) &&
-                colisions[ind2]->check(Tag::Enemy))
-                damages(r, healths, dmgs, ind2, ind1);
+            else if (
+                colisions[ind1]->check(Tag::Damages, Tag::Enemy) &&
+                colisions[ind2]->check_only(Tag::Player))
+                damages(r, healths, dmgs, ind1, ind2);
+            else if (
+                colisions[ind1]->check_only(Tag::Enemy) &&
+                colisions[ind2]->check(Tag::Damages, Tag::Player))
+                damages(r, healths, dmgs, ind1, ind2);
+            else if (
+                colisions[ind1]->check(Tag::Damages, Tag::Player) &&
+                colisions[ind2]->check_only(Tag::Enemy))
+                damages(r, healths, dmgs, ind1, ind2);
             else if (
                 colisions[ind1]->check(Tag::Player) &&
                 colisions[ind2]->check(Tag::Collactable))
