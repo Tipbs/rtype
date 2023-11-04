@@ -40,25 +40,16 @@ void damages(
     size_t i1, size_t i2)
 {
     std::cout << "y a collision\n";
-    if (!dama[i1] || !dama[i2]) {
-        for (auto i = 0; i != 10; ++i) {
-            std::cerr << "ne devrait jamais arriver, un des damages est pas "
-                         "set aaaaa\n";
-        }
-        return;
-    }
-    healt[i1]->health -= dama[i2]->damages;
-    // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
-    // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
-    // HP." << std::endl;
-    healt[i2]->health -= dama[i1]->damages;
-    // std::osyncstream(std::cout) << "User " << i2 << " has taken " <<
-    // dama[i1]->damages << " damages. He now have " << healt[i2]->health << "
-    // HP." << std::endl;
+    if (dama[i2])
+		healt[i1]->health -= dama[i2]->damages;
+    if (dama[i1])
+		healt[i2]->health -= dama[i1]->damages;
+#ifdef SERVER
     if (healt[i1]->health <= 0)
         r.kill_entity(r.entity_from_index(i1));
     if (healt[i2]->health <= 0)
         r.kill_entity(r.entity_from_index(i2));
+#endif
 }
 
 void kill_outside_entities(
