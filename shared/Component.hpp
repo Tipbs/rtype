@@ -169,6 +169,12 @@ struct Point {
     Point(double point) : point(point) {};
 };
 
+struct GameOverState {
+    bool isItOver;
+
+    GameOverState(bool over) : isItOver(over) {};
+};
+
 enum class Tag : std::size_t {
     Player,
     Enemy,

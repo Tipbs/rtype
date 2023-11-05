@@ -42,3 +42,5 @@ void block_player_in_map(
 void kill_outside_entities(
     Registry &r, sparse_array<Position> &pos,
     sparse_array<Colision> &colisions);
+void gameOverTester(Registry &r, sparse_array<Colision> &col,
+    sparse_array<Health> &healths, sparse_array<GameOverState> &state);

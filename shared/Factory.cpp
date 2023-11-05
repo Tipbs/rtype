@@ -24,11 +24,13 @@ void Factory::register_components()
         Sprite, InputField, Rectangle,
         // HUD,
         Rect, Color, Text, ScoreText, ChargeRect, MusicComponent, SoundManager,
+        GameOverBool,
+        
 #endif
         Player, Weapon, Current_Player, Position, Damages, Size, Health, Speed,
         Direction, SpawnGrace, NetworkedEntity, Animation, Couleur,
         ProjectileShooter, Score, Backgrounds, AlwaysShoot, EnemyCount,
-        BossCount, Colision, Point>();
+        BossCount, Colision, Point, GameOverState>();
 }
 
 void Factory::add_systems()
@@ -75,8 +77,10 @@ void Factory::add_systems()
     //     updateHUD);
     _reg.add_system<Score, ScoreText, Text>(update_score_text);
     _reg.add_system<Weapon, ChargeRect, Rect>(update_charge_rect);
+    _reg.add_system<Color, GameOverBool, GameOverState>(update_game_over_state);
     // _reg.add_system<MusicComponent>(handle_music);
     _reg.add_system<SoundManager>(play_sound);
+    _reg.add_system<Colision, Health, GameOverState>(gameOverTester);
 #else
     _reg.add_system<Position, Speed, Weapon, NetworkedEntity, Direction>(
         extract);
@@ -165,7 +169,7 @@ const Entity Factory::create_player(Position pos, size_t net_id)
     _reg.emplace_component<Animation>(new_entity);
     _reg.emplace_component<Couleur>(new_entity, 0);
     _reg.emplace_component<Score>(new_entity, 0);
-    _reg.emplace_component<Health>(new_entity, 1000);
+    _reg.emplace_component<Health>(new_entity, 5);
     _reg.emplace_component<Damages>(new_entity, 1);
     _reg.emplace_component<Colision>(new_entity, Tag::Player);
     _reg.emplace_component<NetworkedEntity>(
@@ -415,6 +419,25 @@ void Factory::create_hud(
         PosHeight + (SizHeight / 2));
     _reg.emplace_component<Color>(scoreValueText, WHITE);
 }
+
+const Entity Factory::create_game_state()
+{
+    Entity const gameState = _reg.spawn_entity();
+    _reg.emplace_component<GameOverState>(gameState, false);
+    return gameState;
+}
+
+void Factory::create_game_over_hud(
+    const int ScreenWidth, const int ScreenHeight, Entity gamestate)
+{
+    Entity const gameOverLayer = _reg.spawn_entity();
+    _reg.add_component<GameOverBool>(gameOverLayer, std::move(gamestate));
+    _reg.emplace_component<Rect>(
+        gameOverLayer, false, Rectangle{0, 0, (float)ScreenWidth, (float)ScreenHeight});
+    _reg.emplace_component<Color>(gameOverLayer, Color{ 230, 41, 55, 0 });
+
+}
+
 #endif
 
 const Entity

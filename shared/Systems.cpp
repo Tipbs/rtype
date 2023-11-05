@@ -324,3 +324,29 @@ void shootProjectiles(
         }
     }
 }
+
+bool checkGameOver(Registry &r, sparse_array<Colision> &col,
+    sparse_array<Health> &healths)
+    {
+        for (int i = 0; i < col.size(); i++) {
+            if (!col[i] || !col[i]->check_only(Tag::Player))
+                continue;
+            if (!healths[i] || healths[i]->health <= 0)
+                continue;
+            return false;
+        }
+        return true;
+    }
+
+void gameOverTester(Registry &r, sparse_array<Colision> &col,
+    sparse_array<Health> &healths, sparse_array<GameOverState> &gameover)
+    {
+        if (checkGameOver(r, col, healths))
+        {
+            for (int i = 0; i < gameover.size(); i++) {
+                if (!gameover[i])
+                    continue;
+                gameover[i]->isItOver = true;
+            }
+        }
+    }

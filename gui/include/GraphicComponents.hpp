@@ -107,3 +107,10 @@ struct ChargeRect {
     ChargeRect(Entity from, double maxWidth)
         : from(from), maxWidth(maxWidth) {};
 };
+
+struct GameOverBool {
+    Entity from;
+    bool state;
+
+    GameOverBool(Entity from) : from(from), state(false) {};
+};

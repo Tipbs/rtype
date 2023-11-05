@@ -347,6 +347,16 @@ void update_charge_rect(
     }
 }
 
+void update_game_over_state(
+    Registry &r, sparse_array<Color> &col,
+    sparse_array<GameOverBool> &GraphicBool, sparse_array<GameOverState> &SentBool)
+{
+    for (auto &&[color, sent, received] : zipper(col, SentBool, GraphicBool)) {
+        color->a = 150 *
+            (SentBool[static_cast<size_t>(received->from)]->isItOver);
+    }
+}
+
 void play_sound(Registry &r, sparse_array<SoundManager> &sounds)
 {
     for (auto &&[sound] : zipper(sounds)) {

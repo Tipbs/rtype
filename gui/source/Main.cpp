@@ -45,6 +45,8 @@ int main(int ac, char **av)
     std::cout << "player pos y: " << net_player_info.pos.y << std::endl;
     Entity weapon = factory.create_weapon(player);
     factory.create_hud(ScreenWidth, ScreenHeight, player, weapon);
+    Entity gamestate = factory.create_game_state();
+    factory.create_game_over_hud(ScreenWidth, ScreenHeight, gamestate);
     factory.create_sounds(reg);
     factory.add_systems();
 

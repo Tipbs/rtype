@@ -39,3 +39,6 @@ void update_score_text(
 void update_charge_rect(
     Registry &r, sparse_array<Weapon> &weapons,
     sparse_array<ChargeRect> &chargeRects, sparse_array<Rect> &rects);
+void update_game_over_state(
+    Registry &r, sparse_array<Color> &col,
+    sparse_array<GameOverBool> &GraphicBool, sparse_array<GameOverState> &SentBool);

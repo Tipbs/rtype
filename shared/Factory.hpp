@@ -32,6 +32,9 @@ class Factory {
     void create_hud(
         const int ScreenWidth, const int ScreenHeight, Entity scoreFrom,
         Entity chargeFrom);
+    const Entity create_game_state();
+    void create_game_over_hud(
+    const int ScreenWidth, const int ScreenHeight, Entity gamestate);
     void create_points(Position pos, int nbr, int points);
 #ifndef SERVER
     void create_sounds(Registry &reg);
