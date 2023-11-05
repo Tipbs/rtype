@@ -51,17 +51,10 @@ void extract(
     sparse_array<NetworkedEntity> &ents, sparse_array<Direction> &directions,
     sparse_array<ProjectileShooter> &shooters)
 {
-    if (reg.gameState != 1) {
-        NetEnt tmp;
-        if (reg.gameState == 2)
-            tmp.type = EntityType::Win;
-        if (reg.gameState == 3)
-            tmp.type = EntityType::Lose;
-        reg._netent.push_back(tmp);
-        return;
-    }
+    size_t i = 0;
     for (auto &&[ind, pos, ent_id, dir] :
          indexed_zipper(positions, ents, directions)) {
+        i++;
         NetEnt tmp;
         tmp.type = ents[ind]->_type;
         tmp.id = ind;
@@ -83,6 +76,15 @@ void extract(
         }
         reg._netent.push_back(tmp);
     }
+    /*if (reg.gameState != 1) {
+        NetEnt tmp;
+        tmp.id = i + 1;
+        if (reg.gameState == 2)
+            tmp.type = EntityType::Win;
+        if (reg.gameState == 3)
+            tmp.type = EntityType::Lose;
+        reg._netent.push_back(tmp);
+    }*/
 }
 
 void resetPlayersDir(
@@ -105,10 +107,12 @@ void kill_zord(
         if (net->_type == EntityType::Boss && hp->health <= 0) {
             std::cout << "killing BOSS\n";
             r.kill_entity(ind);
-            for (auto &&[bossCount] : zipper(bosses))
+            for (auto &&[bossCount] : zipper(bosses)) {
+                bossCount->leftAlive--;
                 bossCount->isLastBossAlive = false;
+            }
         }
-        if (net->_type == EntityType::Enemy && pos->pos_X < 0) {
+        if (net->_type == EntityType::Enemy && (pos->pos_X < 0 || hp->health <= 0)) {
             for (auto &&[enemy] : zipper(enemyCount))
                 enemy->leftAlive--;
             std::cout << "killing zorg\n";

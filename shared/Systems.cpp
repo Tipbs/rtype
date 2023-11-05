@@ -92,6 +92,13 @@ void update_grace(Registry &r, sparse_array<SpawnGrace> &graces)
     }
 }
 
+static size_t getEnemyCount(sparse_array<EnemyCount> &enemyCounts)
+{
+    for (auto &&[index, enemy] : indexed_zipper(enemyCounts))
+        return index;
+    throw std::out_of_range("Cannot find enemies");
+}
+
 void damages(
     Registry &r, sparse_array<Health> &healt, sparse_array<Damages> &dama,
     size_t i1, size_t i2)
@@ -102,18 +109,33 @@ void damages(
     // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
     // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
     // HP." << std::endl;
-    if (healt[i1]->health <= 0)
+    if (healt[i1]->health <= 0) {
+#ifdef SERVER
+        sparse_array<Colision> &col = r.get_components<Colision>();
+        sparse_array<EnemyCount> &enemyCounts = r.get_components<EnemyCount>();
+        size_t ind = 0;
+        try {
+            ind = getEnemyCount(enemyCounts);
+        } catch (std::out_of_range &e) {
+            return;
+        }
+        if (col[i1]->check_only(Tag::Enemy)) {
+            std::cout << "DEAD\n";
+            enemyCounts[ind]->leftAlive--;
+        }
+#endif
         r.kill_entity(r.entity_from_index(i1));
+    }
 
-    std::cout << "damages" << std::endl;
-    if (dama[i1])
+    std::cout << "damages" << std::endl; if (dama[i1])
 		healt[i2]->health -= dama[i1]->damages;
     // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
     // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
     // HP." << std::endl;
 #ifdef SERVER
-    if (healt[i2]->health <= 0)
+    if (healt[i2]->health <= 0) {
         r.kill_entity(r.entity_from_index(i2));
+    }
 #endif
 }
 
@@ -242,7 +264,6 @@ void spawn_enemy(
                       enemiesCount[index]->delay) {
             enemiesCount[index]->timeSinceLastSpawn =
                 std::chrono::steady_clock::now();
-            enemiesCount[index]->leftAlive++;
             enemiesCount[index]->leftToSpawn--;
             float randomNumber = rand() % (580);
             Position pos = {1280, randomNumber};
@@ -267,7 +288,7 @@ void spawn_enemy(
             if (!(boss)) {
                 r.gameState = 2;
             }
-            if (boss->leftToSpawn <= 0)
+            if (boss->leftAlive <= 0)
                 r.gameState = 2;
             std::cout << "OUI\n";
         }

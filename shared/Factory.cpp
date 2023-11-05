@@ -505,7 +505,7 @@ const Entity Factory::create_netent(EntityType type, NetEnt &net_ent)
         case EntityType::Ammo:
             return create_ammo(pos, 1.0, 1, net_id, Tag::Enemy, dir);
         /*case EntityType::Win:
-            return;
+            std::cout << "WIN\n";
         case EntityType::Lose:
             return;
             */
