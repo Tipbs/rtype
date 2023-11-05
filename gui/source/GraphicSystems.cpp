@@ -353,8 +353,14 @@ void update_game_over_state(
 {
     for (auto &&[ind, color, sent, received] : indexed_zipper(col, SentBool, GraphicBool)) {
         color->a = (85 * SentBool[static_cast<size_t>(received->from)]->isItOver); //85 is the opacity of the red square (85/255)
-        col[ind + 1]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver); //85 is the opacity of the red square (85/255)
-        col[ind + 2]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver); //85 is the opacity of the red square (85/255)
+        col[ind + 1]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 2]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 3]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 4]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 5]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 6]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 7]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 8]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
     }
 }
 
