@@ -316,8 +316,8 @@ void handle_shoot_inputs(
 }
 
 void handle_click_inputs(
-    Registry &r, sparse_array<GameOverState> &gameover, sparse_array<Button> &buttons,
-    sparse_array<Rect> &rectangles)
+    Registry &r, sparse_array<GameOverState> &gameover,
+    sparse_array<Button> &buttons, sparse_array<Rect> &rectangles)
 {
     for (size_t i = 0; i < gameover.size(); i++) {
         if (!gameover[i])
@@ -332,18 +332,14 @@ void handle_click_inputs(
             mouseX = GetMouseX();
             mouseY = GetMouseY();
         }
-        if (mouseX < rectangle->rect.x) {
+        if (mouseX < rectangle->rect.x)
             continue;
-        }
-        if (mouseX > rectangle->rect.x + rectangle->rect.width) {
+        if (mouseX > rectangle->rect.x + rectangle->rect.width)
             continue;
-        }
-        if (mouseY < rectangle->rect.y) {
+        if (mouseY < rectangle->rect.y)
             continue;
-        }
-        if (mouseY > rectangle->rect.y + rectangle->rect.height) {
+        if (mouseY > rectangle->rect.y + rectangle->rect.height)
             continue;
-        }
         button->func();
     }
 }
@@ -546,18 +542,31 @@ void update_charge_rect(
 
 void update_game_over_state(
     Registry &r, sparse_array<Color> &col,
-    sparse_array<GameOverBool> &GraphicBool, sparse_array<GameOverState> &SentBool)
+    sparse_array<GameOverBool> &GraphicBool,
+    sparse_array<GameOverState> &SentBool)
 {
-    for (auto &&[ind, color, sent, received] : indexed_zipper(col, SentBool, GraphicBool)) {
-        color->a = (85 * SentBool[static_cast<size_t>(received->from)]->isItOver); //85 is the opacity of the red square (85/255)
-        col[ind + 1]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
-        col[ind + 2]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
-        col[ind + 3]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
-        col[ind + 4]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
-        col[ind + 5]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
-        col[ind + 6]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
-        col[ind + 7]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
-        col[ind + 8]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+    for (auto &&[ind, color, sent, received] :
+         indexed_zipper(col, SentBool, GraphicBool)) {
+        color->a =
+            (85 *
+             SentBool[static_cast<size_t>(received->from)]
+                 ->isItOver); // 85 is the opacity of the red square (85/255)
+        col[ind + 1]->a =
+            (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 2]->a =
+            (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 3]->a =
+            (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 4]->a =
+            (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 5]->a =
+            (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 6]->a =
+            (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 7]->a =
+            (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 8]->a =
+            (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
     }
 }
 

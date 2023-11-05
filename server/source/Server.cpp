@@ -201,7 +201,8 @@ void udp_server::wait_for_connexion(std::size_t bytes_transferred)
         clients[_remote_point].isClientConnected = true;
         clients[_remote_point]._timer =
             boost::posix_time::microsec_clock::universal_time();
-        if (areClientsReady(clients, _nb_player) == true && reg.gameState == 0) {
+        if (areClientsReady(clients, _nb_player) == true &&
+            reg.gameState == 0) {
             reg.gameState = 1;
             tick = std::thread(&udp_server::handle_tick, this); // Timer thread
             broadcasting = std::thread(
@@ -299,7 +300,8 @@ int helper()
     std::osyncstream(std::cout) << "USAGE\n";
     std::osyncstream(std::cout) << "\t./r-type_server <port> <nb_player>\n";
     std::osyncstream(std::cout) << " port\t\tport number of the server\n";
-    std::osyncstream(std::cout) << " nb_clients\tnumber of clients needed to start the game\n";
+    std::osyncstream(std::cout)
+        << " nb_clients\tnumber of clients needed to start the game\n";
     return 0;
 }
 

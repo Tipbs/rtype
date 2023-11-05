@@ -114,8 +114,7 @@ struct LifeRect {
     Entity from;
     double maxWidth;
 
-    LifeRect(Entity from, double maxWidth)
-        : from(from), maxWidth(maxWidth) {};
+    LifeRect(Entity from, double maxWidth) : from(from), maxWidth(maxWidth) {};
 };
 
 struct MenuFields {
@@ -153,6 +152,6 @@ struct GameOverBool {
 
 struct Button {
     std::function<void()> func;
-    
+
     Button(std::function<void()> funct) : func(funct) {};
 };

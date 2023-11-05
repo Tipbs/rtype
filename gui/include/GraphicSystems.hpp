@@ -21,8 +21,8 @@ void handle_shoot_inputs(
     Registry &r, sparse_array<Couleur> &players, sparse_array<Size> &sizes,
     sparse_array<Weapon> &weapons, sparse_array<Position> &positions);
 void handle_click_inputs(
-    Registry &r, sparse_array<GameOverState> &gameover, sparse_array<Button> &buttons,
-    sparse_array<Rect> &rectangles);
+    Registry &r, sparse_array<GameOverState> &gameover,
+    sparse_array<Button> &buttons, sparse_array<Rect> &rectangles);
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
     sparse_array<NetworkedEntity> &entities, sparse_array<Speed> &speeds,
@@ -58,4 +58,5 @@ void update_life_rect(
 
 void update_game_over_state(
     Registry &r, sparse_array<Color> &col,
-    sparse_array<GameOverBool> &GraphicBool, sparse_array<GameOverState> &SentBool);
+    sparse_array<GameOverBool> &GraphicBool,
+    sparse_array<GameOverState> &SentBool);

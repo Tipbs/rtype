@@ -39,7 +39,7 @@ class Factory {
     const Entity create_game_state();
 #ifndef SERVER
     void create_game_over_hud(
-    const int ScreenWidth, const int ScreenHeight, Entity gamestate);
+        const int ScreenWidth, const int ScreenHeight, Entity gamestate);
 #endif
     void create_points(Position pos, int nbr, int points);
 #ifndef SERVER
@@ -48,8 +48,8 @@ class Factory {
         udp_client &net_client, const std::string &ip, const std::string &port,
         const int &ScreenWidth, const int &ScreenHeight);
     void create_menu(
-    udp_client &net_client, const std::string &ip, const std::string &port,
-    const int &ScreenWidth, const int &ScreenHeight);
+        udp_client &net_client, const std::string &ip, const std::string &port,
+        const int &ScreenWidth, const int &ScreenHeight);
 
 #endif
     void register_components();

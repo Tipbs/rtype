@@ -3,8 +3,8 @@
 #include <numbers>
 #include "Component.hpp"
 #include "Factory.hpp"
-#include "Sparse_array.hpp"
 #include "indexed_zipper.hpp"
+#include "Sparse_array.hpp"
 #include "Utils.hpp"
 #include "zipper.hpp"
 
@@ -339,9 +339,8 @@ static void updateBossProjectiles(
         std::pow(dir_to_player.dir_X, 2) + std::pow(dir_to_player.dir_Y, 2));
     dir_to_player.dir_X /= dir_vec_len;
     dir_to_player.dir_Y /= dir_vec_len;
-    if (!shooter.infos.empty()) {
+    if (!shooter.infos.empty())
         shooter.infos.pop_back(); // remove the last shot on closest player
-    }
     shooter.infos.push_back(ProjectileInfo(Position(0, 0), dir_to_player));
 }
 
@@ -373,28 +372,28 @@ void shootProjectiles(
     }
 }
 
-bool checkGameOver(Registry &r, sparse_array<Colision> &col,
-    sparse_array<Health> &healths)
-    {
-        for (int i = 0; i < col.size(); i++) {
-            if (!col[i] || !col[i]->check_only(Tag::Player))
-                continue;
-            if (!healths[i] || healths[i]->health <= 0)
-                continue;
-            return false;
-        }
-        return true;
+bool checkGameOver(
+    Registry &r, sparse_array<Colision> &col, sparse_array<Health> &healths)
+{
+    for (int i = 0; i < col.size(); i++) {
+        if (!col[i] || !col[i]->check_only(Tag::Player))
+            continue;
+        if (!healths[i] || healths[i]->health <= 0)
+            continue;
+        return false;
     }
+    return true;
+}
 
-void gameOverTester(Registry &r, sparse_array<Colision> &col,
-    sparse_array<Health> &healths, sparse_array<GameOverState> &gameover)
-    {
-        if (checkGameOver(r, col, healths))
-        {
-            for (int i = 0; i < gameover.size(); i++) {
-                if (!gameover[i])
-                    continue;
-                gameover[i]->isItOver = true;
-            }
+void gameOverTester(
+    Registry &r, sparse_array<Colision> &col, sparse_array<Health> &healths,
+    sparse_array<GameOverState> &gameover)
+{
+    if (checkGameOver(r, col, healths)) {
+        for (int i = 0; i < gameover.size(); i++) {
+            if (!gameover[i])
+                continue;
+            gameover[i]->isItOver = true;
         }
     }
+}

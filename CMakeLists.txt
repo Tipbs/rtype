@@ -4,6 +4,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_FLAGS "-Wall") 
 
+SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Andreas Loew")
+
 aux_source_directory(./shared SHARED_SRC_DIR)
 
 project(R-Type)
