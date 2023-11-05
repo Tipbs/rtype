@@ -155,6 +155,18 @@ void udp_server::send_playerId(
             boost::asio::placeholders::bytes_transferred));
 }
 
+bool areClientsReady(
+    const std::map<boost::asio::ip::udp::endpoint, struct Clients> &clients)
+{
+    int i = 0;
+    for (auto &clients : clients)
+        if (clients.second.isClientConnected == true)
+            i++;
+    if (i >= 1)
+        return true;
+    return false;
+}
+
 void udp_server::wait_for_connexion(std::size_t bytes_transferred)
 {
     Factory factory(reg);
@@ -188,6 +200,15 @@ void udp_server::wait_for_connexion(std::size_t bytes_transferred)
         clients[_remote_point].isClientConnected = true;
         clients[_remote_point]._timer =
             boost::posix_time::microsec_clock::universal_time();
+        if (areClientsReady(clients) == true && reg.gameState == 0) {
+            reg.gameState = 1;
+            tick = std::thread(&udp_server::handle_tick, this); // Timer thread
+            broadcasting = std::thread(
+                &udp_server::start_snapshot, this); // Snapshot thread
+            tick.detach();
+            broadcasting.detach();
+            start_check();
+        }
         deserialize(bytes_transferred);
     }
 }
@@ -246,12 +267,6 @@ void udp_server::start_threads()
     p.id = clients[_remote_point].player;
     p.pos = parser.get_player_pos(p.id);
     send_playerId(p, _remote_point);
-    tick = std::thread(&udp_server::handle_tick, this); // Timer thread
-    broadcasting =
-        std::thread(&udp_server::start_snapshot, this); // Snapshot thread
-    tick.detach();
-    broadcasting.detach();
-    start_check();
 }
 
 udp_server::udp_server(std::size_t port)
@@ -265,6 +280,7 @@ udp_server::udp_server(std::size_t port)
 
     _port = port;
 
+    reg.gameState = 0;
     start_receive();
     _svc.run();
 }

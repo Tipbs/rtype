@@ -50,15 +50,12 @@ void kill_outside_entities(
 }
 
 void stopAtCenter(
-	Registry &r, sparse_array<Boss> &boss,
-	sparse_array<Position> &positions,
-	sparse_array<Direction> &directions)
+    Registry &r, sparse_array<Boss> &boss, sparse_array<Position> &positions,
+    sparse_array<Direction> &directions)
 {
-    for (auto&& [_, pos, dir] : zipper(boss, positions, directions)) {
-        if (pos->pos_X <= 1280 / 2. - 50.) {
+    for (auto &&[_, pos, dir] : zipper(boss, positions, directions))
+        if (pos->pos_X <= 1280 / 2. - 50.)
             dir->dir_X = 0;
-        }
-    }
 }
 
 void block_player_in_map(
@@ -92,18 +89,40 @@ void update_grace(Registry &r, sparse_array<SpawnGrace> &graces)
     }
 }
 
+static size_t getEnemyCount(sparse_array<EnemyCount> &enemyCounts)
+{
+    for (auto &&[index, enemy] : indexed_zipper(enemyCounts))
+        return index;
+    throw std::out_of_range("Cannot find enemies");
+}
+
 void damages(
     Registry &r, sparse_array<Health> &healt, sparse_array<Damages> &dama,
     size_t i1, size_t i2)
 {
     std::cout << "damages" << std::endl;
     if (dama[i2])
-		healt[i1]->health -= dama[i2]->damages;
+        healt[i1]->health -= dama[i2]->damages;
     // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
     // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
     // HP." << std::endl;
-    if (healt[i1]->health <= 0)
+    if (healt[i1]->health <= 0) {
+#ifdef SERVER
+        sparse_array<Colision> &col = r.get_components<Colision>();
+        sparse_array<EnemyCount> &enemyCounts = r.get_components<EnemyCount>();
+        size_t ind = 0;
+        try {
+            ind = getEnemyCount(enemyCounts);
+        } catch (std::out_of_range &e) {
+            return;
+        }
+        if (col[i1]->check_only(Tag::Enemy)) {
+            std::cout << "DEAD\n";
+            enemyCounts[ind]->leftAlive--;
+        }
+#endif
         r.kill_entity(r.entity_from_index(i1));
+    }
 
     std::cout << "damages" << std::endl;
     if (dama[i1])
@@ -242,7 +261,6 @@ void spawn_enemy(
                       enemiesCount[index]->delay) {
             enemiesCount[index]->timeSinceLastSpawn =
                 std::chrono::steady_clock::now();
-            enemiesCount[index]->leftAlive++;
             enemiesCount[index]->leftToSpawn--;
             float randomNumber = rand() % (580);
             Position pos = {1280, randomNumber};
@@ -260,6 +278,17 @@ void spawn_enemy(
                 f.create_boss(pos, 0);
             }
         }
+#ifdef SERVER
+        if (enemiesCount[index]->leftAlive <= 0 &&
+            (r.gameState != 2 && r.gameState != 3)) {
+            auto &boss = bossCount[index];
+            if (!(boss))
+                r.gameState = 2;
+            if (boss->leftAlive <= 0)
+                r.gameState = 2;
+            std::cout << "YOU WIN\n";
+        }
+#endif
     }
 }
 

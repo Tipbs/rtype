@@ -27,8 +27,8 @@ class Registry {
     sparse_array<Component> &get_components();
     template<class Component>
     sparse_array<Component> const &get_components() const;
-    Entity spawn_entity();
     Entity entity_from_index(std::size_t idx);
+    Entity spawn_entity();
     void kill_entity(Entity const &e);
     template<typename Component>
     typename sparse_array<Component>::reference_type
@@ -50,6 +50,7 @@ class Registry {
 #else
     std::map<std::size_t, std::vector<UserCmd>> user_cmds;
     std::vector<NetEnt> _netent;
+    std::size_t gameState;
 #endif // !SERVER
 
   private:
