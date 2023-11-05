@@ -27,9 +27,8 @@ class Factory {
         const Entity create_asteroids(Position pos, size_t net_id = 0);
         const Entity create_boss_projectile(Position pos, Direction diro, size_t net_id);
         const Entity create_boss(Position pos, size_t net_id);
-        const void create_menu(const int ScreenWidth, const int ScreenHeight);
-
         void create_hud(const int ScreenWidth, const int ScreenHeight, Entity scoreFrom, Entity chargeFrom);
+        void create_menu(const int ScreenWidth, const int ScreenHeight);
         void register_components();
         void add_systems();
         void start_game(boost::asio::io_context &context);

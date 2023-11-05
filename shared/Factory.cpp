@@ -205,22 +205,7 @@ Factory::create_background(const int ScreenWidth, const int ScreenHeight)
     return background;
 }
 
-const void Factory::create_menu(const int ScreenWidth, const int ScreenHeight)
-{
-#ifndef SERVER
-    for (auto &i : (std::tuple<std::string, std::size_t, std::function<void()>>[])
-        { { "PLAY", 0, [](){} }, { "OPTIONS", 1, [](){} }, { "EXIT", 2, SquidGame }, }) {
-        Entity const text = _reg.spawn_entity();
-        _reg.emplace_component<CustomText>(text, std::get<0>(i), std::get<1>(i));
-        _reg.emplace_component<Position>(text, 1280.f / 2, 200 + 150 * std::get<1>(i));
-        _reg.emplace_component<CanBeSelected>(text, std::get<1>(i) == 0, std::get<2>(i));        
-    }
 
-    Entity const menuFields = _reg.spawn_entity();
-    _reg.emplace_component<MenuFields>(menuFields);
-    _reg.emplace_component<Rectangle>(menuFields, ScreenWidth / 2.0f - 200, 180, 400, 50);
-#endif
-}
 
 const Entity Factory::create_player(Position pos, size_t net_id)
 {
@@ -594,4 +579,21 @@ const Entity Factory::create_netent(
         case EntityType::Ammo:
             return create_ammo(pos, dir, 1.0, 1, net_id);
     }
+}
+
+void Factory::create_menu(const int ScreenWidth, const int ScreenHeight)
+{
+#ifndef SERVER
+    for (auto &i : (std::pair<std::string, std::size_t>[])
+        { {"PLAY", 0}, {"EXIT", 1}, {"test3", 2}, }) {
+        Entity const text = _reg.spawn_entity();
+        _reg.emplace_component<CustomText>(text, i.first, i.second);
+        _reg.emplace_component<Position>(text, 1280.f / 2, 200 + 150 * i.second);
+        _reg.emplace_component<CanBeSelected>(text, i.second == 0);        
+    }
+
+    Entity const menuFields = _reg.spawn_entity();
+    _reg.emplace_component<MenuFields>(menuFields);
+    _reg.emplace_component<Rectangle>(menuFields, ScreenWidth / 2.0f - 200, 180, 400, 50);
+#endif
 }
