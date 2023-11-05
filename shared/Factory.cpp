@@ -95,7 +95,7 @@ void Factory::add_systems()
 Factory::Factory(Registry &reg) : _reg(reg) {}
 
 #ifndef SERVER
-void SquidGame() { CloseWindow(); }
+void QuitGame() { CloseWindow(); }
 #endif
 
 const Entity
@@ -560,14 +560,24 @@ void Factory::create_menu(
     create_background(ScreenWidth, ScreenHeight);
     for (auto &i : (std::pair<std::string, std::size_t>[]) {
              {"PLAY", 0},
-             {"EXIT", 1},
-             {"test3", 2},
+             {"OPTIONS", 1},
+             {"EXIT", 2},
          }) {
         Entity const text = _reg.spawn_entity();
         _reg.emplace_component<CustomText>(text, i.first, i.second);
         _reg.emplace_component<Position>(
             text, 1280.f / 2, 200 + 150 * i.second);
-        _reg.emplace_component<CanBeSelected>(text, i.second == 0, [&](){create_game(net_client, ip, port, ScreenWidth, ScreenHeight);});
+        switch (i.second) {
+        case 0:
+            _reg.emplace_component<CanBeSelected>(text, i.second == 0,[&](){create_game(net_client, ip, port, ScreenWidth, ScreenHeight);});
+            break;
+        case 1:
+            _reg.emplace_component<CanBeSelected>(text, i.second == 0,[&](){});
+            break;
+        case 2:
+            _reg.emplace_component<CanBeSelected>(text, i.second == 0,[&](){QuitGame();});
+            break;
+        }
     }
 
     Entity const menuFields = _reg.spawn_entity();
