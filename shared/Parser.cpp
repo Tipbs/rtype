@@ -4,13 +4,13 @@
 
 Parser::Parser(Registry &registry) : _factory(Factory(registry)) {}
 
-Parser::Parser(Registry &registry, std::string file):
-    _factory(Factory(registry))
+Parser::Parser(Registry &registry, std::string file)
+    : _factory(Factory(registry))
 {
     /*for (ptree::value_type &entity : _root.get_child("players")) {
         int id = entity.second.get<int>("id");
-        Position pos = { entity.second.get<double>("pos.x"), entity.second.get<double>("pos.y")};
-        _factory.create_player(id, pos);
+        Position pos = { entity.second.get<double>("pos.x"),
+    entity.second.get<double>("pos.y")}; _factory.create_player(id, pos);
     }*/
 }
 

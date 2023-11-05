@@ -26,7 +26,12 @@ void synchronize(
         const auto &posi = positions[player_cmds.first];
         const auto &sizo = sizes[player_cmds.first];
         auto &player = players[player_cmds.first];
-        auto &weapon = weapons[getEntityWeapon(weapons, player_cmds.first)];
+        if (!player)
+            continue;
+        auto ent_weapon = getEntityWeapon(weapons, player_cmds.first);
+        if (ent_weapon == -1)
+            continue;
+        auto &weapon = weapons[ent_weapon];
         weapon->IsShooting = false;
         weapon->current_charge = 0;
         for (auto &cmds : player_cmds.second) {
@@ -37,7 +42,7 @@ void synchronize(
                     Position(
                         posi->pos_X + (float) sizo->size_X,
                         posi->pos_Y + (float) sizo->size_Y / 2),
-                    cmds.attackScale, player->color_id);
+                    cmds.attackScale, player->color_id, Tag::Player);
                 weapon->IsShooting = cmds.attacking;
                 weapon->current_charge = cmds.attackScale;
             }
@@ -48,9 +53,11 @@ void synchronize(
 void extract(
     Registry &reg, sparse_array<Position> &positions,
     sparse_array<Speed> &speeds, sparse_array<Weapon> &weapons,
-    sparse_array<NetworkedEntity> &ents, sparse_array<Direction> &directions)
+    sparse_array<NetworkedEntity> &ents, sparse_array<Direction> &directions,
+    sparse_array<ProjectileShooter> &shooters)
 {
-    for (auto &&[ind, pos, ent_id, dir] : indexed_zipper(positions, ents, directions)) {
+    for (auto &&[ind, pos, ent_id, dir] :
+         indexed_zipper(positions, ents, directions)) {
         NetEnt tmp;
         tmp.type = ents[ind]->_type;
         tmp.id = ind;
@@ -62,6 +69,13 @@ void extract(
             auto &weapon = weapons[weapon_ind];
             tmp.attacking = weapon->IsShooting;
             tmp.attackState = weapon->current_charge;
+        }
+        if (shooters[ind]) {
+            NetEnt shooter_net;
+            shooter_net.id = ind;
+            shooter_net.type = EntityType::ProjectileShooter;
+            shooter_net.dir.x = shooters[ind]->shotCount;
+            reg._netent.push_back(shooter_net);
         }
         reg._netent.push_back(tmp);
     }

@@ -11,14 +11,6 @@
 #include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
 
-void create_sounds(Registry &reg)
-{
-    Entity sounds = reg.spawn_entity();
-    reg.emplace_component<SoundManager>(sounds);
-    reg.emplace_component<MusicComponent>(
-        sounds, "./gui/ressources/Audio/battle_ost.mp3", MusicFx::Battle);
-}
-
 int main(int ac, char **av)
 {
     const int ScreenWidth = 1280;

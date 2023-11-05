@@ -1,6 +1,8 @@
 #include "GraphicSystems.hpp"
 #include <cstddef>
 #include <cstdlib>
+#include <cmath>
+#include <numbers>
 #include <syncstream>
 #include <raylib.h>
 #include <sys/types.h>
@@ -46,14 +48,12 @@ void display(
     sparse_array<CanBeSelected> &selectables)
 {
     BeginDrawing();
-    for (auto &&[ind, pos, siz, spri] :
-         indexed_zipper(positions, size, sprite)) {
+    for (auto &&[ind, pos, spri] : indexed_zipper(positions, sprite)) {
         Vector2 Rectpos = {
             (float) (positions[ind].value().pos_X),
             (float) positions[ind].value().pos_Y};
         DrawTextureRec(
-            sprite[ind].value().spritesheet, sprite[ind].value().sprite,
-            Rectpos, WHITE);
+            sprite[ind]->spritesheet, sprite[ind]->sprite, Rectpos, WHITE);
     }
 
     draw_rectangle(rect, col);
@@ -144,6 +144,7 @@ void selectable_text(
 void do_animation(
     Registry &r, sparse_array<Sprite> &sprites, sparse_array<Couleur> &couleurs)
 {
+    auto now = std::chrono::steady_clock::now();
     for (auto &&[sprite, colors] : zipper(sprites, couleurs)) {
         if (sprite->width_max == 8 &&
             sprite->height_max == 5) { // Ammunition case
@@ -153,14 +154,11 @@ void do_animation(
                          sprite->width_max - 1
                      ? -6 * sprite->width_padding
                      : sprite->width_padding);
-        } else { // Looping sprites frames
-            if (sprite->width_max == 2 && sprite->height_max == 5)
-                continue;
-            sprite->sprite.x =
-                (sprite->sprite.x / sprite->width_padding ==
-                         sprite->width_max - 1
-                     ? 0
-                     : sprite->sprite.x + sprite->width_padding);
+        } else if (
+            now > (sprite->time_since_last_anim +
+                   sprite->animation_delay)) {
+            sprite->sprite.x += sprite->width_padding;
+            sprite->time_since_last_anim = now;
         }
     }
 }
@@ -227,16 +225,21 @@ void handle_dir_inputs(
     }
 }
 
-size_t getSoundManager(sparse_array<SoundManager> &managers)
+static size_t getSoundManager(sparse_array<SoundManager> &managers)
 {
     for (auto &&[index, manager] : indexed_zipper(managers))
         return index;
-    return -1;
+    throw std::out_of_range("Cannot find sound");
 }
 
-void add_sound(std::string path, sparse_array<SoundManager> &sound)
+static void add_sound(std::string path, sparse_array<SoundManager> &sound)
 {
-    size_t ind = getSoundManager(sound);
+    size_t ind = 0;
+    try {
+        ind = getSoundManager(sound);
+    } catch (std::out_of_range &e) {
+        return;
+    }
     Sound sfx = LoadSound("./gui/ressources/Audio/lazer.wav");
     sound[ind]->sounds.push_back(sfx);
 };
@@ -249,6 +252,8 @@ void handle_shoot_inputs(
 
     for (auto &&[ind, weapon] : indexed_zipper(weapons)) {
         size_t owner_id = static_cast<size_t>(weapon->owner_id);
+        if (!positions[owner_id])
+            break;
         if (IsKeyDown(KEY_SPACE)) {
             weapon->IsShooting = true;
             weapon->current_charge +=
@@ -261,14 +266,15 @@ void handle_shoot_inputs(
                         (float) sizes[owner_id]->size_X,
                     positions[owner_id]->pos_Y +
                         (float) sizes[owner_id]->size_Y / 2),
-                weapon->current_charge, colors[owner_id]->color_id);
+                weapon->current_charge, colors[owner_id]->color_id,
+                Tag::Player);
             r.currentCmd.mutex.lock();
             r.currentCmd.cmd.setAttack(weapons[ind]->current_charge);
             r.currentCmd.mutex.unlock();
+            weapons[ind]->current_charge = 1.;
             add_sound(
                 "./gui/ressources/Audio/lazer.wav",
                 r.get_components<SoundManager>());
-            weapons[ind]->current_charge = 1.;
         }
         break;
     }
@@ -320,10 +326,41 @@ void killDeadEntities(Registry &r, sparse_array<NetworkedEntity> &entities)
                 return ent.id == entities[index]->id;
             });
         if (finded == net_ents.end()) {
-            std::cout << "netent: " << net_ents[0].id << " "
-                      << entities[index]->id << std::endl;
             r.kill_entity(index);
             std::cout << "killing entity " << index << std::endl;
+        }
+    }
+}
+
+static void insertProjectileShooter(
+    Registry &r, sparse_array<Boss> &bosses,
+    sparse_array<ProjectileShooter> &shooters, NetEnt &ent)
+{
+    auto size = bosses.size();
+    size_t boss_index = -1;
+    for (size_t index = 0; index != size; ++index) {
+        if (bosses[index]) {
+            boss_index = index;
+            break;
+        }
+    }
+    if (boss_index == -1)
+        throw std::runtime_error("Failed to insert a projectileShooter to boss, "
+                             "the boss is not found");
+    if (shooters[boss_index]) {
+        shooters[boss_index]->shotCount = ent.dir.x;
+    } else {
+        auto &shooter = r.emplace_component<ProjectileShooter>(
+            boss_index, std::chrono::milliseconds(500));
+        shooter->shotCount = ent.dir.x; // hardcoded
+        auto radius = 80;
+        for (int i = 0; i <= 12; i++) {
+            double angle =
+                2 * std::numbers::pi * i / 12 + shooter->shotCount * 45;
+            double x = std::cos(angle) * radius;
+            double y = std::sin(angle) * radius;
+            shooter->infos.push_back(ProjectileInfo(
+                Position(x, y), Direction(std::cos(angle) / 3, std::sin(angle) / 3)));
         }
     }
 }
@@ -332,7 +369,8 @@ void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
     sparse_array<NetworkedEntity> &entities, sparse_array<Speed> &speeds,
     sparse_array<Current_Player> &currents, sparse_array<Size> &sizes,
-    sparse_array<Player> &players)
+    sparse_array<Player> &players, sparse_array<Boss> &bosses,
+    sparse_array<ProjectileShooter> &shooters)
 {
     auto &net_ents = r.netEnts.ents;
     Factory factory(r);
@@ -340,7 +378,6 @@ void updateWithSnapshots(
     r.netEnts.mutex.lock();
     if (!r.netEnts.ents.empty())
         killDeadEntities(r, entities);
-    // std::cout << "r.netEnts size: " << r.netEnts.ents.size() << std::endl;
     for (auto it = net_ents.begin(); it != net_ents.end(); ++it) {
         auto &net = *it;
         auto finded = std::find_if(
@@ -352,8 +389,6 @@ void updateWithSnapshots(
             });
         if (finded != entities.end())
             continue;
-        std::cout << "id: " << net.id << std::endl;
-        auto pos = Position(net.pos.x, net.pos.y);
         factory.create_netent(net.type, net);
         it = net_ents.erase(it);
         if (it == net_ents.end())
@@ -372,6 +407,10 @@ void updateWithSnapshots(
                 });
             if (finded == net_ents.end())
                 continue;
+            if (bosses[i] && finded->type == EntityType::ProjectileShooter) {
+                insertProjectileShooter(r, bosses, shooters, *finded);
+                continue;
+            }
             if (current && std::abs(finded->pos.x - pos.value().pos_X) < 30.0 &&
                 std::abs(finded->pos.y - pos.value().pos_Y) <
                     30.0) // doesn't rollback if the server pos is close enough
@@ -383,7 +422,7 @@ void updateWithSnapshots(
                     Position(
                         pos->pos_X + (float) size->size_X,
                         pos->pos_Y + (float) size->size_Y / 2),
-                    finded->attackState, player->color_id);
+                    finded->attackState, player->color_id, Tag::Player);
                 // pour le moment le tir ne marche qu'avec les players
                 // vu que create_ammo demande un color_id
             }
@@ -412,8 +451,10 @@ void update_score_text(
     sparse_array<ScoreText> &scoreTexts, sparse_array<Text> &texts)
 {
     for (auto &&[scoreText, text] : zipper(scoreTexts, texts)) {
-        text->text =
-            std::to_string(scores[static_cast<size_t>(scoreText->from)]->score);
+        if (scores[static_cast<size_t>(scoreText->from)]) {
+			text->text =
+				std::to_string(scores[static_cast<size_t>(scoreText->from)]->score);
+        }
     }
 }
 
@@ -422,9 +463,6 @@ void update_charge_rect(
     sparse_array<ChargeRect> &chargeRects, sparse_array<Rect> &rects)
 {
     for (auto &&[chargeRect, rect] : zipper(chargeRects, rects)) {
-        std::cout
-            << weapons[static_cast<size_t>(chargeRect->from)]->current_charge
-            << std::endl;
         rect->rect.width =
             (weapons[static_cast<size_t>(chargeRect->from)]->current_charge -
              1) *
