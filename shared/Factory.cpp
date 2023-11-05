@@ -435,7 +435,7 @@ Factory::create_boss_projectile(Position pos, Direction diro, size_t net_id)
     _reg.emplace_component<Health>(entity, 1);
     // _reg.emplace_component<Tags>(entity, false, true, false, false, false,
     // true, false, true);
-    _reg.emplace_component<Colision>(entity, Tag::Enemy);
+    _reg.emplace_component<Colision>(entity, Tag::Damages);
     return entity;
 }
 
@@ -466,6 +466,7 @@ const Entity Factory::create_boss(Position pos, size_t net_id)
     _reg.emplace_component<Damages>(new_entity, 1);
     _reg.emplace_component<Boss>(new_entity);
     _reg.emplace_component<Couleur>(new_entity, 0);
+    _reg.emplace_component<Colision>(new_entity, Tag::Enemy);
 #ifdef SERVER
     auto &shooter = _reg.add_component<ProjectileShooter>(
         new_entity, std::move(proj_shooter));

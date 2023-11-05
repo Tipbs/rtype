@@ -111,10 +111,10 @@ void damages(
     // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
     // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
     // HP." << std::endl;
-#ifdef SERVER
     if (healt[i2]->health <= 0)
         r.kill_entity(r.entity_from_index(i2));
-#endif
+    if (healt[i1] && healt[i1]->health <= 0)
+        r.kill_entity(r.entity_from_index(i1));
 }
 
 static void
