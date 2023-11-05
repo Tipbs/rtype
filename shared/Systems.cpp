@@ -67,6 +67,18 @@ void kill_outside_entities(
     }
 }
 
+void stopAtCenter(
+	Registry &r, sparse_array<Boss> &boss,
+	sparse_array<Position> &positions,
+	sparse_array<Direction> &directions)
+{
+    for (auto&& [_, pos, dir] : zipper(boss, positions, directions)) {
+        if (pos->pos_X <= 1280 / 2. - 50.) {
+            dir->dir_X = 0;
+        }
+    }
+}
+
 void block_player_in_map(
     Registry &r, sparse_array<Player> &players,
     sparse_array<Position> &positions, sparse_array<Direction> &directions,
@@ -222,8 +234,7 @@ void spawn_enemy(
             auto &boss = bossCount[index];
             if (!(boss))
                 continue;
-            float randomNumber = rand() % (580);
-            Position pos = {1280, randomNumber};
+            Position pos = {1280, 580 / 2.};
             if (boss->isLastBossAlive == false && boss->leftToSpawn > 0) {
                 boss->isLastBossAlive = true;
                 boss->leftToSpawn--;

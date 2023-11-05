@@ -74,7 +74,6 @@ void do_animation(
         } else if (
             now > (sprite->time_since_last_anim +
                    sprite->animation_delay)) {
-            std::cout << "aaaaaaaaaaaaaaa\n";
             sprite->sprite.x += sprite->width_padding;
             sprite->time_since_last_anim = now;
         }

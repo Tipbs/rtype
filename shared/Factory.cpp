@@ -40,6 +40,7 @@ void Factory::add_systems()
     _reg.add_system<Direction, Speed, Position, Size, Weapon, Player>(
         synchronize);
 #endif
+    _reg.add_system<Boss, Position, Direction>(stopAtCenter);
     _reg.add_system<SpawnGrace>(update_grace);
     _reg.add_system<
         Position, Size, SpawnGrace, Damages, Health, Colision, Point, Score>(
@@ -441,7 +442,7 @@ const Entity Factory::create_boss(Position pos, size_t net_id)
     Entity const new_entity = _reg.spawn_entity();
     Size Size(98, 100);
     Speed speedo(300);
-    Direction diro(0, 0);
+    Direction diro(-0.2, 0);
     SpawnGrace gra(std::chrono::seconds(1));
     ProjectileShooter proj_shooter(std::chrono::milliseconds(500));
 #ifndef SERVER
