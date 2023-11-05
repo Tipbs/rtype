@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+#include <functional>
 #include <map>
 #include <vector>
 #include <raylib.h>
@@ -108,6 +110,32 @@ struct ChargeRect {
         : from(from), maxWidth(maxWidth) {};
 };
 
+struct MenuFields {
+    std::size_t nb_fields = 4;
+    std::size_t actual_field = 0;
+    bool mouseOnText = false;
+};
+
+struct CustomText {
+    std::string str = "";
+    Font font =
+        LoadFontEx("gui/ressources/Fonts/Summer_Dream_Sans.ttf", 200, 0, 250);
+    Texture texture = LoadTexture("gui/ressources/Sprites/text_background.png");
+    std::size_t index = 0;
+    ssize_t current = 0;
+
+    CustomText(const std::string &string, std::size_t idx)
+        : str(string), index(idx) {};
+};
+
+struct CanBeSelected {
+    bool isSelected = false;
+    std::function<void()> function;
+
+    CanBeSelected(bool isSelectedByDefault, std::function<void()> func)
+        : isSelected(isSelectedByDefault), function(func) {};
+};
+
 struct GameOverBool {
     Entity from;
     bool state;
@@ -116,8 +144,7 @@ struct GameOverBool {
 };
 
 struct Button {
-    void (*func)();
-    Button(void (*funct)()) {
-        func = funct;
-    };
+    std::function<void()> func;
+    
+    Button(std::function<void()> funct) : func(funct) {};
 };

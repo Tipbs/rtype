@@ -155,14 +155,15 @@ void udp_client::fetch_player_id()
     std::osyncstream(std::cout) << "player id: " << _player_id.id << "\n";
 }
 
-udp_client::udp_client(
-    boost::asio::io_context &svc, const std::string &ip,
-    const std::string &port, Registry &reg)
+udp_client::udp_client(boost::asio::io_context &svc, Registry &reg)
     : _reg(reg), _socket(svc), _svc(svc), timer(svc)
+{}
+
+void udp_client::connect(const std::string &ip, const std::string &port)
 {
     _socket.open(udp::v4());
     _player_id.id = -1;
-    udp::resolver resolver(svc);
+    udp::resolver resolver(_svc);
     udp::resolver::query query(boost::asio::ip::udp::v4(), ip, port);
     udp::resolver::iterator iter = resolver.resolve(query);
     _remote_point = *iter;

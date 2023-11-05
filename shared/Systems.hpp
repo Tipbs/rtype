@@ -28,6 +28,9 @@ void spawn_enemy(
 void kill_outside_entities(
     Registry &r, sparse_array<Position> &pos,
     sparse_array<Colision> &colisions);
+void kill_outside_entities(
+    Registry &r, sparse_array<Position> &pos,
+    sparse_array<Colision> &colisions);
 void enemyAlwaysShoot(
     Registry &r, sparse_array<AlwaysShoot> &always_shoot,
     sparse_array<Position> &positions, sparse_array<Size> &sizes);
@@ -39,8 +42,9 @@ void block_player_in_map(
     Registry &r, sparse_array<Player> &players,
     sparse_array<Position> &positions, sparse_array<Direction> &sizes,
     sparse_array<Size> &directions);
-void kill_outside_entities(
-    Registry &r, sparse_array<Position> &pos,
-    sparse_array<Colision> &colisions);
+void stopAtCenter(
+    Registry &r, sparse_array<Boss> &boss, sparse_array<Position> &positions,
+    sparse_array<Direction> &directions);
+void clear_entities(Registry &r, sparse_array<Position> &positions);
 void gameOverTester(Registry &r, sparse_array<Colision> &col,
     sparse_array<Health> &healths, sparse_array<GameOverState> &state);

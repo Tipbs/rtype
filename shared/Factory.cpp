@@ -4,6 +4,7 @@
 #include <numbers>
 #include <math.h>
 #include <stdlib.h> /* srand, rand */
+#include "Client.hpp"
 #include "Component.hpp"
 #include "Entity.hpp"
 #include "NetEnt.hpp"
@@ -17,6 +18,8 @@
 #include "../server/include/ServerSystems.hpp"
 #endif
 
+void create_sounds(Registry &reg);
+
 void Factory::register_components()
 {
     _reg.register_components<
@@ -24,13 +27,16 @@ void Factory::register_components()
         Sprite, InputField, Rectangle,
         // HUD,
         Rect, Color, Text, ScoreText, ChargeRect, MusicComponent, SoundManager,
+        // Game Over
         GameOverBool, Button,
         
+        // Menu
+        MenuFields, CustomText, CanBeSelected,
 #endif
         Player, Weapon, Current_Player, Position, Damages, Size, Health, Speed,
         Direction, SpawnGrace, NetworkedEntity, Animation, Couleur,
         ProjectileShooter, Score, Backgrounds, AlwaysShoot, EnemyCount,
-        BossCount, Colision, Point, GameOverState>();
+        BossCount, Colision, Point, GameOverState, Boss>();
 }
 
 void Factory::add_systems()
@@ -42,10 +48,15 @@ void Factory::add_systems()
     _reg.add_system<Direction, Speed, Position, Size, Weapon, Player>(
         synchronize);
 #endif
+    _reg.add_system<Boss, Position, Direction>(stopAtCenter);
     _reg.add_system<SpawnGrace>(update_grace);
     _reg.add_system<
         Position, Size, SpawnGrace, Damages, Health, Colision, Point, Score>(
         colision);
+    _reg.add_system<Player, Position, Direction, Size>(block_player_in_map);
+    _reg.add_system<Position, Colision>(kill_outside_entities);
+    _reg.add_system<ProjectileShooter, Position, Size, Player>(
+        shootProjectiles);
     _reg.add_system<
         Position, Speed, Direction
 #ifdef SERVER
@@ -53,16 +64,20 @@ void Factory::add_systems()
         Player
 #endif
         >(move);
-    _reg.add_system<Player, Position, Direction, Size>(block_player_in_map);
-    _reg.add_system<Position, Colision>(kill_outside_entities);
 #ifdef SERVER
+    _reg.add_system<
+        Position, Speed, Weapon, NetworkedEntity, Direction, ProjectileShooter>(
+        extract);
+    _reg.add_system<Player, Direction>(resetPlayersDir);
     _reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
-    _reg.add_system<ProjectileShooter, Position, Size, Player>(
-        shootProjectiles);
-#endif
-#ifndef SERVER
-    _reg.add_system<Position, Sprite, Rectangle, InputField, Rect, Color, Text>(
-        display);
+    _reg.add_system<
+        Position, Speed, Weapon, NetworkedEntity, Direction, ProjectileShooter>(
+        extract);
+    _reg.add_system<Player, Direction>(resetPlayersDir);
+#else
+    _reg.add_system<
+        Position, Sprite, Rectangle, InputField, Rect, Color, Text, MenuFields,
+        CustomText, CanBeSelected>(display);
     _reg.add_system<Direction, Current_Player, Sprite, Speed, Couleur>(
         handle_dir_inputs);
     _reg.add_system<Couleur, Size, Weapon, Position>(handle_shoot_inputs);
@@ -72,24 +87,26 @@ void Factory::add_systems()
     _reg.add_system<Sprite, Couleur, Weapon, Current_Player>(do_ship_animation);
     _reg.add_system<Position, Size, Backgrounds>(make_infinite_background);
     _reg.add_system<
-        Position, NetworkedEntity, Speed, Current_Player, Size, Player>(
-        updateWithSnapshots);
+        Position, NetworkedEntity, Speed, Current_Player, Size, Player, Boss,
+        ProjectileShooter>(updateWithSnapshots);
     // _reg.add_system<Weapon, Couleur, HUD>(
     //     updateHUD);
     _reg.add_system<Score, ScoreText, Text>(update_score_text);
     _reg.add_system<Weapon, ChargeRect, Rect>(update_charge_rect);
     _reg.add_system<Color, GameOverBool, GameOverState>(update_game_over_state);
-    // _reg.add_system<MusicComponent>(handle_music);
+    _reg.add_system<MusicComponent>(handle_music);
     _reg.add_system<SoundManager>(play_sound);
     _reg.add_system<Colision, Health, GameOverState>(gameOverTester);
-#else
-    _reg.add_system<Position, Speed, Weapon, NetworkedEntity, Direction>(
-        extract);
-    _reg.add_system<Player, Direction>(resetPlayersDir);
+    _reg.add_system<MenuFields, Rectangle, CustomText>(handle_menu_inputs);
+    _reg.add_system<CustomText, Position, CanBeSelected>(selectable_text);
 #endif
 }
 
 Factory::Factory(Registry &reg) : _reg(reg) {}
+
+#ifndef SERVER
+void QuitGame() { CloseWindow(); }
+#endif
 
 const Entity
 Factory::create_background(const int ScreenWidth, const int ScreenHeight)
@@ -159,9 +176,9 @@ const Entity Factory::create_player(Position pos, size_t net_id)
 
     _reg.emplace_component<Player>(new_entity);
     _reg.emplace_component<Position>(new_entity, pos);
-    _reg.emplace_component<Size>(new_entity, 83, 43);
+    _reg.emplace_component<Size>(new_entity, 61, 32);
 #ifndef SERVER
-    _reg.emplace_component<Sprite>(new_entity, path.c_str(), 83, 43, 2, 5);
+    _reg.emplace_component<Sprite>(new_entity, path.c_str(), 61, 32, 2, 5);
 #endif
     _reg.emplace_component<Speed>(new_entity, 300);
 
@@ -170,7 +187,7 @@ const Entity Factory::create_player(Position pos, size_t net_id)
     _reg.emplace_component<Animation>(new_entity);
     _reg.emplace_component<Couleur>(new_entity, 0);
     _reg.emplace_component<Score>(new_entity, 0);
-    _reg.emplace_component<Health>(new_entity, 5);
+    _reg.emplace_component<Health>(new_entity, 10);
     _reg.emplace_component<Damages>(new_entity, 1);
     _reg.emplace_component<Colision>(new_entity, Tag::Player);
     _reg.emplace_component<NetworkedEntity>(
@@ -428,20 +445,13 @@ const Entity Factory::create_game_state()
     return gameState;
 }
 
-void test_button_retry()
-{
-    std::cout << "\033[1;31m" << "\n\n\nOn va à la fonc\n\n\n" << "\033[1;0m" << std::endl;
-}
-
-#ifndef SERVER
 void button_quit()
 {
     CloseWindow();
 }
-#endif
 
 void Factory::create_game_over_hud(
-    const int ScreenWidth, const int ScreenHeight, Entity gamestate)
+    const int ScreenWidth, const int ScreenHeight, Entity gamestate, udp_client &net_client, const std::string &ip, const std::string &port)
 {
 
     int button_width = ScreenWidth / 5;
@@ -473,7 +483,7 @@ void Factory::create_game_over_hud(
     _reg.emplace_component<Rect>(
         buttonMenu, false, Rectangle{(float)1 * button_width, (float)4 * button_height, (float)button_width, (float)button_height});
     _reg.emplace_component<Color>(buttonMenu, Color{ 20, 20, 20, 0 });
-    _reg.emplace_component<Button>(buttonMenu, test_button_retry);
+    _reg.emplace_component<Button>(buttonMenu, [&]() {create_menu(net_client, ip, port, ScreenWidth, ScreenHeight);});
 
     Entity const buttonQuit = _reg.spawn_entity();
     _reg.emplace_component<Rect>(
@@ -521,24 +531,22 @@ Factory::create_boss_projectile(Position pos, Direction diro, size_t net_id)
 #endif
     _reg.emplace_component<Speed>(entity, 200);
     _reg.add_component(entity, std::move(diro));
-    _reg.emplace_component<Damages>(entity, 20);
+    _reg.emplace_component<Damages>(entity, 1);
     _reg.emplace_component<Health>(entity, 1);
     // _reg.emplace_component<Tags>(entity, false, true, false, false, false,
     // true, false, true);
-    _reg.emplace_component<Colision>(entity, Tag::Enemy);
-    _reg.emplace_component<NetworkedEntity>(entity, 1, EntityType::Projectile);
+    _reg.emplace_component<Colision>(entity, Tag::Enemy, Tag::Damages);
     return entity;
 }
 
 const Entity Factory::create_boss(Position pos, size_t net_id)
 {
-    std::cout << "create boss: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n";
     Entity const new_entity = _reg.spawn_entity();
     Size Size(98, 100);
     Speed speedo(300);
-    Direction diro(0, 0);
+    Direction diro(-0.2, 0);
     SpawnGrace gra(std::chrono::seconds(1));
-    ProjectileShooter proj_shooter(std::chrono::milliseconds(350));
+    ProjectileShooter proj_shooter(std::chrono::milliseconds(2000));
 #ifndef SERVER
     std::string path = "./gui/ressources/Sprites/boss.png";
     Sprite sprite(path.c_str(), 97, 102, 10, 1);
@@ -554,8 +562,12 @@ const Entity Factory::create_boss(Position pos, size_t net_id)
     // _reg.emplace_component<AlwaysShoot>(
     //     new_entity, std::chrono::milliseconds(750));
     _reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
-    _reg.emplace_component<Health>(new_entity, 1000);
+    _reg.emplace_component<Health>(new_entity, 200);
     _reg.emplace_component<Damages>(new_entity, 1);
+    _reg.emplace_component<Boss>(new_entity);
+    _reg.emplace_component<Couleur>(new_entity, 0);
+    _reg.emplace_component<Colision>(new_entity, Tag::Enemy);
+#ifdef SERVER
     auto &shooter = _reg.add_component<ProjectileShooter>(
         new_entity, std::move(proj_shooter));
     auto radius = 80;
@@ -566,6 +578,7 @@ const Entity Factory::create_boss(Position pos, size_t net_id)
         shooter->infos.push_back(ProjectileInfo(
             Position(x, y), Direction(cos(angle) / 3, sin(angle) / 3)));
     }
+#endif
     _reg.emplace_component<NetworkedEntity>(
         new_entity, net_id, EntityType::Boss);
 
@@ -590,8 +603,6 @@ const Entity Factory::create_netent(EntityType type, NetEnt &net_ent)
         if (type == pair.first)
             return pair.second(this, pos, net_id);
     switch (type) {
-        case EntityType::Projectile:
-            return create_boss_projectile(pos, dir, net_id);
         case EntityType::Ammo:
             return create_ammo(pos, 1.0, 1, net_id, Tag::Enemy, dir);
         default:
@@ -628,5 +639,60 @@ void Factory::create_sounds(Registry &reg)
     reg.emplace_component<SoundManager>(sounds);
     reg.emplace_component<MusicComponent>(
         sounds, "./gui/ressources/Audio/battle_ost.mp3", MusicFx::Battle);
+}
+
+void Factory::create_menu(
+    udp_client &net_client, const std::string &ip, const std::string &port,
+    const int &ScreenWidth, const int &ScreenHeight)
+{
+    _reg.kill_all_entities();
+    create_background(ScreenWidth, ScreenHeight);
+    for (auto &i : (std::pair<std::string, std::size_t>[]) {
+             {"PLAY", 0},
+             {"OPTIONS", 1},
+             {"EXIT", 2},
+         }) {
+        Entity const text = _reg.spawn_entity();
+        _reg.emplace_component<CustomText>(text, i.first, i.second);
+        _reg.emplace_component<Position>(
+            text, 1280.f / 2, 200 + 150 * i.second);
+        switch (i.second) {
+        case 0:
+            _reg.emplace_component<CanBeSelected>(text, i.second == 0,[&](){create_game(net_client, ip, port, ScreenWidth, ScreenHeight);});
+            break;
+        case 1:
+            _reg.emplace_component<CanBeSelected>(text, i.second == 0,[&](){});
+            break;
+        case 2:
+            _reg.emplace_component<CanBeSelected>(text, i.second == 0,[&](){QuitGame();});
+            break;
+        }
+    }
+
+    Entity const menuFields = _reg.spawn_entity();
+    _reg.emplace_component<MenuFields>(menuFields);
+    _reg.emplace_component<Rectangle>(
+        menuFields, ScreenWidth / 2.0f - 200, 180, 400, 50);
+}
+
+void Factory::create_game(
+    udp_client &net_client, const std::string &ip, const std::string &port,
+    const int &ScreenWidth, const int &ScreenHeight)
+{
+    _reg.kill_all_entities();
+    create_background(ScreenWidth, ScreenHeight);
+    net_client.connect(ip, port);
+    auto net_player_info = net_client.get_player_id();
+    create_points(Position(200, 200), 1, 10);
+    Entity player = create_player(net_player_info.pos, net_player_info.id);
+    _reg.emplace_component<Current_Player>(player);
+    std::cout << "player pos id: " << net_player_info.id << std::endl;
+    std::cout << "player pos x: " << net_player_info.pos.x << std::endl;
+    std::cout << "player pos y: " << net_player_info.pos.y << std::endl;
+    Entity weapon = create_weapon(player);
+    Entity gamestate = create_game_state();
+    create_game_over_hud(ScreenWidth, ScreenHeight, gamestate, net_client, ip, port);
+    create_hud(ScreenWidth, ScreenHeight, player, weapon);
+    // create_sounds(_reg);
 }
 #endif

@@ -16,6 +16,18 @@ void Registry::kill_entity(Entity const &e)
         _erase_funcs[arr.first](std::ref(*this), e);
 }
 
+void Registry::kill_all_entities()
+{
+    for (const auto &[key, _] : _components_arrays) {
+        std::cout << "test1" << std::endl;
+        for (int i = 0; i < _maxId; i++) {
+            std::cout << i << std::endl;
+            _erase_funcs[key](std::ref(*this), i);
+        }
+    }
+    _maxId = 0;
+}
+
 void Registry::run_systems()
 {
     for (auto &system : _systems)
