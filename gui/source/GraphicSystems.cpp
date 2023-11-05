@@ -351,9 +351,10 @@ void update_game_over_state(
     Registry &r, sparse_array<Color> &col,
     sparse_array<GameOverBool> &GraphicBool, sparse_array<GameOverState> &SentBool)
 {
-    for (auto &&[color, sent, received] : zipper(col, SentBool, GraphicBool)) {
-        color->a = 150 *
-            (SentBool[static_cast<size_t>(received->from)]->isItOver);
+    for (auto &&[ind, color, sent, received] : indexed_zipper(col, SentBool, GraphicBool)) {
+        color->a = (85 * SentBool[static_cast<size_t>(received->from)]->isItOver); //85 is the opacity of the red square (85/255)
+        col[ind + 1]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver); //85 is the opacity of the red square (85/255)
+        col[ind + 2]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver); //85 is the opacity of the red square (85/255)
     }
 }
 

@@ -432,9 +432,20 @@ void Factory::create_game_over_hud(
 {
     Entity const gameOverLayer = _reg.spawn_entity();
     _reg.add_component<GameOverBool>(gameOverLayer, std::move(gamestate));
+    _reg.emplace_component<GameOverState>(gameOverLayer, false);
     _reg.emplace_component<Rect>(
         gameOverLayer, false, Rectangle{0, 0, (float)ScreenWidth, (float)ScreenHeight});
     _reg.emplace_component<Color>(gameOverLayer, Color{ 230, 41, 55, 0 });
+
+    Entity const gameOverTextBorder = _reg.spawn_entity();
+    _reg.emplace_component<Text>(gameOverTextBorder, "You Died", 64);
+    _reg.emplace_component<Position>(gameOverTextBorder, (ScreenWidth - MeasureText("You Died", 64)) / 2, ScreenHeight / 3);
+    _reg.emplace_component<Color>(gameOverTextBorder, Color{ 230, 230, 230, 255 });
+
+    Entity const gameOverText = _reg.spawn_entity();
+    _reg.emplace_component<Text>(gameOverText, "You Died", 64);
+    _reg.emplace_component<Position>(gameOverText, ((ScreenWidth - MeasureText("You Died", 64)) / 2) - 2, ScreenHeight / 3 - 1);
+    _reg.emplace_component<Color>(gameOverText, Color{ 20, 20, 20, 255 });
 
 }
 
