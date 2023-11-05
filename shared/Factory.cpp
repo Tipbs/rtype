@@ -373,56 +373,61 @@ void Factory::create_hud(
 
     float textWidth = MeasureText("Charge : ", 32);
     float Side_Bar = PosWidth + textWidth + (SizWidth / 2.);
-
-    Entity const hudPlay2Rect = _reg.spawn_entity();
     double rectLifeWidth = (SizWidth / 2 + textWidth) * multiplier;
-    _reg.emplace_component<LifeRect>(hudPlay2Rect, std::move(scoreFrom), std::move(rectLifeWidth));
-    _reg.emplace_component<Rect>(
-        hudPlay2Rect, false,
-        Rectangle {
-            Side_Bar, PosHeight, (SizWidth - Side_Bar) * multiplier,
-            SizHeight / 3});
-    _reg.emplace_component<Color>(hudPlay2Rect, play2color);
 
-    Entity const hudPlay2RectLines = _reg.spawn_entity();
-    _reg.emplace_component<Rect>(
-        hudPlay2RectLines, true,
-        Rectangle {Side_Bar, PosHeight, (SizWidth - Side_Bar), SizHeight / 3});
-    _reg.emplace_component<Color>(hudPlay2RectLines, WHITE);
+    // Entity const hudPlay2Rect = _reg.spawn_entity();
+    // _reg.emplace_component<LifeRect>(hudPlay2Rect, std::move(scoreFrom), std::move(rectLifeWidth));
+    // _reg.emplace_component<Rect>(
+    //     hudPlay2Rect, false,
+    //     Rectangle {
+    //         Side_Bar, PosHeight, (SizWidth - Side_Bar) * multiplier,
+    //         SizHeight / 3});
+    // _reg.emplace_component<Color>(hudPlay2Rect, play2color);
+
+    // Entity const hudPlay2RectLines = _reg.spawn_entity();
+    // _reg.emplace_component<Rect>(
+    //     hudPlay2RectLines, true,
+    //     Rectangle {Side_Bar, PosHeight, (SizWidth - Side_Bar), SizHeight / 3});
+    // _reg.emplace_component<Color>(hudPlay2RectLines, WHITE);
 
     Entity const hudPlay3Rect = _reg.spawn_entity();
     _reg.emplace_component<LifeRect>(hudPlay3Rect, std::move(scoreFrom), std::move(rectLifeWidth));
     _reg.emplace_component<Rect>(
         hudPlay3Rect, false,
         Rectangle {
-            Side_Bar, PosHeight + (SizHeight / 3),
-            (SizWidth - Side_Bar) * multiplier, SizHeight / 3});
-    _reg.emplace_component<Color>(hudPlay3Rect, play3color);
+            Side_Bar, PosHeight + (SizHeight / 4),
+            (SizWidth - Side_Bar) * multiplier, SizHeight / 2});
+    _reg.emplace_component<Color>(hudPlay3Rect, GREEN);
+
+    Entity const hudPlay3Text = _reg.spawn_entity();
+    _reg.emplace_component<Text>(hudPlay3Text, "HP", SizHeight / 2);
+    _reg.emplace_component<Position>(hudPlay3Text, Side_Bar + 3, PosHeight + (SizHeight / 4));
+    _reg.emplace_component<Color>(hudPlay3Text, WHITE);
 
     Entity const hudPlay3RectLines = _reg.spawn_entity();
     _reg.emplace_component<Rect>(
         hudPlay3RectLines, true,
         Rectangle {
-            Side_Bar, PosHeight + (SizHeight / 3), (SizWidth - Side_Bar),
-            SizHeight / 3});
+            Side_Bar, PosHeight + (SizHeight / 4), (SizWidth - Side_Bar),
+            SizHeight / 2});
     _reg.emplace_component<Color>(hudPlay3RectLines, WHITE);
 
-    Entity const hudPlay4Rect = _reg.spawn_entity();
-    _reg.emplace_component<LifeRect>(hudPlay4Rect, std::move(scoreFrom), std::move(rectLifeWidth));
-    _reg.emplace_component<Rect>(
-        hudPlay4Rect, false,
-        Rectangle {
-            Side_Bar, PosHeight + 2 * (SizHeight / 3),
-            (SizWidth - Side_Bar) * multiplier, SizHeight / 3});
-    _reg.emplace_component<Color>(hudPlay4Rect, play4color);
+    // Entity const hudPlay4Rect = _reg.spawn_entity();
+    // _reg.emplace_component<LifeRect>(hudPlay4Rect, std::move(scoreFrom), std::move(rectLifeWidth));
+    // _reg.emplace_component<Rect>(
+    //     hudPlay4Rect, false,
+    //     Rectangle {
+    //         Side_Bar, PosHeight + 2 * (SizHeight / 3),
+    //         (SizWidth - Side_Bar) * multiplier, SizHeight / 3});
+    // _reg.emplace_component<Color>(hudPlay4Rect, play4color);
 
-    Entity const hudPlay4RectLines = _reg.spawn_entity();
-    _reg.emplace_component<Rect>(
-        hudPlay4RectLines, true,
-        Rectangle {
-            Side_Bar, PosHeight + 2 * (SizHeight / 3), (SizWidth - Side_Bar),
-            SizHeight / 3});
-    _reg.emplace_component<Color>(hudPlay4RectLines, WHITE);
+    // Entity const hudPlay4RectLines = _reg.spawn_entity();
+    // _reg.emplace_component<Rect>(
+    //     hudPlay4RectLines, true,
+    //     Rectangle {
+    //         Side_Bar, PosHeight + 2 * (SizHeight / 3), (SizWidth - Side_Bar),
+    //         SizHeight / 3});
+    // _reg.emplace_component<Color>(hudPlay4RectLines, WHITE);
 
     Entity const ChargeText = _reg.spawn_entity();
     _reg.emplace_component<Text>(ChargeText, "Charge : ", 32);
