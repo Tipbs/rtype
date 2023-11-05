@@ -55,7 +55,7 @@ struct Size {
 };
 
 struct Health {
-    int health = 1;
+    double health = 1;
     Health(int x) : health(x) {};
 };
 

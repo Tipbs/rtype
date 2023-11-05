@@ -23,6 +23,11 @@ cd build && cmake .. --preset=conan-release
 cd .. && cmake --build --preset conan-release
 ```
 
+### Documentation
+
+- Networking : [RFC](https://github.com/Tipbs/rtype/blob/main/RFC.md)
+- ECS : [Framework documentation](https://github.com/Tipbs/rtype/blob/main/docs/ecs/src/SUMMARY.md)
+
 ### Code Formatting
 
 The project use clang format and github actions for code quality,

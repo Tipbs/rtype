@@ -561,6 +561,17 @@ void update_game_over_state(
     }
 }
 
+void update_life_rect(
+    Registry &r, sparse_array<Health> &health,
+    sparse_array<LifeRect> &lifeRects, sparse_array<Rect> &rects)
+{
+    for (auto &&[lifeRect, rect] : zipper(lifeRects, rects)) {
+        rect->rect.width =
+            (health[static_cast<size_t>(lifeRect->from)]->health) / 10 *
+            lifeRect->maxWidth;
+    }
+}
+
 void play_sound(Registry &r, sparse_array<SoundManager> &sounds)
 {
     for (auto &&[sound] : zipper(sounds)) {
