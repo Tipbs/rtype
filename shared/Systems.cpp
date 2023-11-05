@@ -126,14 +126,14 @@ void damages(
 
     std::cout << "damages" << std::endl;
     if (dama[i1])
-        healt[i2]->health -= dama[i1]->damages;
-        // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
-        // dama[i2]->damages << " damages. He now have " << healt[i1]->health <<
-        // " HP." << std::endl;
-#ifdef SERVER
+		healt[i2]->health -= dama[i1]->damages;
+    // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
+    // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
+    // HP." << std::endl;
     if (healt[i2]->health <= 0)
         r.kill_entity(r.entity_from_index(i2));
-#endif
+    if (healt[i1] && healt[i1]->health <= 0)
+        r.kill_entity(r.entity_from_index(i1));
 }
 
 static void
@@ -326,6 +326,8 @@ static void updateBossProjectiles(
     // shoot the closest player
     Position bossPos(600, 300);
     size_t closest_player = getClosestPlayerToBoss(pos, players, bossPos);
+    if (closest_player == -1)
+        return;
     Position &player_pos = *pos[closest_player];
     Direction dir_to_player = Direction(
         player_pos.pos_X - bossPos.pos_X, player_pos.pos_Y - bossPos.pos_Y);
@@ -333,8 +335,9 @@ static void updateBossProjectiles(
         std::pow(dir_to_player.dir_X, 2) + std::pow(dir_to_player.dir_Y, 2));
     dir_to_player.dir_X /= dir_vec_len;
     dir_to_player.dir_Y /= dir_vec_len;
-    if (!shooter.infos.empty())
+    if (!shooter.infos.empty()) {
         shooter.infos.pop_back(); // remove the last shot on closest player
+    }
     shooter.infos.push_back(ProjectileInfo(Position(0, 0), dir_to_player));
 }
 

@@ -26,7 +26,12 @@ void synchronize(
         const auto &posi = positions[player_cmds.first];
         const auto &sizo = sizes[player_cmds.first];
         auto &player = players[player_cmds.first];
-        auto &weapon = weapons[getEntityWeapon(weapons, player_cmds.first)];
+        if (!player)
+            continue;
+        auto ent_weapon = getEntityWeapon(weapons, player_cmds.first);
+        if (ent_weapon == -1)
+            continue;
+        auto &weapon = weapons[ent_weapon];
         weapon->IsShooting = false;
         weapon->current_charge = 0;
         for (auto &cmds : player_cmds.second) {

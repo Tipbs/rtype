@@ -169,6 +169,8 @@ void handle_shoot_inputs(
 
     for (auto &&[ind, weapon] : indexed_zipper(weapons)) {
         size_t owner_id = static_cast<size_t>(weapon->owner_id);
+        if (!positions[owner_id])
+            break;
         if (IsKeyDown(KEY_SPACE)) {
             weapon->IsShooting = true;
             weapon->current_charge +=
@@ -372,8 +374,10 @@ void update_score_text(
     sparse_array<ScoreText> &scoreTexts, sparse_array<Text> &texts)
 {
     for (auto &&[scoreText, text] : zipper(scoreTexts, texts)) {
-        text->text =
-            std::to_string(scores[static_cast<size_t>(scoreText->from)]->score);
+        if (scores[static_cast<size_t>(scoreText->from)]) {
+			text->text =
+				std::to_string(scores[static_cast<size_t>(scoreText->from)]->score);
+        }
     }
 }
 
