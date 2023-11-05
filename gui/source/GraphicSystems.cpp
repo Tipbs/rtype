@@ -367,8 +367,10 @@ void update_score_text(
     sparse_array<ScoreText> &scoreTexts, sparse_array<Text> &texts)
 {
     for (auto &&[scoreText, text] : zipper(scoreTexts, texts)) {
-        text->text =
-            std::to_string(scores[static_cast<size_t>(scoreText->from)]->score);
+        if (scores[static_cast<size_t>(scoreText->from)]) {
+			text->text =
+				std::to_string(scores[static_cast<size_t>(scoreText->from)]->score);
+        }
     }
 }
 

@@ -166,7 +166,7 @@ const Entity Factory::create_player(Position pos, size_t net_id)
     _reg.emplace_component<Animation>(new_entity);
     _reg.emplace_component<Couleur>(new_entity, 0);
     _reg.emplace_component<Score>(new_entity, 0);
-    _reg.emplace_component<Health>(new_entity, 1000);
+    _reg.emplace_component<Health>(new_entity, 10);
     _reg.emplace_component<Damages>(new_entity, 1);
     _reg.emplace_component<Colision>(new_entity, Tag::Player);
     _reg.emplace_component<NetworkedEntity>(
@@ -431,7 +431,7 @@ Factory::create_boss_projectile(Position pos, Direction diro, size_t net_id)
 #endif
     _reg.emplace_component<Speed>(entity, 200);
     _reg.add_component(entity, std::move(diro));
-    _reg.emplace_component<Damages>(entity, 20);
+    _reg.emplace_component<Damages>(entity, 1);
     _reg.emplace_component<Health>(entity, 1);
     // _reg.emplace_component<Tags>(entity, false, true, false, false, false,
     // true, false, true);
