@@ -23,8 +23,6 @@ int main(int ac, char **av)
 {
     const int ScreenWidth = 1280;
     const int ScreenHeight = 720;
-    // const int ScreenWidth = 900;
-    // const int ScreenHeight = 1000;
     boost::asio::io_context context;
     Registry reg;
     std::string port = "5000";
@@ -38,9 +36,6 @@ int main(int ac, char **av)
     reg.register_component<CustomText>();
     reg.register_component<CanBeSelected>();
 
-
-    udp_client net_client(context, reg);
-    context.run();
     InitWindow(ScreenWidth, ScreenHeight, "R-Type");
     InitAudioDevice();
     SetTargetFPS(60);
@@ -49,6 +44,7 @@ int main(int ac, char **av)
 
     factory.register_components();
     factory.create_background(ScreenWidth, ScreenHeight);
+    //udp_client net_client(context, reg);
     //auto net_player_info = net_client.get_player_id();
     //Entity player =
     //    factory.create_player(net_player_info.pos, net_player_info.id);
@@ -59,6 +55,9 @@ int main(int ac, char **av)
     //Entity weapon = factory.create_weapon(player);
     //factory.create_hud(ScreenWidth, ScreenHeight, player, weapon);
     //create_sounds(reg);
+    //net_client.connect(ip, port);
+    //factory.start_game(context);
+    factory.create_menu(ScreenWidth, ScreenHeight);
     factory.add_systems();
 
     while (!WindowShouldClose()) {

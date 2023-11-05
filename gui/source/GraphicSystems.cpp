@@ -69,7 +69,7 @@ void display(
         DrawTextureRec(text->texture, {
                 0.f,
                 0.f,
-                500,
+                550,
                 (float) MeasureTextEx(text->font, text->str.c_str(), 100, 1.f).y
             }, {
                 (float) (position->pos_X - (float) MeasureTextEx(text->font, text->str.c_str(), 50, 1.f).x * 1.5),
@@ -78,7 +78,7 @@ void display(
         DrawRectangleLinesEx({
             (float) (position->pos_X - (float) MeasureTextEx(text->font, text->str.c_str(), 50, 1.f).x * 1.5),
             (float) (position->pos_Y - (float) MeasureTextEx(text->font, text->str.c_str(), 50, 1.f).y + 35),
-            500,
+            550,
             MeasureTextEx(text->font, text->str.c_str(), 50, 1.f).y * 2,
         }, 5, selectable->isSelected ? WHITE : DARKBLUE);
         DrawTextEx(text->font, text->str.c_str(),
@@ -134,6 +134,9 @@ void selectable_text(
     for (auto &&[text, position, selectable]: zipper(texts, positions, selectables)) {
         if (tmp == text->index) {
             selectable->isSelected = true;
+        }
+        if (IsKeyPressed(KEY_SPACE) && selectable->isSelected) {
+            selectable->function();
         }
     }
 }

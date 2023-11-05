@@ -131,7 +131,8 @@ struct CustomText {
 
 struct CanBeSelected {
     bool isSelected = false;
+    std::function<void()> function;
 
-    CanBeSelected(bool isSelectedByDefault):
-        isSelected(isSelectedByDefault) {};
+    CanBeSelected(bool isSelectedByDefault, std::function<void()> func)
+        : isSelected(isSelectedByDefault), function(func) {};
 };
