@@ -26,7 +26,12 @@ void synchronize(
         const auto &posi = positions[player_cmds.first];
         const auto &sizo = sizes[player_cmds.first];
         auto &player = players[player_cmds.first];
-        auto &weapon = weapons[getEntityWeapon(weapons, player_cmds.first)];
+        if (!player)
+            continue;
+        auto ent_weapon = getEntityWeapon(weapons, player_cmds.first);
+        if (ent_weapon == -1)
+            continue;
+        auto &weapon = weapons[ent_weapon];
         weapon->IsShooting = false;
         weapon->current_charge = 0;
         for (auto &cmds : player_cmds.second) {
@@ -37,7 +42,7 @@ void synchronize(
                     Position(
                         posi->pos_X + (float) sizo->size_X,
                         posi->pos_Y + (float) sizo->size_Y / 2),
-                    cmds.attackScale, player->color_id);
+                    cmds.attackScale, player->color_id, Tag::Player);
                 weapon->IsShooting = cmds.attacking;
                 weapon->current_charge = cmds.attackScale;
             }
@@ -48,9 +53,20 @@ void synchronize(
 void extract(
     Registry &reg, sparse_array<Position> &positions,
     sparse_array<Speed> &speeds, sparse_array<Weapon> &weapons,
-    sparse_array<NetworkedEntity> &ents, sparse_array<Direction> &directions)
+    sparse_array<NetworkedEntity> &ents, sparse_array<Direction> &directions,
+    sparse_array<ProjectileShooter> &shooters)
 {
-    for (auto &&[ind, pos, ent_id, dir] : indexed_zipper(positions, ents, directions)) {
+    if (reg.gameState != 1) {
+        NetEnt tmp;
+        if (reg.gameState == 2)
+            tmp.type = EntityType::Win;
+        if (reg.gameState == 3)
+            tmp.type = EntityType::Lose;
+        reg._netent.push_back(tmp);
+        return;
+    }
+    for (auto &&[ind, pos, ent_id, dir] :
+         indexed_zipper(positions, ents, directions)) {
         NetEnt tmp;
         tmp.type = ents[ind]->_type;
         tmp.id = ind;
@@ -62,6 +78,13 @@ void extract(
             auto &weapon = weapons[weapon_ind];
             tmp.attacking = weapon->IsShooting;
             tmp.attackState = weapon->current_charge;
+        }
+        if (shooters[ind]) {
+            NetEnt shooter_net;
+            shooter_net.id = ind;
+            shooter_net.type = EntityType::ProjectileShooter;
+            shooter_net.dir.x = shooters[ind]->shotCount;
+            reg._netent.push_back(shooter_net);
         }
         reg._netent.push_back(tmp);
     }
@@ -87,10 +110,13 @@ void kill_zord(
         if (net->_type == EntityType::Boss && hp->health <= 0) {
             std::cout << "killing BOSS\n";
             r.kill_entity(ind);
-            for (auto &&[bossCount] : zipper(bosses))
+            for (auto &&[bossCount] : zipper(bosses)) {
+                bossCount->leftAlive--;
                 bossCount->isLastBossAlive = false;
+            }
         }
-        if (net->_type == EntityType::Enemy && pos->pos_X < 0) {
+        if (net->_type == EntityType::Enemy &&
+            (pos->pos_X < 0 || hp->health <= 0)) {
             for (auto &&[enemy] : zipper(enemyCount))
                 enemy->leftAlive--;
             std::cout << "killing zorg\n";

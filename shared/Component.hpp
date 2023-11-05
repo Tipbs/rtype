@@ -1,18 +1,18 @@
 #pragma once
 
+#include <bitset>
 #include <string>
 #include <utility>
-#include <chrono>
 #include <vector>
 #include "Entity.hpp"
 #include "NetEnt.hpp"
 #include "Utils.hpp"
 
 #ifdef SERVER
-	float GetFrameTime();
-	void ResetFrameTime();
+float GetFrameTime();
+void ResetFrameTime();
 #else
-	#include <raylib.h>
+#include <raylib.h>
 #endif // !SERVER
 
 std::chrono::steady_clock::time_point GetTimePoint();
@@ -31,62 +31,70 @@ struct NetworkedEntity {
 };
 
 struct Position {
-	double pos_X = 0;
-	double pos_Y = 0;
+    double pos_X = 0;
+    double pos_Y = 0;
+
     Position operator+(Position &pos)
-	{
-		return Position(pos_X + pos.pos_X, pos_Y + pos.pos_Y);
-	};
-	Position(double x = 0, double y = 0): pos_X(x), pos_Y(y) {};
-	Position(Utils::Vec2 vec): pos_X(vec.x), pos_Y(vec.y) {};
+    {
+        return Position(pos_X + pos.pos_X, pos_Y + pos.pos_Y);
+    };
+
+    Position(double x = 0, double y = 0) : pos_X(x), pos_Y(y) {};
+    Position(Utils::Vec2 vec) : pos_X(vec.x), pos_Y(vec.y) {};
 };
 
 struct Damages {
-	int damages = 0;
-	Damages(int x): damages(x) {};
+    int damages = 0;
+    Damages(int x) : damages(x) {};
 };
 
 struct Size {
-	int size_X = 1;
-	int size_Y = 1;
-	Size(int x, int y): size_X(x), size_Y(y) {};
+    int size_X = 1;
+    int size_Y = 1;
+    Size(int x, int y) : size_X(x), size_Y(y) {};
 };
 
 struct Health {
-	int health = 1;
-	Health(int x): health(x) {};
+    double health = 1;
+    Health(int x) : health(x) {};
 };
 
 struct Speed {
-	double speed = 0;
-	Speed(double x): speed(x) {};
+    double speed = 0;
+    Speed(double x) : speed(x) {};
 };
 
 struct Direction {
-	double dir_X = 0;
-	double dir_Y = 0;
-	Direction(double x, double y): dir_X(x), dir_Y(y) {};
+    double dir_X = 0;
+    double dir_Y = 0;
+    Direction(double x, double y) : dir_X(x), dir_Y(y) {};
 };
 
 struct SpawnGrace {
-	std::chrono::duration<float> time;
-	std::chrono::steady_clock::time_point creation_time;
-	SpawnGrace(std::chrono::duration<float> x, std::chrono::steady_clock::time_point y): time(x), creation_time(y) {};
-	SpawnGrace(std::chrono::duration<float> timer): time(timer) {
-		creation_time = GetTimePoint();
-	};
+    std::chrono::duration<float> time;
+    std::chrono::steady_clock::time_point creation_time;
+    SpawnGrace(
+        std::chrono::duration<float> x, std::chrono::steady_clock::time_point y)
+        : time(x), creation_time(y) {};
+
+    SpawnGrace(std::chrono::duration<float> timer) : time(timer)
+    {
+        creation_time = GetTimePoint();
+    };
 };
 
 struct Weapon {
     int type = 1;
-    Size size = Size(1,1);
+    Size size = Size(1, 1);
     double attack_speed = 1.;
     Entity owner_id;
     bool IsShooting = false;
-    float current_charge = 0.;
+    float current_charge = 0.1;
 
-    Weapon(Entity owner_id, int type = 1, int ammo_per_sec = 1): type(type), owner_id(owner_id) {
-        size = Size(1,1);
+    Weapon(Entity owner_id, int type = 1, int ammo_per_sec = 1)
+        : type(type), owner_id(owner_id)
+    {
+        size = Size(1, 1);
         attack_speed = 1. / ammo_per_sec;
     };
 };
@@ -101,70 +109,101 @@ struct Animation {
     Animation() {};
 };
 
+struct Boss {};
+
 struct Backgrounds {
-    Backgrounds()
-    {};
+    Backgrounds() {};
 };
 
 struct EnemyCount {
     int leftToSpawn = 0;
     int leftAlive = 0;
-    float timeSinceLastSpawn = 0;
-    float spawnFrequency = 2;
-    EnemyCount(int enemiesNb, int spawnFrequency = 2): leftToSpawn(enemiesNb), spawnFrequency(spawnFrequency) {};
+    std::chrono::steady_clock::time_point timeSinceLastSpawn;
+    std::chrono::steady_clock::duration delay;
+    EnemyCount(int enemiesNb, std::chrono::steady_clock::duration del)
+        : leftToSpawn(enemiesNb), leftAlive(enemiesNb), delay(del) {};
 };
 
 struct BossCount {
     int leftToSpawn = 0;
+    int leftAlive = 0;
     bool isLastBossAlive = false;
-    BossCount(int enemiesNb): leftToSpawn(enemiesNb) {};
+    BossCount(int enemiesNb) : leftToSpawn(enemiesNb), leftAlive(enemiesNb) {};
 };
 
 struct AlwaysShoot {
-	std::chrono::duration<float> delay;
-	std::chrono::steady_clock::time_point last_shoot;
+    std::chrono::duration<float> delay;
+    std::chrono::steady_clock::time_point last_shoot;
 
-	AlwaysShoot(std::chrono::duration<float> duration)
-		: delay(duration), last_shoot(std::chrono::steady_clock::now()) { }
+    AlwaysShoot(std::chrono::duration<float> duration)
+        : delay(duration), last_shoot(std::chrono::steady_clock::now())
+    {}
 };
 
 struct ProjectileInfo {
-	Position offset;
-	Direction dir;
-        ProjectileInfo(Position off, Direction direction)
-            : offset(off), dir(direction) {}
+    Position offset;
+    Direction dir;
+
+    ProjectileInfo(Position off, Direction direction)
+        : offset(off), dir(direction)
+    {}
 };
 
 struct ProjectileShooter {
-	std::vector<ProjectileInfo> infos;
-	std::chrono::duration<float> delay;
-	std::chrono::steady_clock::time_point lastShot;
-	int shotCount = 0;
+    std::vector<ProjectileInfo> infos;
+    std::chrono::duration<float> delay;
+    std::chrono::steady_clock::time_point lastShot;
+    int shotCount = 0;
 
-	ProjectileShooter(std::chrono::duration<float> del) : delay(del), lastShot(std::chrono::steady_clock::now())
-	{}
+    ProjectileShooter(std::chrono::duration<float> del)
+        : delay(del), lastShot(std::chrono::steady_clock::now())
+    {}
 };
 
 struct Score {
     int score;
 
-    Score(int score): score(score) {};
+    Score(int score) : score(score) {};
 };
 
-struct Tags {
-    bool IsFriendly;
-    bool IsHostile;
-    bool IsPlayer;
-    bool IsEnemy;
-    bool IsBoss;
-    bool IsAmmo;
-    bool IsBonus;
-    bool HasCollision;
+struct Point {
+    int point;
 
-    Tags(
-        bool IsFriendly, bool IsHostile, bool IsPlayer, bool IsEnemy,
-        bool IsBoss, bool IsAmmo, bool IsBonus, bool HasCollision)
-        : IsFriendly(IsFriendly), IsHostile(IsHostile), IsPlayer(IsPlayer),
-          IsEnemy(IsEnemy), IsBoss(IsBoss), IsAmmo(IsAmmo), IsBonus(IsBonus),
-          HasCollision(HasCollision) {};
+    Point(double point) : point(point) {};
+};
+
+struct GameOverState {
+    bool isItOver;
+
+    GameOverState(bool over) : isItOver(over) {};
+};
+
+enum class Tag : std::size_t {
+    Player,
+    Enemy,
+    Damages,
+    Collactable
+};
+
+struct Colision : public std::bitset<4> {
+    template<typename... Args>
+    Colision(Args &&...tags)
+    {
+        (..., set(static_cast<size_t>(tags)));
+    }
+
+    template<std::same_as<Tag>... Args>
+    bool check(Args &&...tags) const
+    {
+        return (... && test(static_cast<std::size_t>(tags)));
+    }
+
+    template<std::same_as<Tag>... Args>
+    bool check_only(Args &&...tags) const
+    {
+        std::bitset<4> temp = *this;
+
+        (..., temp.set(static_cast<std::size_t>(tags), false));
+        return temp.none();
+    }
 };

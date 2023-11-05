@@ -1,6 +1,36 @@
 #pragma once
 
+#include <cstddef>
+#include <functional>
+#include <map>
+#include <vector>
+#include <raylib.h>
 #include "../../shared/Component.hpp"
+
+enum MusicFx {
+    Battle,
+    Menu,
+};
+
+struct MusicComponent {
+    std::map<MusicFx, Sound> musics;
+    MusicFx context = Battle;
+
+    MusicComponent(std::vector<std::pair<std::string, MusicFx>> paths)
+    {
+        for (auto &path : paths)
+            musics[path.second] = LoadSound(path.first.c_str());
+    }
+
+    MusicComponent(std::string path, MusicFx type)
+    {
+        musics[type] = LoadSound(path.c_str());
+    }
+};
+
+struct SoundManager {
+    std::vector<Sound> sounds;
+};
 
 struct Sprite {
     Texture2D spritesheet;
@@ -30,7 +60,7 @@ struct Sprite {
 
     Sprite(
         const char *path, int width, int height, double width_multiplier = 1,
-        double height_multiplier = 1)
+        double height_multiplier = 1, int offset_x = 0, int offset_y = 0)
     {
         Image sprit = LoadImage(path);
         ImageResizeNN(
@@ -42,8 +72,8 @@ struct Sprite {
         height_max = height_multiplier;
         sprite.height = (spritesheet.height) / height_multiplier;
         sprite.width = (spritesheet.width) / width_multiplier;
-        sprite.x = 0;
-        sprite.y = 0;
+        sprite.x = offset_x * width;
+        sprite.y = offset_y * width;
     };
 };
 
@@ -78,4 +108,50 @@ struct ChargeRect {
 
     ChargeRect(Entity from, double maxWidth)
         : from(from), maxWidth(maxWidth) {};
+};
+
+struct LifeRect {
+    Entity from;
+    double maxWidth;
+
+    LifeRect(Entity from, double maxWidth) : from(from), maxWidth(maxWidth) {};
+};
+
+struct MenuFields {
+    std::size_t nb_fields = 4;
+    std::size_t actual_field = 0;
+    bool mouseOnText = false;
+};
+
+struct CustomText {
+    std::string str = "";
+    Font font =
+        LoadFontEx("gui/ressources/Fonts/Summer_Dream_Sans.ttf", 200, 0, 250);
+    Texture texture = LoadTexture("gui/ressources/Sprites/text_background.png");
+    std::size_t index = 0;
+    ssize_t current = 0;
+
+    CustomText(const std::string &string, std::size_t idx)
+        : str(string), index(idx) {};
+};
+
+struct CanBeSelected {
+    bool isSelected = false;
+    std::function<void()> function;
+
+    CanBeSelected(bool isSelectedByDefault, std::function<void()> func)
+        : isSelected(isSelectedByDefault), function(func) {};
+};
+
+struct GameOverBool {
+    Entity from;
+    bool state;
+
+    GameOverBool(Entity from) : from(from), state(false) {};
+};
+
+struct Button {
+    std::function<void()> func;
+
+    Button(std::function<void()> funct) : func(funct) {};
 };

@@ -4,8 +4,10 @@ CLANGFORMAT=`which clang-format`
 STYLE="file"
 SERVER_FILES="server/source/*.cpp"
 GUI_FILES="gui/source/*.cpp"
+SHARED_FILES="shared/*.cpp"
 SERVER_HEADERS_FILES="server/include/*.hpp"
 GUI_HEADERS_FILES="gui/include/*.hpp"
+SHARED_HEADERS_FILES="shared/*.hpp"
 
 if [ $# -eq 1 ]; then
     if [[ $1 == "-h" || $1 == "--help" ]]; then
@@ -17,7 +19,7 @@ if [ $# -eq 1 ]; then
         exit 0
     fi
     if [[ $1 == "-f" || $1 == "--fix" ]]; then
-        $CLANGFORMAT -i --style=${STYLE} ${GUI_FILES} ${SERVER_FILES} ${SERVER_HEADERS_FILES} ${GUI_HEADERS_FILES}
+        $CLANGFORMAT -i --style=${STYLE} ${GUI_FILES} ${SERVER_FILES} ${SHARED_FILES} ${SERVER_HEADERS_FILES} ${GUI_HEADERS_FILES} ${SHARED_HEADERS_FILES}
         exit 0
     fi
     exit 1
@@ -32,6 +34,13 @@ echo "Nothing to format"
 
 echo "----- GUI -----"
 $CLANGFORMAT -n --Werror --style=${STYLE} ${GUI_FILES} ${GUI_HEADERS_FILES}
+if [ $? -ne 0 ]; then
+    exit 1
+fi
+echo "Nothing to format"
+
+echo "----- SHARED -----"
+$CLANGFORMAT -n --Werror --style=${STYLE} ${SHARED_FILES} ${SHARED_HEADERS_FILES}
 if [ $? -ne 0 ]; then
     exit 1
 fi
