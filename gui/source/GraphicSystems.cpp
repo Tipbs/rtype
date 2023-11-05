@@ -306,6 +306,8 @@ void updateWithSnapshots(
             });
         if (finded != entities.end())
             continue;
+        if (net.type == EntityType::Win || net.type == EntityType::Lose)
+            continue;
         factory.create_netent(net.type, net);
         it = net_ents.erase(it);
         if (it == net_ents.end())

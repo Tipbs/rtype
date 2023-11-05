@@ -286,7 +286,7 @@ void spawn_enemy(
                 r.gameState = 2;
             if (boss->leftAlive <= 0)
                 r.gameState = 2;
-            std::cout << "OUI\n";
+            std::cout << "YOU WIN\n";
         }
 #endif
     }
