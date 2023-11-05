@@ -61,6 +61,7 @@ void display(
 void do_animation(
     Registry &r, sparse_array<Sprite> &sprites, sparse_array<Couleur> &couleurs)
 {
+    auto now = std::chrono::steady_clock::now();
     for (auto &&[sprite, colors] : zipper(sprites, couleurs)) {
         if (sprite->width_max == 8 &&
             sprite->height_max == 5) { // Ammunition case
@@ -70,14 +71,12 @@ void do_animation(
                          sprite->width_max - 1
                      ? -6 * sprite->width_padding
                      : sprite->width_padding);
-        } else { // Looping sprites frames
-            if (sprite->width_max == 2 && sprite->height_max == 5)
-                continue;
-            sprite->sprite.x =
-                (sprite->sprite.x / sprite->width_padding ==
-                         sprite->width_max - 1
-                     ? 0
-                     : sprite->sprite.x + sprite->width_padding);
+        } else if (
+            now > (sprite->time_since_last_anim +
+                   sprite->animation_delay)) {
+            std::cout << "aaaaaaaaaaaaaaa\n";
+            sprite->sprite.x += sprite->width_padding;
+            sprite->time_since_last_anim = now;
         }
     }
 }
@@ -271,7 +270,8 @@ static void insertProjectileShooter(
         shooter->shotCount = ent.dir.x; // hardcoded
         auto radius = 80;
         for (int i = 0; i <= 12; i++) {
-            double angle = 2 * std::numbers::pi * i / 12 + shooter->shotCount * 45;
+            double angle =
+                2 * std::numbers::pi * i / 12 + shooter->shotCount * 45;
             double x = cos(angle) * radius;
             double y = sin(angle) * radius;
             shooter->infos.push_back(ProjectileInfo(
