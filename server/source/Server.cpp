@@ -156,13 +156,14 @@ void udp_server::send_playerId(
 }
 
 bool areClientsReady(
-    const std::map<boost::asio::ip::udp::endpoint, struct Clients> &clients)
+    const std::map<boost::asio::ip::udp::endpoint, struct Clients> &clients,
+    int _nb_player)
 {
     int i = 0;
     for (auto &clients : clients)
         if (clients.second.isClientConnected == true)
             i++;
-    if (i >= 2)
+    if (i >= _nb_player)
         return true;
     return false;
 }
@@ -200,7 +201,7 @@ void udp_server::wait_for_connexion(std::size_t bytes_transferred)
         clients[_remote_point].isClientConnected = true;
         clients[_remote_point]._timer =
             boost::posix_time::microsec_clock::universal_time();
-        if (areClientsReady(clients) == true && reg.gameState == 0) {
+        if (areClientsReady(clients, _nb_player) == true && reg.gameState == 0) {
             reg.gameState = 1;
             tick = std::thread(&udp_server::handle_tick, this); // Timer thread
             broadcasting = std::thread(
@@ -269,12 +270,13 @@ void udp_server::start_threads()
     send_playerId(p, _remote_point);
 }
 
-udp_server::udp_server(std::size_t port)
+udp_server::udp_server(std::size_t port, int nb_player)
     : _svc(), _socket(_svc, udp::endpoint(udp::v4(), port)), tick_timer(_svc),
       check_timer(_svc), parser(reg)
 {
     Factory factory(reg);
 
+    _nb_player = nb_player;
     factory.register_components();
     factory.add_systems();
 
@@ -295,8 +297,9 @@ udp_server::~udp_server()
 int helper()
 {
     std::osyncstream(std::cout) << "USAGE\n";
-    std::osyncstream(std::cout) << "\t./server <port>\n";
-    std::osyncstream(std::cout) << " port\tport number of the server\n";
+    std::osyncstream(std::cout) << "\t./server <port> <nb_player>\n";
+    std::osyncstream(std::cout) << " port\t\tport number of the server\n";
+    std::osyncstream(std::cout) << " nb_clients\tnumber of clients needed to start the game\n";
     return 0;
 }
 
@@ -304,12 +307,19 @@ int main(int ac, char **av)
 {
     try {
         std::size_t port = 5000;
+        int nb_player = 2;
         if (ac == 2 &&
             (std::string(av[1]) == "-h" || std::string(av[1]) == "--help"))
             return helper();
-        if (ac == 2 && std::stoi(av[1]))
+        if (ac == 3 && std::stoi(av[1]) && std::stoi(av[2])) {
             port = std::stoi(av[1]);
-        udp_server server(port);
+            if (nb_player >= 1 && nb_player <= 4)
+                nb_player = std::stoi(av[2]);
+        } else {
+            if (ac == 2)
+                return helper();
+        }
+        udp_server server(port, nb_player);
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
     }
