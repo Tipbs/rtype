@@ -162,7 +162,7 @@ bool areClientsReady(
     for (auto &clients : clients)
         if (clients.second.isClientConnected == true)
             i++;
-    if (i >= 1)
+    if (i >= 2)
         return true;
     return false;
 }
