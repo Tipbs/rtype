@@ -55,7 +55,7 @@ struct Size {
 };
 
 struct Health {
-    int health = 1;
+    double health = 1;
     Health(int x) : health(x) {};
 };
 
@@ -89,7 +89,7 @@ struct Weapon {
     double attack_speed = 1.;
     Entity owner_id;
     bool IsShooting = false;
-    float current_charge = 0.;
+    float current_charge = 0.1;
 
     Weapon(Entity owner_id, int type = 1, int ammo_per_sec = 1)
         : type(type), owner_id(owner_id)
@@ -109,6 +109,8 @@ struct Animation {
     Animation() {};
 };
 
+struct Boss {};
+
 struct Backgrounds {
     Backgrounds() {};
 };
@@ -119,13 +121,14 @@ struct EnemyCount {
     std::chrono::steady_clock::time_point timeSinceLastSpawn;
     std::chrono::steady_clock::duration delay;
     EnemyCount(int enemiesNb, std::chrono::steady_clock::duration del)
-        : leftToSpawn(enemiesNb), delay(del) {};
+        : leftToSpawn(enemiesNb), leftAlive(enemiesNb), delay(del) {};
 };
 
 struct BossCount {
     int leftToSpawn = 0;
+    int leftAlive = 0;
     bool isLastBossAlive = false;
-    BossCount(int enemiesNb) : leftToSpawn(enemiesNb) {};
+    BossCount(int enemiesNb) : leftToSpawn(enemiesNb), leftAlive(enemiesNb) {};
 };
 
 struct AlwaysShoot {
@@ -167,6 +170,12 @@ struct Point {
     int point;
 
     Point(double point) : point(point) {};
+};
+
+struct GameOverState {
+    bool isItOver;
+
+    GameOverState(bool over) : isItOver(over) {};
 };
 
 enum class Tag : std::size_t {

@@ -4,6 +4,7 @@
 #include "Component.hpp"
 #include "Factory.hpp"
 #include "indexed_zipper.hpp"
+#include "Sparse_array.hpp"
 #include "Utils.hpp"
 #include "zipper.hpp"
 
@@ -49,6 +50,15 @@ void kill_outside_entities(
             r.kill_entity(r.entity_from_index(ind));
 }
 
+void stopAtCenter(
+    Registry &r, sparse_array<Boss> &boss, sparse_array<Position> &positions,
+    sparse_array<Direction> &directions)
+{
+    for (auto &&[_, pos, dir] : zipper(boss, positions, directions))
+        if (pos->pos_X <= 1280 / 2. - 50.)
+            dir->dir_X = 0;
+}
+
 void block_player_in_map(
     Registry &r, sparse_array<Player> &players,
     sparse_array<Position> &positions, sparse_array<Direction> &directions,
@@ -80,25 +90,55 @@ void update_grace(Registry &r, sparse_array<SpawnGrace> &graces)
     }
 }
 
+static size_t getEnemyCount(sparse_array<EnemyCount> &enemyCounts)
+{
+    for (auto &&[index, enemy] : indexed_zipper(enemyCounts))
+        return index;
+    throw std::out_of_range("Cannot find enemies");
+}
+
 void damages(
     Registry &r, sparse_array<Health> &healt, sparse_array<Damages> &dama,
     size_t i1, size_t i2)
 {
+    Factory factory(r);
     std::cout << "damages" << std::endl;
-    healt[i1]->health -= dama[i2]->damages;
+    if (dama[i2])
+        healt[i1]->health -= dama[i2]->damages;
     // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
     // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
     // HP." << std::endl;
-    if (healt[i1]->health <= 0)
+    if (healt[i1]->health <= 0) {
+        sparse_array<Colision> &col = r.get_components<Colision>();
+        sparse_array<Position> &pos = r.get_components<Position>();
+#ifdef SERVER
+        sparse_array<EnemyCount> &enemyCounts = r.get_components<EnemyCount>();
+        size_t ind = 0;
+        try {
+            ind = getEnemyCount(enemyCounts);
+        } catch (std::out_of_range &e) {
+            return;
+        }
+        if (col[i1]->check_only(Tag::Enemy)) {
+            std::cout << "DEAD\n";
+            enemyCounts[ind]->leftAlive--;
+        }
+#endif
+        if (col[i1]->check_only(Tag::Enemy))
+            factory.create_points(pos[i1].value(), 3, 10);
         r.kill_entity(r.entity_from_index(i1));
+    }
 
     std::cout << "damages" << std::endl;
-    healt[i2]->health -= dama[i1]->damages;
+    if (dama[i1])
+        healt[i2]->health -= dama[i1]->damages;
     // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
     // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
     // HP." << std::endl;
     if (healt[i2]->health <= 0)
         r.kill_entity(r.entity_from_index(i2));
+    if (healt[i1] && healt[i1]->health <= 0)
+        r.kill_entity(r.entity_from_index(i1));
 }
 
 static void
@@ -135,7 +175,7 @@ void colision(
         if (!colisions[ind1] || grace[ind1])
             continue;
         for (size_t ind2 = 0; ind2 != pos_size; ++ind2) {
-            if (!colisions[ind2] || grace[ind2])
+            if (!colisions[ind2] || grace[ind2] || !sizes[ind2] || !sizes[ind1])
                 continue;
             if (!colisions[ind1]) // need to recheck because damages may have
                                   // kill the entity
@@ -146,8 +186,6 @@ void colision(
                     positions[ind1].value(), positions[ind2].value(),
                     sizes[ind1].value(), sizes[ind2].value()))
                 continue;
-            std::cout << colisions[ind1]->to_string() << std::endl;
-            std::cout << colisions[ind2]->to_string() << std::endl;
 
             if (colisions[ind1]->check_only(Tag::Player) &&
                 colisions[ind2]->check(Tag::Damages, Tag::Enemy))
@@ -165,13 +203,13 @@ void colision(
                 colisions[ind2]->check_only(Tag::Enemy))
                 damages(r, healths, dmgs, ind1, ind2);
             else if (
-                colisions[ind1]->check(Tag::Player) &&
+                colisions[ind1]->check_only(Tag::Player) &&
                 colisions[ind2]->check(Tag::Collactable))
                 collect_points(
                     r, scores[ind1].value(), points[ind2].value(), ind2);
             else if (
                 colisions[ind1]->check(Tag::Collactable) &&
-                colisions[ind2]->check(Tag::Player))
+                colisions[ind2]->check_only(Tag::Player))
                 collect_points(
                     r, scores[ind2].value(), points[ind1].value(), ind1);
         }
@@ -228,26 +266,33 @@ void spawn_enemy(
                       enemiesCount[index]->delay) {
             enemiesCount[index]->timeSinceLastSpawn =
                 std::chrono::steady_clock::now();
-            enemiesCount[index]->leftAlive++;
             enemiesCount[index]->leftToSpawn--;
             float randomNumber = rand() % (580);
             Position pos = {1280, randomNumber};
 
             f.create_zorg(pos);
         }
-        if (enemiesCount[index]->leftAlive <= 0 &&
-            enemiesCount[index]->leftToSpawn <= 0) {
+        if (enemiesCount[index]->leftToSpawn <= 0) {
             auto &boss = bossCount[index];
             if (!(boss))
                 continue;
-            float randomNumber = rand() % (580);
-            Position pos = {1280, randomNumber};
+            Position pos = {1280, 580 / 2.};
             if (boss->isLastBossAlive == false && boss->leftToSpawn > 0) {
                 boss->isLastBossAlive = true;
                 boss->leftToSpawn--;
                 f.create_boss(pos, 0);
             }
         }
+#ifdef SERVER
+        if (enemiesCount[index]->leftAlive <= 0 &&
+            (r.gameState != 2 && r.gameState != 3)) {
+            auto &boss = bossCount[index];
+            if (!(boss))
+                r.gameState = 2;
+            if (boss->leftAlive <= 0)
+                r.gameState = 2;
+        }
+#endif
     }
 }
 
@@ -285,6 +330,8 @@ static void updateBossProjectiles(
     // shoot the closest player
     Position bossPos(600, 300);
     size_t closest_player = getClosestPlayerToBoss(pos, players, bossPos);
+    if (closest_player == -1)
+        return;
     Position &player_pos = *pos[closest_player];
     Direction dir_to_player = Direction(
         player_pos.pos_X - bossPos.pos_X, player_pos.pos_Y - bossPos.pos_Y);
@@ -321,6 +368,32 @@ void shootProjectiles(
                 *shooters[index], positions,
                 players); // atm called for each shooter but should check if
                           // it's the boss and the phase of the boss (health)
+        }
+    }
+}
+
+bool checkGameOver(
+    Registry &r, sparse_array<Colision> &col, sparse_array<Health> &healths)
+{
+    for (int i = 0; i < col.size(); i++) {
+        if (!col[i] || !col[i]->check_only(Tag::Player))
+            continue;
+        if (!healths[i] || healths[i]->health <= 0)
+            continue;
+        return false;
+    }
+    return true;
+}
+
+void gameOverTester(
+    Registry &r, sparse_array<Colision> &col, sparse_array<Health> &healths,
+    sparse_array<GameOverState> &gameover)
+{
+    if (checkGameOver(r, col, healths)) {
+        for (int i = 0; i < gameover.size(); i++) {
+            if (!gameover[i])
+                continue;
+            gameover[i]->isItOver = true;
         }
     }
 }

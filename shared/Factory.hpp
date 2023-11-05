@@ -1,10 +1,14 @@
 #pragma once
 
 #include <map>
+#include <boost/asio/io_context.hpp>
 #include "Component.hpp"
 #include "Entity.hpp"
 #include "NetEnt.hpp"
 #include "Registry.hpp"
+#ifndef SERVER
+#include "../gui/include/Client.hpp"
+#endif
 
 class Factory {
   public:
@@ -32,9 +36,21 @@ class Factory {
     void create_hud(
         const int ScreenWidth, const int ScreenHeight, Entity scoreFrom,
         Entity chargeFrom);
+    const Entity create_game_state();
+#ifndef SERVER
+    void create_game_over_hud(
+        const int ScreenWidth, const int ScreenHeight, Entity gamestate);
+#endif
     void create_points(Position pos, int nbr, int points);
 #ifndef SERVER
     void create_sounds(Registry &reg);
+    void create_game(
+        udp_client &net_client, const std::string &ip, const std::string &port,
+        const int &ScreenWidth, const int &ScreenHeight);
+    void create_menu(
+        udp_client &net_client, const std::string &ip, const std::string &port,
+        const int &ScreenWidth, const int &ScreenHeight);
+
 #endif
     void register_components();
     void add_systems();

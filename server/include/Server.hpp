@@ -26,7 +26,7 @@ struct Clients {
 
 class udp_server {
   public:
-    udp_server(std::size_t port);
+    udp_server(std::size_t port, int);
     ~udp_server();
 
     void handle_receive(const boost::system::error_code &, std::size_t);
@@ -55,6 +55,7 @@ class udp_server {
 
     std::size_t _port;
     std::size_t netId = 0;
+    int _nb_player;
 
     boost::asio::io_context _svc;
     boost::asio::ip::udp::socket _socket;
