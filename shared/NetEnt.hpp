@@ -38,6 +38,7 @@ class NetEnt {
         ar &id;
         ar &type;
         ar &pos;
+        ar &dir;
         ar &attacking;
         ar &attackState;
     };

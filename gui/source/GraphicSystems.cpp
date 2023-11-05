@@ -264,11 +264,11 @@ static void insertProjectileShooter(
         throw std::exception("Failed to insert a projectileShooter to boss, "
                              "the boss is not found");
     if (shooters[boss_index]) {
-        shooters[boss_index]->shotCount = static_cast<int>(ent.pos.x);
+        shooters[boss_index]->shotCount = ent.dir.x;
     } else {
         auto &shooter = r.emplace_component<ProjectileShooter>(
             boss_index, std::chrono::milliseconds(500));
-        shooter->shotCount = static_cast<int>(ent.pos.x); // hardcoded
+        shooter->shotCount = ent.dir.x; // hardcoded
         auto radius = 80;
         for (int i = 0; i <= 12; i++) {
             double angle = 2 * std::numbers::pi * i / 12 + shooter->shotCount * 45;
