@@ -203,8 +203,8 @@ void udp_server::wait_for_connexion(std::size_t bytes_transferred)
         if (areClientsReady(clients) == true && reg.gameState == 0) {
             reg.gameState = 1;
             tick = std::thread(&udp_server::handle_tick, this); // Timer thread
-            broadcasting =
-                std::thread(&udp_server::start_snapshot, this); // Snapshot thread
+            broadcasting = std::thread(
+                &udp_server::start_snapshot, this); // Snapshot thread
             tick.detach();
             broadcasting.detach();
             start_check();

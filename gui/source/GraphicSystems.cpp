@@ -1,7 +1,7 @@
 #include "GraphicSystems.hpp"
+#include <cmath>
 #include <cstddef>
 #include <cstdlib>
-#include <cmath>
 #include <numbers>
 #include <syncstream>
 #include <raylib.h>
@@ -73,8 +73,7 @@ void do_animation(
                      ? -6 * sprite->width_padding
                      : sprite->width_padding);
         } else if (
-            now > (sprite->time_since_last_anim +
-                   sprite->animation_delay)) {
+            now > (sprite->time_since_last_anim + sprite->animation_delay)) {
             sprite->sprite.x += sprite->width_padding;
             sprite->time_since_last_anim = now;
         }
@@ -261,8 +260,9 @@ static void insertProjectileShooter(
         }
     }
     if (boss_index == -1)
-        throw std::runtime_error("Failed to insert a projectileShooter to boss, "
-                             "the boss is not found");
+        throw std::runtime_error(
+            "Failed to insert a projectileShooter to boss, "
+            "the boss is not found");
     if (shooters[boss_index]) {
         shooters[boss_index]->shotCount = ent.dir.x;
     } else {
@@ -276,7 +276,8 @@ static void insertProjectileShooter(
             double x = std::cos(angle) * radius;
             double y = std::sin(angle) * radius;
             shooter->infos.push_back(ProjectileInfo(
-                Position(x, y), Direction(std::cos(angle) / 3, std::sin(angle) / 3)));
+                Position(x, y),
+                Direction(std::cos(angle) / 3, std::sin(angle) / 3)));
         }
     }
 }

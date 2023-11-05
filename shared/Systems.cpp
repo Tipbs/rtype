@@ -50,15 +50,12 @@ void kill_outside_entities(
 }
 
 void stopAtCenter(
-	Registry &r, sparse_array<Boss> &boss,
-	sparse_array<Position> &positions,
-	sparse_array<Direction> &directions)
+    Registry &r, sparse_array<Boss> &boss, sparse_array<Position> &positions,
+    sparse_array<Direction> &directions)
 {
-    for (auto&& [_, pos, dir] : zipper(boss, positions, directions)) {
-        if (pos->pos_X <= 1280 / 2. - 50.) {
+    for (auto &&[_, pos, dir] : zipper(boss, positions, directions))
+        if (pos->pos_X <= 1280 / 2. - 50.)
             dir->dir_X = 0;
-        }
-    }
 }
 
 void block_player_in_map(
@@ -105,7 +102,7 @@ void damages(
 {
     std::cout << "damages" << std::endl;
     if (dama[i2])
-		healt[i1]->health -= dama[i2]->damages;
+        healt[i1]->health -= dama[i2]->damages;
     // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
     // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
     // HP." << std::endl;
@@ -127,15 +124,15 @@ void damages(
         r.kill_entity(r.entity_from_index(i1));
     }
 
-    std::cout << "damages" << std::endl; if (dama[i1])
-		healt[i2]->health -= dama[i1]->damages;
-    // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
-    // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
-    // HP." << std::endl;
+    std::cout << "damages" << std::endl;
+    if (dama[i1])
+        healt[i2]->health -= dama[i1]->damages;
+        // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
+        // dama[i2]->damages << " damages. He now have " << healt[i1]->health <<
+        // " HP." << std::endl;
 #ifdef SERVER
-    if (healt[i2]->health <= 0) {
+    if (healt[i2]->health <= 0)
         r.kill_entity(r.entity_from_index(i2));
-    }
 #endif
 }
 
@@ -285,9 +282,8 @@ void spawn_enemy(
         if (enemiesCount[index]->leftAlive <= 0 &&
             (r.gameState != 2 && r.gameState != 3)) {
             auto &boss = bossCount[index];
-            if (!(boss)) {
+            if (!(boss))
                 r.gameState = 2;
-            }
             if (boss->leftAlive <= 0)
                 r.gameState = 2;
             std::cout << "OUI\n";

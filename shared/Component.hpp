@@ -121,7 +121,7 @@ struct EnemyCount {
     std::chrono::steady_clock::time_point timeSinceLastSpawn;
     std::chrono::steady_clock::duration delay;
     EnemyCount(int enemiesNb, std::chrono::steady_clock::duration del)
-        : leftToSpawn(enemiesNb), leftAlive(enemiesNb), delay(del){};
+        : leftToSpawn(enemiesNb), leftAlive(enemiesNb), delay(del) {};
 };
 
 struct BossCount {

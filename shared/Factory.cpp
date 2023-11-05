@@ -70,8 +70,8 @@ void Factory::add_systems()
     _reg.add_system<Sprite, Couleur, Weapon, Current_Player>(do_ship_animation);
     _reg.add_system<Position, Size, Backgrounds>(make_infinite_background);
     _reg.add_system<
-        Position, NetworkedEntity, Speed, Current_Player, Size, Player, Boss, ProjectileShooter>(
-        updateWithSnapshots);
+        Position, NetworkedEntity, Speed, Current_Player, Size, Player, Boss,
+        ProjectileShooter>(updateWithSnapshots);
     // _reg.add_system<Weapon, Couleur, HUD>(
     //     updateHUD);
     _reg.add_system<Score, ScoreText, Text>(update_score_text);
@@ -79,7 +79,8 @@ void Factory::add_systems()
     // _reg.add_system<MusicComponent>(handle_music);
     _reg.add_system<SoundManager>(play_sound);
 #else
-    _reg.add_system<Position, Speed, Weapon, NetworkedEntity, Direction, ProjectileShooter>(
+    _reg.add_system<
+        Position, Speed, Weapon, NetworkedEntity, Direction, ProjectileShooter>(
         extract);
     _reg.add_system<Player, Direction>(resetPlayersDir);
 #endif

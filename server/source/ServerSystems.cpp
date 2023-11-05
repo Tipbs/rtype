@@ -112,7 +112,8 @@ void kill_zord(
                 bossCount->isLastBossAlive = false;
             }
         }
-        if (net->_type == EntityType::Enemy && (pos->pos_X < 0 || hp->health <= 0)) {
+        if (net->_type == EntityType::Enemy &&
+            (pos->pos_X < 0 || hp->health <= 0)) {
             for (auto &&[enemy] : zipper(enemyCount))
                 enemy->leftAlive--;
             std::cout << "killing zorg\n";
