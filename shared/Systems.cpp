@@ -3,6 +3,7 @@
 #include <numbers>
 #include "Component.hpp"
 #include "Factory.hpp"
+#include "Sparse_array.hpp"
 #include "indexed_zipper.hpp"
 #include "Utils.hpp"
 #include "zipper.hpp"
@@ -100,6 +101,7 @@ void damages(
     Registry &r, sparse_array<Health> &healt, sparse_array<Damages> &dama,
     size_t i1, size_t i2)
 {
+    Factory factory(r);
     std::cout << "damages" << std::endl;
     if (dama[i2])
         healt[i1]->health -= dama[i2]->damages;
@@ -107,8 +109,9 @@ void damages(
     // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
     // HP." << std::endl;
     if (healt[i1]->health <= 0) {
-#ifdef SERVER
         sparse_array<Colision> &col = r.get_components<Colision>();
+        sparse_array<Position> &pos = r.get_components<Position>();
+#ifdef SERVER
         sparse_array<EnemyCount> &enemyCounts = r.get_components<EnemyCount>();
         size_t ind = 0;
         try {
@@ -121,6 +124,8 @@ void damages(
             enemyCounts[ind]->leftAlive--;
         }
 #endif
+        if (col[i1]->check_only(Tag::Enemy))
+            factory.create_points(pos[i1].value(), 3, 10);
         r.kill_entity(r.entity_from_index(i1));
     }
 
@@ -198,13 +203,13 @@ void colision(
                 colisions[ind2]->check_only(Tag::Enemy))
                 damages(r, healths, dmgs, ind1, ind2);
             else if (
-                colisions[ind1]->check(Tag::Player) &&
+                colisions[ind1]->check_only(Tag::Player) &&
                 colisions[ind2]->check(Tag::Collactable))
                 collect_points(
                     r, scores[ind1].value(), points[ind2].value(), ind2);
             else if (
                 colisions[ind1]->check(Tag::Collactable) &&
-                colisions[ind2]->check(Tag::Player))
+                colisions[ind2]->check_only(Tag::Player))
                 collect_points(
                     r, scores[ind2].value(), points[ind1].value(), ind1);
         }

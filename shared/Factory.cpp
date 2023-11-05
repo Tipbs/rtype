@@ -604,7 +604,6 @@ void Factory::create_game(
     create_background(ScreenWidth, ScreenHeight);
     net_client.connect(ip, port);
     auto net_player_info = net_client.get_player_id();
-    create_points(Position(200, 200), 1, 10);
     Entity player = create_player(net_player_info.pos, net_player_info.id);
     _reg.emplace_component<Current_Player>(player);
     std::cout << "player pos id: " << net_player_info.id << std::endl;
