@@ -49,3 +49,6 @@ void selectable_text(
     Registry &r, sparse_array<CustomText> &texts,
     sparse_array<Position> &positions,
     sparse_array<CanBeSelected> &selectables);
+void update_life_rect(
+    Registry &r, sparse_array<Health> &health,
+    sparse_array<LifeRect> &lifeRects, sparse_array<Rect> &rects);

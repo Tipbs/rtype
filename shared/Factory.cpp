@@ -26,7 +26,7 @@ void Factory::register_components()
 #ifndef SERVER
         Sprite, InputField, Rectangle,
         // HUD,
-        Rect, Color, Text, ScoreText, ChargeRect, MusicComponent, SoundManager,
+        Rect, Color, Text, ScoreText, ChargeRect, MusicComponent, SoundManager, LifeRect,
         // Menu
         MenuFields, CustomText, CanBeSelected,
 #endif
@@ -93,6 +93,7 @@ void Factory::add_systems()
     _reg.add_system<SoundManager>(play_sound);
     _reg.add_system<MenuFields, Rectangle, CustomText>(handle_menu_inputs);
     _reg.add_system<CustomText, Position, CanBeSelected>(selectable_text);
+    _reg.add_system<Health, LifeRect, Rect>(update_life_rect);
 #endif
 }
 
@@ -364,9 +365,12 @@ void Factory::create_hud(
             (SizHeight / 2)});
     _reg.emplace_component<Color>(hudPlay1RectLines, WHITE);
 
-    float Side_Bar = PosWidth + MeasureText("Charge : ", 32) + (SizWidth / 2.);
+    float textWidth = MeasureText("Charge : ", 32);
+    float Side_Bar = PosWidth + textWidth + (SizWidth / 2.);
 
     Entity const hudPlay2Rect = _reg.spawn_entity();
+    double rectLifeWidth = (SizWidth / 2 + textWidth) * multiplier;
+    _reg.emplace_component<LifeRect>(hudPlay2Rect, std::move(scoreFrom), std::move(rectLifeWidth));
     _reg.emplace_component<Rect>(
         hudPlay2Rect, false,
         Rectangle {
@@ -381,6 +385,7 @@ void Factory::create_hud(
     _reg.emplace_component<Color>(hudPlay2RectLines, WHITE);
 
     Entity const hudPlay3Rect = _reg.spawn_entity();
+    _reg.emplace_component<LifeRect>(hudPlay3Rect, std::move(scoreFrom), std::move(rectLifeWidth));
     _reg.emplace_component<Rect>(
         hudPlay3Rect, false,
         Rectangle {
@@ -397,6 +402,7 @@ void Factory::create_hud(
     _reg.emplace_component<Color>(hudPlay3RectLines, WHITE);
 
     Entity const hudPlay4Rect = _reg.spawn_entity();
+    _reg.emplace_component<LifeRect>(hudPlay4Rect, std::move(scoreFrom), std::move(rectLifeWidth));
     _reg.emplace_component<Rect>(
         hudPlay4Rect, false,
         Rectangle {

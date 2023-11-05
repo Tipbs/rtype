@@ -110,6 +110,14 @@ struct ChargeRect {
         : from(from), maxWidth(maxWidth) {};
 };
 
+struct LifeRect {
+    Entity from;
+    double maxWidth;
+
+    LifeRect(Entity from, double maxWidth)
+        : from(from), maxWidth(maxWidth) {};
+};
+
 struct MenuFields {
     std::size_t nb_fields = 4;
     std::size_t actual_field = 0;
