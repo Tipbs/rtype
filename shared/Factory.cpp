@@ -20,7 +20,6 @@
 
 void create_sounds(Registry &reg);
 
-
 void Factory::start_game(boost::asio::io_context &context)
 {
 #ifndef SERVER
@@ -30,8 +29,7 @@ void Factory::start_game(boost::asio::io_context &context)
     context.run();
 
     auto net_player_info = net_client.get_player_id();
-    Entity player =
-        create_player(net_player_info.pos, net_player_info.id);
+    Entity player = create_player(net_player_info.pos, net_player_info.id);
     _reg.emplace_component<Current_Player>(player);
     std::cout << "player pos id: " << net_player_info.id << std::endl;
     std::cout << "player pos x: " << net_player_info.pos.x << std::endl;
@@ -49,17 +47,14 @@ void Factory::register_components()
 #ifndef SERVER
         Sprite, InputField, Rectangle,
         // HUD,
-        Rect,
-        Color,
-        Text,
-        ScoreText,
-        ChargeRect,
-        MusicComponent,
-        SoundManager,
-        MenuFields,
-        CustomText,
-        CanBeSelected,
+        Rect, Color, Text, ScoreText, ChargeRect, MusicComponent, SoundManager,
+        // Menu
+        MenuFields, CustomText, CanBeSelected,
 #endif
+        Player, Weapon, Current_Player, Position, Damages, Size, Health, Speed,
+        Direction, SpawnGrace, NetworkedEntity, Animation, Couleur,
+        ProjectileShooter, Score, Backgrounds, AlwaysShoot, EnemyCount,
+        BossCount, Colision, Point, Boss>();
 }
 
 void Factory::add_systems()
@@ -76,6 +71,10 @@ void Factory::add_systems()
     _reg.add_system<
         Position, Size, SpawnGrace, Damages, Health, Colision, Point, Score>(
         colision);
+    _reg.add_system<Player, Position, Direction, Size>(block_player_in_map);
+    _reg.add_system<Position, Colision>(kill_outside_entities);
+    _reg.add_system<ProjectileShooter, Position, Size, Player>(
+        shootProjectiles);
     _reg.add_system<
         Position, Speed, Direction
 #ifdef SERVER
@@ -83,16 +82,16 @@ void Factory::add_systems()
         Player
 #endif
         >(move);
-    _reg.add_system<Player, Position, Direction, Size>(block_player_in_map);
-    _reg.add_system<Position, Colision>(kill_outside_entities);
-    _reg.add_system<ProjectileShooter, Position, Size, Player>(
-        shootProjectiles);
 #ifdef SERVER
+    _reg.add_system<
+        Position, Speed, Weapon, NetworkedEntity, Direction, ProjectileShooter>(
+        extract);
+    _reg.add_system<Player, Direction>(resetPlayersDir);
     _reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
-#endif
-#ifndef SERVER
-    _reg.add_system<Position, Sprite, Rectangle, InputField, Rect, Color, Text>(
-        display);
+#else
+    _reg.add_system<
+        Position, Sprite, Rectangle, InputField, Rect, Color, Text, MenuFields,
+        CustomText, CanBeSelected>(display);
     _reg.add_system<Direction, Current_Player, Sprite, Speed, Couleur>(
         handle_dir_inputs);
     _reg.add_system<Couleur, Size, Weapon, Position>(handle_shoot_inputs);
@@ -101,8 +100,8 @@ void Factory::add_systems()
     _reg.add_system<Sprite, Couleur, Weapon, Current_Player>(do_ship_animation);
     _reg.add_system<Position, Size, Backgrounds>(make_infinite_background);
     _reg.add_system<
-        Position, NetworkedEntity, Speed, Current_Player, Size, Player, Boss, ProjectileShooter>(
-        updateWithSnapshots);
+        Position, NetworkedEntity, Speed, Current_Player, Size, Player, Boss,
+        ProjectileShooter>(updateWithSnapshots);
     // _reg.add_system<Weapon, Couleur, HUD>(
     //     updateHUD);
     _reg.add_system<Score, ScoreText, Text>(update_score_text);
@@ -111,22 +110,13 @@ void Factory::add_systems()
     _reg.add_system<SoundManager>(play_sound);
     _reg.add_system<MenuFields, Rectangle, CustomText>(handle_menu_inputs);
     _reg.add_system<CustomText, Position, CanBeSelected>(selectable_text);
-
-#else
-    _reg.add_system<Position, Speed, Weapon, NetworkedEntity, Direction, ProjectileShooter>(
-        extract);
-    _reg.add_system<Player, Direction>(resetPlayersDir);
 #endif
 }
 
-Factory::Factory(Registry &reg)
-    : _reg(reg) {}
+Factory::Factory(Registry &reg) : _reg(reg) {}
 
 #ifndef SERVER
-void SquidGame()
-{
-   CloseWindow();
-}
+void SquidGame() { CloseWindow(); }
 #endif
 
 const Entity
@@ -189,8 +179,6 @@ Factory::create_background(const int ScreenWidth, const int ScreenHeight)
     _reg.emplace_component<Backgrounds>(background3);
     return background;
 }
-
-
 
 const Entity Factory::create_player(Position pos, size_t net_id)
 {
@@ -589,16 +577,21 @@ void Factory::create_sounds(Registry &reg)
 void Factory::create_menu(const int ScreenWidth, const int ScreenHeight)
 {
 #ifndef SERVER
-    for (auto &i : (std::pair<std::string, std::size_t>[])
-        { {"PLAY", 0}, {"EXIT", 1}, {"test3", 2}, }) {
+    for (auto &i : (std::pair<std::string, std::size_t>[]) {
+             {"PLAY", 0},
+             {"EXIT", 1},
+             {"test3", 2},
+         }) {
         Entity const text = _reg.spawn_entity();
         _reg.emplace_component<CustomText>(text, i.first, i.second);
-        _reg.emplace_component<Position>(text, 1280.f / 2, 200 + 150 * i.second);
-        _reg.emplace_component<CanBeSelected>(text, i.second == 0);        
+        _reg.emplace_component<Position>(
+            text, 1280.f / 2, 200 + 150 * i.second);
+        _reg.emplace_component<CanBeSelected>(text, i.second == 0);
     }
 
     Entity const menuFields = _reg.spawn_entity();
     _reg.emplace_component<MenuFields>(menuFields);
-    _reg.emplace_component<Rectangle>(menuFields, ScreenWidth / 2.0f - 200, 180, 400, 50);
+    _reg.emplace_component<Rectangle>(
+        menuFields, ScreenWidth / 2.0f - 200, 180, 400, 50);
 #endif
 }

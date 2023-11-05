@@ -4,11 +4,11 @@
 #include "GraphicComponents.hpp"
 
 void display(
-    Registry &r, sparse_array<Position> &positions, sparse_array<Size> &size,
-    sparse_array<Sprite> &sprite, sparse_array<Player> &anim,
-    sparse_array<Rectangle> &rectangles, sparse_array<InputField> &inputFields,
-    sparse_array<Rect> &rect, sparse_array<Color> &col,
-    sparse_array<Text> &text, sparse_array<MenuFields> &menuFields, sparse_array<CustomText> &texts,
+    Registry &r, sparse_array<Position> &positions,
+    sparse_array<Sprite> &sprite, sparse_array<Rectangle> &rectangles,
+    sparse_array<InputField> &inputFields, sparse_array<Rect> &rect,
+    sparse_array<Color> &col, sparse_array<Text> &text,
+    sparse_array<MenuFields> &menuFields, sparse_array<CustomText> &customTexts,
     sparse_array<CanBeSelected> &selectables);
 void handle_dir_inputs(
     Registry &r, sparse_array<Direction> &dir,
@@ -46,5 +46,6 @@ void handle_menu_inputs(
     Registry &r, sparse_array<MenuFields> &menuFields,
     sparse_array<Rectangle> &rectangles, sparse_array<CustomText> &texts);
 void selectable_text(
-    Registry &r, sparse_array<CustomText> &texts, sparse_array<Position> &positions,
+    Registry &r, sparse_array<CustomText> &texts,
+    sparse_array<Position> &positions,
     sparse_array<CanBeSelected> &selectables);

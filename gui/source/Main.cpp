@@ -26,6 +26,7 @@ int main(int ac, char **av)
         port = av[2];
     }
     udp_client net_client(context, reg);
+    net_client.connect(ip, port);
     context.run();
     InitWindow(ScreenWidth, ScreenHeight, "R-Type");
     InitAudioDevice();

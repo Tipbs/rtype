@@ -155,11 +155,9 @@ void udp_client::fetch_player_id()
     std::osyncstream(std::cout) << "player id: " << _player_id.id << "\n";
 }
 
-udp_client::udp_client(
-    boost::asio::io_context &svc, Registry &reg)
-    :  _reg(reg), _socket(svc), _svc(svc), timer(svc)
-{
-}
+udp_client::udp_client(boost::asio::io_context &svc, Registry &reg)
+    : _reg(reg), _socket(svc), _svc(svc), timer(svc)
+{}
 
 void udp_client::connect(const std::string &ip, const std::string &port)
 {
