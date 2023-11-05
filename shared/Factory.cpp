@@ -67,6 +67,10 @@ void Factory::add_systems()
         extract);
     _reg.add_system<Player, Direction>(resetPlayersDir);
     _reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
+    _reg.add_system<
+        Position, Speed, Weapon, NetworkedEntity, Direction, ProjectileShooter>(
+        extract);
+    _reg.add_system<Player, Direction>(resetPlayersDir);
 #else
     _reg.add_system<
         Position, Sprite, Rectangle, InputField, Rect, Color, Text, MenuFields,
@@ -85,7 +89,7 @@ void Factory::add_systems()
     //     updateHUD);
     _reg.add_system<Score, ScoreText, Text>(update_score_text);
     _reg.add_system<Weapon, ChargeRect, Rect>(update_charge_rect);
-    // _reg.add_system<MusicComponent>(handle_music);
+    _reg.add_system<MusicComponent>(handle_music);
     _reg.add_system<SoundManager>(play_sound);
     _reg.add_system<MenuFields, Rectangle, CustomText>(handle_menu_inputs);
     _reg.add_system<CustomText, Position, CanBeSelected>(selectable_text);
@@ -166,9 +170,9 @@ const Entity Factory::create_player(Position pos, size_t net_id)
 
     _reg.emplace_component<Player>(new_entity);
     _reg.emplace_component<Position>(new_entity, pos);
-    _reg.emplace_component<Size>(new_entity, 83, 43);
+    _reg.emplace_component<Size>(new_entity, 61, 32);
 #ifndef SERVER
-    _reg.emplace_component<Sprite>(new_entity, path.c_str(), 83, 43, 2, 5);
+    _reg.emplace_component<Sprite>(new_entity, path.c_str(), 61, 32, 2, 5);
 #endif
     _reg.emplace_component<Speed>(new_entity, 300);
 
@@ -446,7 +450,7 @@ Factory::create_boss_projectile(Position pos, Direction diro, size_t net_id)
     _reg.emplace_component<Health>(entity, 1);
     // _reg.emplace_component<Tags>(entity, false, true, false, false, false,
     // true, false, true);
-    _reg.emplace_component<Colision>(entity, Tag::Damages);
+    _reg.emplace_component<Colision>(entity, Tag::Enemy, Tag::Damages);
     return entity;
 }
 
@@ -457,7 +461,7 @@ const Entity Factory::create_boss(Position pos, size_t net_id)
     Speed speedo(300);
     Direction diro(-0.2, 0);
     SpawnGrace gra(std::chrono::seconds(1));
-    ProjectileShooter proj_shooter(std::chrono::milliseconds(500));
+    ProjectileShooter proj_shooter(std::chrono::milliseconds(2000));
 #ifndef SERVER
     std::string path = "./gui/ressources/Sprites/boss.png";
     Sprite sprite(path.c_str(), 97, 102, 10, 1);

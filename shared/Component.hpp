@@ -121,13 +121,14 @@ struct EnemyCount {
     std::chrono::steady_clock::time_point timeSinceLastSpawn;
     std::chrono::steady_clock::duration delay;
     EnemyCount(int enemiesNb, std::chrono::steady_clock::duration del)
-        : leftToSpawn(enemiesNb), delay(del) {};
+        : leftToSpawn(enemiesNb), leftAlive(enemiesNb), delay(del) {};
 };
 
 struct BossCount {
     int leftToSpawn = 0;
+    int leftAlive = 0;
     bool isLastBossAlive = false;
-    BossCount(int enemiesNb) : leftToSpawn(enemiesNb) {};
+    BossCount(int enemiesNb) : leftToSpawn(enemiesNb), leftAlive(enemiesNb) {};
 };
 
 struct AlwaysShoot {
