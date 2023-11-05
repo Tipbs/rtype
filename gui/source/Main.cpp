@@ -11,6 +11,15 @@
 #include "GraphicComponents.hpp"
 #include "GraphicSystems.hpp"
 
+int helper()
+{
+    std::cout << "USAGE\n";
+    std::cout << "\t./r-type_client <ip> <port>\n";
+    std::cout << " ip\t\tip number of the server\n";
+    std::cout << " port\t\tport number of the server\n";
+    return 0;
+}
+
 int main(int ac, char **av)
 {
     const int ScreenWidth = 1280;
@@ -21,6 +30,9 @@ int main(int ac, char **av)
     Registry reg;
     std::string port = "5000";
     std::string ip = "127.0.0.1";
+    if (ac == 2 &&
+        (std::string(av[1]) == "-h" || std::string(av[1]) == "--help"))
+        return helper();
     if (ac == 3 && std::stoi(av[2])) {
         ip = av[1];
         port = av[2];

@@ -297,7 +297,7 @@ udp_server::~udp_server()
 int helper()
 {
     std::osyncstream(std::cout) << "USAGE\n";
-    std::osyncstream(std::cout) << "\t./server <port> <nb_player>\n";
+    std::osyncstream(std::cout) << "\t./r-type_server <port> <nb_player>\n";
     std::osyncstream(std::cout) << " port\t\tport number of the server\n";
     std::osyncstream(std::cout) << " nb_clients\tnumber of clients needed to start the game\n";
     return 0;
