@@ -50,6 +50,15 @@ void extract(
     sparse_array<Speed> &speeds, sparse_array<Weapon> &weapons,
     sparse_array<NetworkedEntity> &ents, sparse_array<Direction> &directions)
 {
+    if (reg.gameState != 1) {
+        NetEnt tmp;
+        if (reg.gameState == 2)
+            tmp.type = EntityType::Win;
+        if (reg.gameState == 3)
+            tmp.type = EntityType::Lose;
+        reg._netent.push_back(tmp);
+        return;
+    }
     for (auto &&[ind, pos, ent_id, dir] :
          indexed_zipper(positions, ents, directions)) {
         NetEnt tmp;

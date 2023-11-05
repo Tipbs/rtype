@@ -248,6 +248,18 @@ void spawn_enemy(
                 f.create_boss(pos, 0);
             }
         }
+#ifdef SERVER
+        if (enemiesCount[index]->leftAlive <= 0 &&
+            (r.gameState != 2 && r.gameState != 3)) {
+            auto &boss = bossCount[index];
+            if (!(boss)) {
+                r.gameState = 2;
+            }
+            if (boss->leftToSpawn <= 0)
+                r.gameState = 2;
+            std::cout << "OUI\n";
+        }
+#endif
     }
 }
 

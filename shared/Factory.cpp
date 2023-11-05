@@ -503,6 +503,11 @@ const Entity Factory::create_netent(EntityType type, NetEnt &net_ent)
             return create_boss_projectile(pos, dir, net_id);
         case EntityType::Ammo:
             return create_ammo(pos, 1.0, 1, net_id, Tag::Enemy, dir);
+        /*case EntityType::Win:
+            return;
+        case EntityType::Lose:
+            return;
+            */
         default:
             throw std::exception();
     }
