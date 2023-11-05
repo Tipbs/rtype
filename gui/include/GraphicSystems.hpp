@@ -18,6 +18,9 @@ void hadle_text_inputs(
 void handle_shoot_inputs(
     Registry &r, sparse_array<Couleur> &players, sparse_array<Size> &sizes,
     sparse_array<Weapon> &weapons, sparse_array<Position> &positions);
+void handle_click_inputs(
+    Registry &r, sparse_array<GameOverState> &gameover, sparse_array<Button> &buttons,
+    sparse_array<Rect> &rectangles);
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
     sparse_array<NetworkedEntity> &entities, sparse_array<Speed> &speeds,

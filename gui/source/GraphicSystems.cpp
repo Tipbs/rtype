@@ -196,6 +196,39 @@ void handle_shoot_inputs(
     }
 }
 
+void handle_click_inputs(
+    Registry &r, sparse_array<GameOverState> &gameover, sparse_array<Button> &buttons,
+    sparse_array<Rect> &rectangles)
+{
+    for (size_t i = 0; i < gameover.size(); i++) {
+        if (!gameover[i])
+            continue;
+        if (!gameover[i]->isItOver)
+            return;
+    }
+    for (auto &&[button, rectangle] : zipper(buttons, rectangles)) {
+        int mouseX = 0;
+        int mouseY = 0;
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            mouseX = GetMouseX();
+            mouseY = GetMouseY();
+        }
+        if (mouseX < rectangle->rect.x) {
+            continue;
+        }
+        if (mouseX > rectangle->rect.x + rectangle->rect.width) {
+            continue;
+        }
+        if (mouseY < rectangle->rect.y) {
+            continue;
+        }
+        if (mouseY > rectangle->rect.y + rectangle->rect.height) {
+            continue;
+        }
+        button->func();
+    }
+}
+
 void hadle_text_inputs(
     Registry &r, sparse_array<InputField> &inputFields,
     sparse_array<Rectangle> &rectangles)

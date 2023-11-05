@@ -114,3 +114,10 @@ struct GameOverBool {
 
     GameOverBool(Entity from) : from(from), state(false) {};
 };
+
+struct Button {
+    void (*func)();
+    Button(void (*funct)()) {
+        func = funct;
+    };
+};
