@@ -170,6 +170,8 @@ void handle_shoot_inputs(
 
     for (auto &&[ind, weapon] : indexed_zipper(weapons)) {
         size_t owner_id = static_cast<size_t>(weapon->owner_id);
+        if (!positions[owner_id])
+            break;
         if (IsKeyDown(KEY_SPACE)) {
             weapon->IsShooting = true;
             weapon->current_charge +=

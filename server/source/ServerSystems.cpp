@@ -28,7 +28,10 @@ void synchronize(
         auto &player = players[player_cmds.first];
         if (!player)
             continue;
-        auto &weapon = weapons[getEntityWeapon(weapons, player_cmds.first)];
+        auto ent_weapon = getEntityWeapon(weapons, player_cmds.first);
+        if (ent_weapon == -1)
+            continue;
+        auto &weapon = weapons[ent_weapon];
         weapon->IsShooting = false;
         weapon->current_charge = 0;
         for (auto &cmds : player_cmds.second) {

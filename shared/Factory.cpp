@@ -462,7 +462,7 @@ const Entity Factory::create_boss(Position pos, size_t net_id)
     // _reg.emplace_component<AlwaysShoot>(
     //     new_entity, std::chrono::milliseconds(750));
     _reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
-    _reg.emplace_component<Health>(new_entity, 1000);
+    _reg.emplace_component<Health>(new_entity, 200);
     _reg.emplace_component<Damages>(new_entity, 1);
     _reg.emplace_component<Boss>(new_entity);
     _reg.emplace_component<Couleur>(new_entity, 0);
