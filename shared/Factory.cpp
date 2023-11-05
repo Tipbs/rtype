@@ -451,7 +451,7 @@ void button_quit()
 }
 
 void Factory::create_game_over_hud(
-    const int ScreenWidth, const int ScreenHeight, Entity gamestate, udp_client &net_client, const std::string &ip, const std::string &port)
+    const int ScreenWidth, const int ScreenHeight, Entity gamestate)
 {
 
     int button_width = ScreenWidth / 5;
@@ -479,40 +479,40 @@ void Factory::create_game_over_hud(
     _reg.emplace_component<Color>(gameOverText, Color{ 20, 20, 20, 0 });
 
 
-    Entity const buttonMenu = _reg.spawn_entity();
-    _reg.emplace_component<Rect>(
-        buttonMenu, false, Rectangle{(float)1 * button_width, (float)4 * button_height, (float)button_width, (float)button_height});
-    _reg.emplace_component<Color>(buttonMenu, Color{ 20, 20, 20, 0 });
-    _reg.emplace_component<Button>(buttonMenu, [&]() {create_menu(net_client, ip, port, ScreenWidth, ScreenHeight);});
+    // Entity const buttonMenu = _reg.spawn_entity();
+    // _reg.emplace_component<Rect>(
+    //     buttonMenu, false, Rectangle{(float)1 * button_width, (float)4 * button_height, (float)button_width, (float)button_height});
+    // _reg.emplace_component<Color>(buttonMenu, Color{ 20, 20, 20, 0 });
+    // _reg.emplace_component<Button>(buttonMenu, [&]() {create_menu(net_client, ip, port, ScreenWidth, ScreenHeight);});
 
     Entity const buttonQuit = _reg.spawn_entity();
     _reg.emplace_component<Rect>(
-        buttonQuit, false, Rectangle{(float)3 * button_width, (float)4 * button_height, (float)button_width, (float)button_height});
+        buttonQuit, false, Rectangle{(float)2 * button_width, (float)4 * button_height, (float)button_width, (float)button_height});
     _reg.emplace_component<Color>(buttonQuit, Color{ 20, 20, 20, 0 });
     _reg.emplace_component<Button>(buttonQuit, button_quit);
 
 
 
-    Entity const buttonMenuBorder = _reg.spawn_entity();
-    _reg.emplace_component<Rect>(
-        buttonMenuBorder, true, Rectangle{(float)1 * button_width, (float)4 * button_height, (float)button_width, (float)button_height});
-    _reg.emplace_component<Color>(buttonMenuBorder, Color{ 230, 230, 230, 0 });
+    // Entity const buttonMenuBorder = _reg.spawn_entity();
+    // _reg.emplace_component<Rect>(
+    //     buttonMenuBorder, true, Rectangle{(float)1 * button_width, (float)4 * button_height, (float)button_width, (float)button_height});
+    // _reg.emplace_component<Color>(buttonMenuBorder, Color{ 230, 230, 230, 0 });
 
     Entity const buttonQuitBorder = _reg.spawn_entity();
     _reg.emplace_component<Rect>(
-        buttonQuitBorder, true, Rectangle{(float)3 * button_width, (float)4 * button_height, (float)button_width, (float)button_height});
+        buttonQuitBorder, true, Rectangle{(float)2 * button_width, (float)4 * button_height, (float)button_width, (float)button_height});
     _reg.emplace_component<Color>(buttonQuitBorder, Color{ 230, 230, 230, 0 });
 
 
 
-    Entity const RetryText = _reg.spawn_entity();
-    _reg.emplace_component<Text>(RetryText, "Retry", global_font_size);
-    _reg.emplace_component<Position>(RetryText, (button_width + (button_width - MeasureText("Retry", global_font_size)) / 2), 4 * button_height + ((button_height - global_font_size) / 2));
-    _reg.emplace_component<Color>(RetryText, Color{ 230, 230, 230, 0 });
+    // Entity const RetryText = _reg.spawn_entity();
+    // _reg.emplace_component<Text>(RetryText, "Retry", global_font_size);
+    // _reg.emplace_component<Position>(RetryText, (button_width + (button_width - MeasureText("Retry", global_font_size)) / 2), 4 * button_height + ((button_height - global_font_size) / 2));
+    // _reg.emplace_component<Color>(RetryText, Color{ 230, 230, 230, 0 });
 
     Entity const QuitText = _reg.spawn_entity();
     _reg.emplace_component<Text>(QuitText, "Quit", global_font_size);
-    _reg.emplace_component<Position>(QuitText, (3 * button_width + (button_width - MeasureText("Quit", global_font_size)) / 2), 4 * button_height + ((button_height - global_font_size) / 2));
+    _reg.emplace_component<Position>(QuitText, (2 * button_width + (button_width - MeasureText("Quit", global_font_size)) / 2), 4 * button_height + ((button_height - global_font_size) / 2));
     _reg.emplace_component<Color>(QuitText, Color{ 230, 230, 230, 0 });
 }
 
@@ -691,7 +691,7 @@ void Factory::create_game(
     std::cout << "player pos y: " << net_player_info.pos.y << std::endl;
     Entity weapon = create_weapon(player);
     Entity gamestate = create_game_state();
-    create_game_over_hud(ScreenWidth, ScreenHeight, gamestate, net_client, ip, port);
+    create_game_over_hud(ScreenWidth, ScreenHeight, gamestate);
     create_hud(ScreenWidth, ScreenHeight, player, weapon);
     // create_sounds(_reg);
 }
