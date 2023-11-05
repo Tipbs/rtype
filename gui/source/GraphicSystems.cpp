@@ -1,6 +1,7 @@
 #include "GraphicSystems.hpp"
 #include <cstddef>
 #include <cstdlib>
+#include <cmath>
 #include <numbers>
 #include <syncstream>
 #include <raylib.h>
@@ -272,10 +273,10 @@ static void insertProjectileShooter(
         for (int i = 0; i <= 12; i++) {
             double angle =
                 2 * std::numbers::pi * i / 12 + shooter->shotCount * 45;
-            double x = cos(angle) * radius;
-            double y = sin(angle) * radius;
+            double x = std::cos(angle) * radius;
+            double y = std::sin(angle) * radius;
             shooter->infos.push_back(ProjectileInfo(
-                Position(x, y), Direction(cos(angle) / 3, sin(angle) / 3)));
+                Position(x, y), Direction(std::cos(angle) / 3, std::sin(angle) / 3)));
         }
     }
 }
