@@ -181,7 +181,8 @@ void handle_shoot_inputs(
                         (float) sizes[owner_id]->size_X,
                     positions[owner_id]->pos_Y +
                         (float) sizes[owner_id]->size_Y / 2),
-                weapon->current_charge, colors[owner_id]->color_id);
+                weapon->current_charge, colors[owner_id]->color_id,
+                Tag::Player);
             r.currentCmd.mutex.lock();
             r.currentCmd.cmd.setAttack(weapons[ind]->current_charge);
             r.currentCmd.mutex.unlock();
@@ -336,7 +337,7 @@ void updateWithSnapshots(
                     Position(
                         pos->pos_X + (float) size->size_X,
                         pos->pos_Y + (float) size->size_Y / 2),
-                    finded->attackState, player->color_id);
+                    finded->attackState, player->color_id, Tag::Player);
                 // pour le moment le tir ne marche qu'avec les players
                 // vu que create_ammo demande un color_id
             }

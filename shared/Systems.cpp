@@ -35,27 +35,10 @@ void move(
     }
 }
 
-void damages(
-    Registry &r, sparse_array<Health> &healt, sparse_array<Damages> &dama,
-    size_t i1, size_t i2)
-{
-    std::cout << "y a collision\n";
-    if (healt[i1] && dama[i2])
-		healt[i1]->health -= dama[i2]->damages;
-    if (healt[i2] && dama[i1])
-		healt[i2]->health -= dama[i1]->damages;
-#ifdef SERVER
-    if (healt[i1] && healt[i1]->health <= 0) // il ne devrait pas y avoir autant de checks dans damage, à fix todo!
-        r.kill_entity(r.entity_from_index(i1));
-    if (healt[i2] && healt[i2]->health <= 0)
-        r.kill_entity(r.entity_from_index(i2));
-#endif
-}
-
 void kill_outside_entities(
     Registry &r, sparse_array<Position> &pos, sparse_array<Colision> &colisions)
 {
-    for (auto &&[ind, position, colision] : indexed_zipper(pos, colisions)) {
+    for (auto &&[ind, position, colision] : indexed_zipper(pos, colisions))
         if (position->pos_X > 1780)
             r.kill_entity(r.entity_from_index(ind));
         else if (position->pos_X < -500)
@@ -64,7 +47,6 @@ void kill_outside_entities(
             r.kill_entity(r.entity_from_index(ind));
         else if (position->pos_Y < -500)
             r.kill_entity(r.entity_from_index(ind));
-    }
 }
 
 void stopAtCenter(
@@ -105,15 +87,36 @@ void update_grace(Registry &r, sparse_array<SpawnGrace> &graces)
     for (size_t ind = 0; ind != graces_size; ++ind) {
         if (!graces[ind])
             continue;
-        if (graces[ind]->creation_time + graces[ind]->time >= time)
+        if (graces[ind]->creation_time + graces[ind]->time <= time)
             r.remove_component<SpawnGrace>(ind);
     }
+}
+
+void damages(
+    Registry &r, sparse_array<Health> &healt, sparse_array<Damages> &dama,
+    size_t i1, size_t i2)
+{
+    std::cout << "damages" << std::endl;
+    healt[i1]->health -= dama[i2]->damages;
+    // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
+    // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
+    // HP." << std::endl;
+    if (healt[i1]->health <= 0)
+        r.kill_entity(r.entity_from_index(i1));
+
+    std::cout << "damages" << std::endl;
+    healt[i2]->health -= dama[i1]->damages;
+    // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
+    // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
+    // HP." << std::endl;
+    if (healt[i2]->health <= 0)
+        r.kill_entity(r.entity_from_index(i2));
 }
 
 static void
 collect_points(Registry &reg, Score &score, Point &point, Entity pointIndex)
 {
-    std::cout << "dslkfjsldfqkj" << std::endl;
+    std::cout << "collect" << std::endl;
     score.score += point.point;
     reg.kill_entity(pointIndex);
 }
@@ -143,11 +146,11 @@ void colision(
     for (size_t ind1 = 0; ind1 != pos_size; ++ind1) {
         if (!colisions[ind1] || grace[ind1])
             continue;
-        if (!positions[ind1]) // need to recheck because damages may have
-                              // kill the entity
-            continue;
         for (size_t ind2 = 0; ind2 != pos_size; ++ind2) {
             if (!colisions[ind2] || grace[ind2] || !sizes[ind2] || !sizes[ind1])
+                continue;
+            if (!colisions[ind1]) // need to recheck because damages may have
+                                  // kill the entity
                 continue;
             if (ind2 <= ind1)
                 continue;
@@ -155,18 +158,32 @@ void colision(
                     positions[ind1].value(), positions[ind2].value(),
                     sizes[ind1].value(), sizes[ind2].value()))
                 continue;
+            std::cout << colisions[ind1]->to_string() << std::endl;
+            std::cout << colisions[ind2]->to_string() << std::endl;
 
-            if (colisions[ind1]->check(Tag::Damages) ||
-                colisions[ind2]->check(Tag::Damages))
+            if (colisions[ind1]->check_only(Tag::Player) &&
+                colisions[ind2]->check(Tag::Damages, Tag::Enemy))
+                damages(r, healths, dmgs, ind1, ind2);
+            else if (
+                colisions[ind1]->check(Tag::Damages, Tag::Enemy) &&
+                colisions[ind2]->check_only(Tag::Player))
+                damages(r, healths, dmgs, ind1, ind2);
+            else if (
+                colisions[ind1]->check_only(Tag::Enemy) &&
+                colisions[ind2]->check(Tag::Damages, Tag::Player))
+                damages(r, healths, dmgs, ind1, ind2);
+            else if (
+                colisions[ind1]->check(Tag::Damages, Tag::Player) &&
+                colisions[ind2]->check_only(Tag::Enemy))
                 damages(r, healths, dmgs, ind1, ind2);
             else if (
                 colisions[ind1]->check(Tag::Player) &&
-                colisions[ind2]->check(Tag::Point))
+                colisions[ind2]->check(Tag::Collactable))
                 collect_points(
                     r, scores[ind1].value(), points[ind2].value(), ind2);
             else if (
-                colisions[ind2]->check(Tag::Player) &&
-                colisions[ind1]->check(Tag::Point))
+                colisions[ind1]->check(Tag::Collactable) &&
+                colisions[ind2]->check(Tag::Player))
                 collect_points(
                     r, scores[ind2].value(), points[ind1].value(), ind1);
         }
@@ -192,7 +209,7 @@ void enemyAlwaysShoot(
                 Position(
                     pos->pos_X - (size->size_X / 2.),
                     pos->pos_Y + (size->size_Y / 2.)),
-                1.0, 3, 0, Direction(-2, 0));
+                1.0, 3, 0, Tag::Enemy, Direction(-2, 0));
         }
     }
 }

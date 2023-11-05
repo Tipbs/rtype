@@ -45,11 +45,13 @@ void Factory::add_systems()
     _reg.add_system<
         Position, Size, SpawnGrace, Damages, Health, Colision, Point, Score>(
         colision);
-    _reg.add_system<Position, Speed, Direction
-        #ifdef SERVER
-        , Player
-        #endif
-    >(move);
+    _reg.add_system<
+        Position, Speed, Direction
+#ifdef SERVER
+        ,
+        Player
+#endif
+        >(move);
     _reg.add_system<Player, Position, Direction, Size>(block_player_in_map);
     _reg.add_system<Position, Colision>(kill_outside_entities);
     _reg.add_system<ProjectileShooter, Position, Size, Player>(
@@ -74,7 +76,7 @@ void Factory::add_systems()
     //     updateHUD);
     _reg.add_system<Score, ScoreText, Text>(update_score_text);
     _reg.add_system<Weapon, ChargeRect, Rect>(update_charge_rect);
-    _reg.add_system<MusicComponent>(handle_music);
+    // _reg.add_system<MusicComponent>(handle_music);
     _reg.add_system<SoundManager>(play_sound);
 #else
     _reg.add_system<Position, Speed, Weapon, NetworkedEntity, Direction, ProjectileShooter>(
@@ -195,7 +197,7 @@ const Entity Factory::create_enemy(Position pos, size_t net_id)
 }
 
 const Entity Factory::create_ammo(
-    Position pos, float damage_mult, int color_id, Direction diro)
+    Position pos, float damage_mult, int color_id, Tag type, Direction diro)
 {
     Entity const new_entity = _reg.spawn_entity();
     int hitwidth = 120 * (damage_mult / 2);
@@ -216,15 +218,16 @@ const Entity Factory::create_ammo(
     _reg.emplace_component<Health>(new_entity, 1);
     _reg.emplace_component<Animation>(new_entity);
     _reg.emplace_component<Couleur>(new_entity, color_id);
-    _reg.emplace_component<Colision>(new_entity, Tag::Damages, Tag::Ammo);
+    _reg.emplace_component<Colision>(new_entity, Tag::Damages, type);
     return new_entity;
 }
 
 const Entity Factory::create_ammo(
-    Position pos, float damage_mult, int color_id, size_t net_id,
+    Position pos, float damage_mult, int color_id, size_t net_id, Tag type,
     Direction diro)
 {
-    Entity const new_entity = create_ammo(pos, damage_mult, color_id, diro);
+    Entity const new_entity =
+        create_ammo(pos, damage_mult, color_id, type, diro);
 
     _reg.emplace_component<NetworkedEntity>(
         new_entity, net_id, EntityType::Ammo);
@@ -432,8 +435,7 @@ Factory::create_boss_projectile(Position pos, Direction diro, size_t net_id)
     _reg.emplace_component<Health>(entity, 1);
     // _reg.emplace_component<Tags>(entity, false, true, false, false, false,
     // true, false, true);
-    _reg.emplace_component<Colision>(entity, Tag::Ammo);
-    //_reg.emplace_component<NetworkedEntity>(entity, 1, EntityType::Projectile);
+    _reg.emplace_component<Colision>(entity, Tag::Enemy);
     return entity;
 }
 
@@ -501,7 +503,7 @@ const Entity Factory::create_netent(EntityType type, NetEnt &net_ent)
             return pair.second(this, pos, net_id);
     switch (type) {
         case EntityType::Ammo:
-            return create_ammo(pos, 1.0, 1, net_id, dir);
+            return create_ammo(pos, 1.0, 1, net_id, Tag::Enemy, dir);
         default:
             throw std::exception();
     }
@@ -519,7 +521,7 @@ void Factory::create_points(Position pos, int nbr, int points)
 
         _reg.emplace_component<Position>(entity, x, y);
         _reg.emplace_component<Size>(entity, width, height);
-        _reg.emplace_component<Colision>(entity, Tag::Point);
+        _reg.emplace_component<Colision>(entity, Tag::Collactable);
         _reg.add_component<Point>(entity, points);
 #ifndef SERVER
         _reg.emplace_component<Sprite>(
@@ -528,7 +530,6 @@ void Factory::create_points(Position pos, int nbr, int points)
 #endif
     }
 }
-
 
 #ifndef SERVER
 void Factory::create_sounds(Registry &reg)
@@ -539,4 +540,3 @@ void Factory::create_sounds(Registry &reg)
         sounds, "./gui/ressources/Audio/battle_ost.mp3", MusicFx::Battle);
 }
 #endif
-
