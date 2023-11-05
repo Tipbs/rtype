@@ -26,8 +26,6 @@ int main(int ac, char **av)
         port = av[2];
     }
     udp_client net_client(context, reg);
-    net_client.connect(ip, port);
-    context.run();
     InitWindow(ScreenWidth, ScreenHeight, "R-Type");
     InitAudioDevice();
     SetTargetFPS(60);
@@ -36,17 +34,8 @@ int main(int ac, char **av)
 
     factory.register_components();
     factory.create_background(ScreenWidth, ScreenHeight);
-    auto net_player_info = net_client.get_player_id();
-    // factory.create_points(Position(200, 200), 1, 10);
-    Entity player =
-        factory.create_player(net_player_info.pos, net_player_info.id);
-    reg.emplace_component<Current_Player>(player);
-    std::cout << "player pos id: " << net_player_info.id << std::endl;
-    std::cout << "player pos x: " << net_player_info.pos.x << std::endl;
-    std::cout << "player pos y: " << net_player_info.pos.y << std::endl;
-    Entity weapon = factory.create_weapon(player);
-    factory.create_hud(ScreenWidth, ScreenHeight, player, weapon);
-    // factory.create_sounds(reg);
+    factory.create_game(net_client, ip, port, ScreenWidth, ScreenHeight);
+
     factory.add_systems();
 
     while (!WindowShouldClose()) {

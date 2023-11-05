@@ -6,6 +6,9 @@
 #include "Entity.hpp"
 #include "NetEnt.hpp"
 #include "Registry.hpp"
+#ifndef SERVER
+    #include "../gui/include/Client.hpp"
+#endif
 
 class Factory {
   public:
@@ -36,11 +39,11 @@ class Factory {
     void create_points(Position pos, int nbr, int points);
 #ifndef SERVER
     void create_sounds(Registry &reg);
+    void create_game(udp_client &net_client, const std::string &ip, const std::string &port, const int ScreenWidth, const int ScreenHeight);
 #endif
     void register_components();
     void add_systems();
     void create_menu(const int ScreenWidth, const int ScreenHeight);
-    void start_game(boost::asio::io_context &context);
 
   private:
     Registry &_reg;

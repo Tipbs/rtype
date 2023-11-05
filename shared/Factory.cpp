@@ -20,27 +20,6 @@
 
 void create_sounds(Registry &reg);
 
-void Factory::start_game(boost::asio::io_context &context)
-{
-#ifndef SERVER
-    const int ScreenWidth = 1280;
-    const int ScreenHeight = 720;
-    udp_client net_client(context, _reg);
-    context.run();
-
-    auto net_player_info = net_client.get_player_id();
-    Entity player = create_player(net_player_info.pos, net_player_info.id);
-    _reg.emplace_component<Current_Player>(player);
-    std::cout << "player pos id: " << net_player_info.id << std::endl;
-    std::cout << "player pos x: " << net_player_info.pos.x << std::endl;
-    std::cout << "player pos y: " << net_player_info.pos.y << std::endl;
-    Entity weapon = create_weapon(player);
-    create_hud(ScreenWidth, ScreenHeight, player, weapon);
-    create_sounds(_reg);
-    net_client.connect("127.0.0.1", "5000");
-#endif
-}
-
 void Factory::register_components()
 {
     _reg.register_components<
@@ -595,3 +574,21 @@ void Factory::create_menu(const int ScreenWidth, const int ScreenHeight)
         menuFields, ScreenWidth / 2.0f - 200, 180, 400, 50);
 #endif
 }
+
+#ifndef SERVER
+void Factory::create_game(udp_client &net_client, const std::string &ip, const std::string &port, const int ScreenWidth, const int ScreenHeight)
+{
+    net_client.connect(ip, port);
+    auto net_player_info = net_client.get_player_id();
+    create_points(Position(200, 200), 1, 10);
+    Entity player =
+        create_player(net_player_info.pos, net_player_info.id);
+    _reg.emplace_component<Current_Player>(player);
+    std::cout << "player pos id: " << net_player_info.id << std::endl;
+    std::cout << "player pos x: " << net_player_info.pos.x << std::endl;
+    std::cout << "player pos y: " << net_player_info.pos.y << std::endl;
+    Entity weapon = create_weapon(player);
+    create_hud(ScreenWidth, ScreenHeight, player, weapon);
+    // create_sounds(_reg);
+}
+#endif
