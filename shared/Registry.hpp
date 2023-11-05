@@ -43,6 +43,7 @@ class Registry {
     add_system(Function &&f); // perfect forwarding in lambda capture , anyone ?
     template<class... Components, typename Function>
     void add_system(Function const &f); // taking it by reference .
+    void kill_all_entities();
     void run_systems();
 #ifndef SERVER
     ThreadNetEnt netEnts;

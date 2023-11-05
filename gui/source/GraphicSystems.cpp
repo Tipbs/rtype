@@ -39,26 +39,12 @@ void draw_text(
             color.value());
 }
 
-void display(
-    Registry &r, sparse_array<Position> &positions,
-    sparse_array<Sprite> &sprite, sparse_array<Rectangle> &rectangles,
-    sparse_array<InputField> &inputFields, sparse_array<Rect> &rect,
-    sparse_array<Color> &col, sparse_array<Text> &text,
-    sparse_array<MenuFields> &menuFields, sparse_array<CustomText> &customTexts,
+static void draw_menu(
+    sparse_array<InputField> &inputFields, sparse_array<Position> &positions,
+    sparse_array<Rectangle> &rectangles, sparse_array<MenuFields> &menuFields,
+    sparse_array<CustomText> &customTexts,
     sparse_array<CanBeSelected> &selectables)
 {
-    BeginDrawing();
-    for (auto &&[ind, pos, spri] : indexed_zipper(positions, sprite)) {
-        Vector2 Rectpos = {
-            (float) (positions[ind].value().pos_X),
-            (float) positions[ind].value().pos_Y};
-        DrawTextureRec(
-            sprite[ind]->spritesheet, sprite[ind]->sprite, Rectpos, WHITE);
-    }
-
-    draw_rectangle(rect, col);
-    draw_text(text, positions, col);
-
     for (auto &&[inputField, rectangle] : zipper(inputFields, rectangles)) {
         DrawRectangleRec(rectangle.value(), BLANK);
         DrawRectangleLinesEx(rectangle.value(), 3, RED);
@@ -112,6 +98,30 @@ void display(
              (float) position->pos_Y + 10},
             70, 1.0f, WHITE);
     }
+}
+
+void display(
+    Registry &r, sparse_array<Position> &positions,
+    sparse_array<Sprite> &sprite, sparse_array<Rectangle> &rectangles,
+    sparse_array<InputField> &inputFields, sparse_array<Rect> &rect,
+    sparse_array<Color> &col, sparse_array<Text> &text,
+    sparse_array<MenuFields> &menuFields, sparse_array<CustomText> &customTexts,
+    sparse_array<CanBeSelected> &selectables)
+{
+    BeginDrawing();
+    for (auto &&[ind, pos, spri] : indexed_zipper(positions, sprite)) {
+        Vector2 Rectpos = {
+            (float) (positions[ind].value().pos_X),
+            (float) positions[ind].value().pos_Y};
+        DrawTextureRec(
+            sprite[ind]->spritesheet, sprite[ind]->sprite, Rectpos, WHITE);
+    }
+
+    draw_rectangle(rect, col);
+    draw_text(text, positions, col);
+    draw_menu(
+        inputFields, positions, rectangles, menuFields, customTexts,
+        selectables);
 
     EndDrawing();
 }
@@ -162,8 +172,8 @@ void selectable_text(
          zipper(texts, positions, selectables)) {
         if (tmp == text->index)
             selectable->isSelected = true;
-        // if (IsKeyPressed(KEY_SPACE) && selectable->isSelected)
-        //     selectable->function();
+        if (IsKeyPressed(KEY_SPACE) && selectable->isSelected)
+            selectable->function();
     }
 }
 

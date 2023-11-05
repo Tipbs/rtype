@@ -89,7 +89,7 @@ struct Weapon {
     double attack_speed = 1.;
     Entity owner_id;
     bool IsShooting = false;
-    float current_charge = 0.;
+    float current_charge = 0.1;
 
     Weapon(Entity owner_id, int type = 1, int ammo_per_sec = 1)
         : type(type), owner_id(owner_id)

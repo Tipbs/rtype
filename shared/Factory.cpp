@@ -551,11 +551,13 @@ void Factory::create_sounds(Registry &reg)
     reg.emplace_component<MusicComponent>(
         sounds, "./gui/ressources/Audio/battle_ost.mp3", MusicFx::Battle);
 }
-#endif
 
-void Factory::create_menu(const int ScreenWidth, const int ScreenHeight)
+void Factory::create_menu(
+    udp_client &net_client, const std::string &ip, const std::string &port,
+    const int &ScreenWidth, const int &ScreenHeight)
 {
-#ifndef SERVER
+    _reg.kill_all_entities();
+    create_background(ScreenWidth, ScreenHeight);
     for (auto &i : (std::pair<std::string, std::size_t>[]) {
              {"PLAY", 0},
              {"EXIT", 1},
@@ -565,24 +567,25 @@ void Factory::create_menu(const int ScreenWidth, const int ScreenHeight)
         _reg.emplace_component<CustomText>(text, i.first, i.second);
         _reg.emplace_component<Position>(
             text, 1280.f / 2, 200 + 150 * i.second);
-        _reg.emplace_component<CanBeSelected>(text, i.second == 0);
+        _reg.emplace_component<CanBeSelected>(text, i.second == 0, [&](){create_game(net_client, ip, port, ScreenWidth, ScreenHeight);});
     }
 
     Entity const menuFields = _reg.spawn_entity();
     _reg.emplace_component<MenuFields>(menuFields);
     _reg.emplace_component<Rectangle>(
         menuFields, ScreenWidth / 2.0f - 200, 180, 400, 50);
-#endif
 }
 
-#ifndef SERVER
-void Factory::create_game(udp_client &net_client, const std::string &ip, const std::string &port, const int ScreenWidth, const int ScreenHeight)
+void Factory::create_game(
+    udp_client &net_client, const std::string &ip, const std::string &port,
+    const int &ScreenWidth, const int &ScreenHeight)
 {
+    _reg.kill_all_entities();
+    create_background(ScreenWidth, ScreenHeight);
     net_client.connect(ip, port);
     auto net_player_info = net_client.get_player_id();
     create_points(Position(200, 200), 1, 10);
-    Entity player =
-        create_player(net_player_info.pos, net_player_info.id);
+    Entity player = create_player(net_player_info.pos, net_player_info.id);
     _reg.emplace_component<Current_Player>(player);
     std::cout << "player pos id: " << net_player_info.id << std::endl;
     std::cout << "player pos x: " << net_player_info.pos.x << std::endl;

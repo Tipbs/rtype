@@ -33,8 +33,8 @@ int main(int ac, char **av)
     Factory factory(reg);
 
     factory.register_components();
-    factory.create_background(ScreenWidth, ScreenHeight);
-    factory.create_game(net_client, ip, port, ScreenWidth, ScreenHeight);
+    // factory.create_game(net_client, ip, port, ScreenWidth, ScreenHeight);
+    factory.create_menu(net_client, ip, port, ScreenWidth, ScreenHeight);
 
     factory.add_systems();
 
