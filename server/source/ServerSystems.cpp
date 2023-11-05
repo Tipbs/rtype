@@ -72,7 +72,7 @@ void extract(
         tmp.id = ind;
         tmp.pos.x = pos->pos_X;
         tmp.pos.y = pos->pos_Y;
-        tmp.dir = {dir->dir_X, dir->dir_Y};
+        tmp.dir = {static_cast<float>(dir->dir_X), static_cast<float>(dir->dir_Y)};
         auto weapon_ind = getEntityWeapon(weapons, ind);
         if (weapon_ind != -1) {
             auto &weapon = weapons[weapon_ind];

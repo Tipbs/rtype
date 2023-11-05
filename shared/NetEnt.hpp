@@ -4,7 +4,7 @@
 #include <boost/serialization/vector.hpp>
 #include "Utils.hpp"
 
-enum class EntityType {
+enum class EntityType : uint8_t {
     Player,
     Zorg,
     Boss,
