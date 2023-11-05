@@ -61,7 +61,6 @@ class indexed_zipper_iterator {
     iterator_tuple _current;
     size_t _max; // compare this value to _idx to prevent infinite loop .
     size_t _idx;
-    size_t _zipper_idx;
     std::index_sequence_for<Containers...> _seq {};
 };
 
@@ -115,8 +114,7 @@ indexed_zipper_iterator<Containers...>::incr_all(std::index_sequence<Is...>)
     if (_idx >= _max)
         return;
     _idx++;
-    _zipper_idx++;
-    for (; all_set(_seq) && _idx < _max; _idx++)
+    for (; _idx < _max && all_set(_seq); _idx++)
         ;
 }
 

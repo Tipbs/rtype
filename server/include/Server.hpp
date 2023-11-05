@@ -1,22 +1,3 @@
-#define _WIN32_WINNT 0x0501
-namespace boost {
-#ifdef BOOST_NO_EXCEPTIONS
-//void throw_exception(const std::exception &e)
-//{
-//    throw e; // or whatever
-//};
-
-void throw_exception(std::exception const &e)
-{
-    throw e; // or whatever
-};
-
-void throw_exception(std::exception const &e, boost::source_location const &)
-{
-    throw e; // or whatever
-};
-#endif
-} // namespace boost
 #include <chrono>
 #include <cstdint>
 #include <map>
@@ -29,36 +10,23 @@ void throw_exception(std::exception const &e, boost::source_location const &)
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
-
 #include "../../shared/NetEnt.hpp"
+#include "../../shared/Parser.hpp"
 #include "../../shared/Registry.hpp"
 #include "../../shared/Systems.hpp"
 #include "../../shared/UserCmd.hpp"
 #include "../../shared/Utils.hpp"
 
-namespace boost {
-#ifdef BOOST_NO_EXCEPTIONS
-void throw_exception(std::exception const &e)
-{
-    throw e; // or whatever
-};
-
-void throw_exception(std::exception const &e, boost::source_location const &)
-{
-    throw e; // or whatever
-};
-#endif
-} // namespace boost
-
 struct Clients {
     std::size_t _id;
+    std::size_t player;
     bool isClientConnected;
     boost::posix_time::ptime _timer;
 };
 
 class udp_server {
   public:
-    udp_server(std::size_t port);
+    udp_server(std::size_t port, int);
     ~udp_server();
 
     void handle_receive(const boost::system::error_code &, std::size_t);
@@ -68,7 +36,8 @@ class udp_server {
     void handle_send(const boost::system::error_code &error, std::size_t);
 
     void start_snapshot();
-    void send_playerId(std::size_t playerId, boost::asio::ip::udp::endpoint);
+    void
+    send_playerId(Utils::PlayerId playerId, boost::asio::ip::udp::endpoint);
     void wait_for_connexion(std::size_t);
     void handle_broadcast(const boost::system::error_code &, std::size_t);
     void multiple_broadcast(
@@ -85,13 +54,15 @@ class udp_server {
     Registry reg;
 
     std::size_t _port;
+    std::size_t netId = 0;
+    int _nb_player;
 
     boost::asio::io_context _svc;
     boost::asio::ip::udp::socket _socket;
     boost::asio::deadline_timer tick_timer;
     boost::asio::deadline_timer check_timer;
     boost::asio::ip::udp::endpoint _remote_point;
-    boost::array<char, 512> _recv_buffer;
+    boost::array<char, 2048> _recv_buffer;
 
     std::map<boost::asio::ip::udp::endpoint, struct Clients> clients;
     std::map<std::size_t, std::vector<UserCmd>> cmd;
@@ -99,4 +70,6 @@ class udp_server {
     std::thread tick;
     std::thread broadcasting;
     std::mutex cmd_mutex;
+
+    Parser parser;
 };

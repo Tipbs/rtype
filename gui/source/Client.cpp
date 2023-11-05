@@ -4,6 +4,7 @@
 #include <semaphore>
 #include <sstream>
 #include <string>
+#include <syncstream>
 #include <thread>
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
@@ -12,20 +13,6 @@
 #include <boost/asio/ip/udp.hpp>
 #include <boost/bind.hpp>
 #include "../../shared/NetEnt.hpp"
-
-namespace boost {
-#ifdef BOOST_NO_EXCEPTIONS
-void throw_exception(std::exception const &e)
-{
-    throw e; // or whatever
-};
-
-void throw_exception(std::exception const &e, boost::source_location const &)
-{
-    throw e; // or whatever
-};
-#endif
-} // namespace boost
 
 using boost::asio::ip::udp;
 std::binary_semaphore MainToThread {0};
@@ -46,11 +33,11 @@ void udp_client::send()
     auto copyCmd = _reg.currentCmd.cmd;
     _reg.currentCmd.cmd.reset();
     _reg.currentCmd.mutex.unlock();
-    // std::cout << "eeqsdqsd\n";
+    // std::osyncstream(std::cout) << "eeqsdqsd\n";
     archive << copyCmd;
     std::string serializedData = oss.str();
-    // std::cout << "Sending " << serializedData.size() << "bytes from " <<
-    // serializedData.data() << std::endl;
+    // std::osyncstream(std::cout) << "Sending " << serializedData.size() <<
+    // "bytes from " << serializedData.data() << std::endl;
     _socket.async_send_to(
         boost::asio::buffer(serializedData.c_str(), serializedData.size()),
         _remote_point,
@@ -62,10 +49,10 @@ void udp_client::send()
 void udp_client::handle_receive(
     const boost::system::error_code &error, std::size_t bytes_transferred)
 {
-    // std::cout << "Received mais erreur\n";
+    // std::osyncstream(std::cout) << "Received mais erreur\n";
     if (!error) {
-        // std::cout << "Received " << bytes_transferred << " bytes" <<
-        // std::endl;
+        std::osyncstream(std::cout)
+            << "Received " << bytes_transferred << " bytes" << std::endl;
         try {
             std::string seralizedData(_recv_buffer.data(), bytes_transferred);
             std::istringstream iss(seralizedData);
@@ -77,8 +64,9 @@ void udp_client::handle_receive(
                 _reg.netEnts.ents.begin(), tmp.begin(), tmp.end());
             _reg.netEnts.mutex.unlock();
         } catch (std::exception &err) {
-            std::cout << "Error in handle_receive: " << err.what()
-                      << " (probably normal)\n";
+            std::osyncstream(std::cout)
+                << "Error in handle_receive: " << err.what()
+                << " (probably normal)\n";
         }
     }
     start_receive();
@@ -117,24 +105,28 @@ void udp_client::send_user()
 void udp_client::net_get_id(
     const boost::system::error_code &error, std::size_t bytes_transferred)
 {
-    std::cout << "Received mais erreur net_get_id ;)" << bytes_transferred
-              << "\n";
+    // std::osyncstream(std::cout) << "Received mais erreur net_get_id ;)" <<
+    // bytes_transferred
+    //           << "\n";
     if (!error) {
-        std::cout << "net_get_id: Received " << bytes_transferred << " bytes"
-                  << std::endl;
+        std::osyncstream(std::cout)
+            << "net_get_id: Received " << bytes_transferred << " bytes"
+            << std::endl;
         try {
             std::string seralizedData(_recv_buffer.data(), bytes_transferred);
             std::istringstream iss(seralizedData);
             boost::archive::binary_iarchive archive(iss);
             Utils::PlayerId tmp;
             archive >> tmp;
-            _player_id = tmp.id;
-        } catch (std::exception err) {
+            _player_id.id = tmp.id;
+            _player_id.pos = tmp.pos;
+        } catch (const std::exception &err) {
             std::cerr << "serialization exception: " << err.what();
             throw err;
         }
     } else {
-        std::cout << "Erreur dans net_get_id: " << error.message() << std::endl;
+        std::osyncstream(std::cout)
+            << "Erreur dans net_get_id: " << error.message() << std::endl;
     }
 }
 
@@ -149,27 +141,29 @@ void udp_client::fetch_player_id()
         boost::bind(
             &udp_client::net_get_id, this, boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred));
-    while (_player_id == -1) {
+    while (_player_id.id == static_cast<size_t>(-1)) {
         if (std::chrono::system_clock::now() - timeout >
             std::chrono::seconds(10)) {
             std::cerr << "Failed to get player id from server\n";
             throw std::runtime_error("Failed to get player id from server");
         }
         _socket.send_to(boost::asio::buffer({'\0'}, 1), _remote_point);
-        std::cout << "looping " << std::endl;
+        std::osyncstream(std::cout) << "looping " << std::endl;
         _svc.run();
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-    std::cout << "player id: " << _player_id << "\n";
+    std::osyncstream(std::cout) << "player id: " << _player_id.id << "\n";
 }
 
-udp_client::udp_client(
-    boost::asio::io_context &svc, const std::string &ip,
-    const std::string &port, Registry &reg)
-    : _socket(svc), timer(svc), _reg(reg), _svc(svc)
+udp_client::udp_client(boost::asio::io_context &svc, Registry &reg)
+    : _reg(reg), _socket(svc), _svc(svc), timer(svc)
+{}
+
+void udp_client::connect(const std::string &ip, const std::string &port)
 {
     _socket.open(udp::v4());
-    udp::resolver resolver(svc);
+    _player_id.id = -1;
+    udp::resolver resolver(_svc);
     udp::resolver::query query(boost::asio::ip::udp::v4(), ip, port);
     udp::resolver::iterator iter = resolver.resolve(query);
     _remote_point = *iter;
@@ -192,20 +186,3 @@ udp_client::~udp_client()
     tick.std::thread::~thread();
     sending.std::thread::~thread();
 }
-
-// int main(int ac, char **av)
-// {
-//     try {
-//         boost::asio::io_context _svc;
-//         std::string port = "5000";
-//         std::string ip = "127.0.0.1";
-//         if (ac == 3 && std::stoi(av[2])) {
-//             ip = av[1];
-//             port = av[2];
-//         }
-//         udp_client client(_svc, ip, port);
-//         _svc.run();
-//     } catch (std::exception &e) {
-//         std::cerr << e.what() << std::endl;
-//     }
-// }

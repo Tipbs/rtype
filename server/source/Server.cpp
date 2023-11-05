@@ -4,6 +4,7 @@
 #include <istream>
 #include <map>
 #include <semaphore>
+#include <syncstream>
 #include <boost/archive/archive_exception.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
@@ -13,7 +14,8 @@
 #include <boost/asio/io_context.hpp>
 #include <boost/bind/bind.hpp>
 #include "../../shared/Component.hpp"
-#include "../../shared/Bundle.hpp"
+#include "../../shared/Factory.hpp"
+#include "ServerSystems.hpp"
 
 using boost::asio::ip::udp;
 std::binary_semaphore MainToThread {0};
@@ -30,11 +32,13 @@ void udp_server::handle_check(const boost::system::error_code &error)
 {
     if (!error) {
         auto now = boost::posix_time::microsec_clock::universal_time();
-        std::cout << "check\n";
+        std::osyncstream(std::cout) << "check\n";
         for (auto it = clients.begin(); it != clients.end();) {
             if ((now - it->second._timer).total_seconds() > 5) {
-                std::cout << "Client " << it->first << " disconnected\n";
-                std::cout << "Killed entity " << it->second._id << std::endl;
+                std::osyncstream(std::cout)
+                    << "Client " << it->first << " disconnected\n";
+                std::osyncstream(std::cout)
+                    << "Killed entity " << it->second._id << std::endl;
                 reg.kill_entity(reg.entity_from_index(it->second._id));
                 it = clients.erase(it);
             } else {
@@ -77,7 +81,8 @@ void udp_server::multiple_broadcast(
                     boost::asio::placeholders::bytes_transferred));
         }
     } catch (boost::archive::archive_exception &e) {
-        std::cout << "Archive Error: " << e.what() << std::endl;
+        std::osyncstream(std::cout)
+            << "Archive Error: " << e.what() << std::endl;
     }
 }
 
@@ -107,8 +112,8 @@ void udp_server::handle_tick() // tick every seconds
     while (true) {
         MainToThread.release();
         ThreadToMain.acquire();
-        tick_timer.expires_from_now(boost::posix_time::millisec(50));
         ResetFrameTime();
+        tick_timer.expires_from_now(boost::posix_time::millisec(50));
         tick_timer.wait();
     }
 }
@@ -121,9 +126,8 @@ void udp_server::deserialize(const std::size_t bytes_transferred)
         boost::archive::binary_iarchive archive(iss);
         UserCmd tmp;
         archive >> tmp;
-        // std::cout << "je suis le cmd moved x: " << tmp.moved.x << std::endl;
         cmd_mutex.lock();
-        cmd[clients[_remote_point]._id].push_back(tmp);
+        cmd[clients[_remote_point].player].push_back(tmp);
         cmd_mutex.unlock();
     } catch (boost::archive::archive_exception &e) {
         std::cerr << "deserialization failed: " << e.what() << std::endl;
@@ -137,13 +141,11 @@ void udp_server::handle_send(
 }
 
 void udp_server::send_playerId(
-    std::size_t playerId, udp::endpoint client_endpoint)
+    Utils::PlayerId playerId, udp::endpoint client_endpoint)
 {
-    Utils::PlayerId player;
-    player.id = playerId;
     std::ostringstream oss;
     boost::archive::binary_oarchive archive(oss);
-    archive << player;
+    archive << playerId;
     std::string serializedData = oss.str();
     _socket.async_send_to(
         boost::asio::buffer(serializedData.c_str(), serializedData.size()),
@@ -153,31 +155,62 @@ void udp_server::send_playerId(
             boost::asio::placeholders::bytes_transferred));
 }
 
+bool areClientsReady(
+    const std::map<boost::asio::ip::udp::endpoint, struct Clients> &clients,
+    int _nb_player)
+{
+    int i = 0;
+    for (auto &clients : clients)
+        if (clients.second.isClientConnected == true)
+            i++;
+    if (i >= _nb_player)
+        return true;
+    return false;
+}
+
 void udp_server::wait_for_connexion(std::size_t bytes_transferred)
 {
+    Factory factory(reg);
+
     if (bytes_transferred != 1 && clients.size() == 0)
         return;
     if (bytes_transferred == 1 && clients.count(_remote_point) == 0) {
-        Entity player = reg.spawn_entity();
-        Player nePlayer((size_t) player);
-        Position nePos(0, 0);
-        reg.add_component(player, std::move(nePlayer));
-        reg.add_component(player, std::move(nePos));
-        if (clients.size() == 0)
+        if (clients.size() == 0) {
             start_threads();
-        clients[_remote_point]._id = (size_t) player;
+            return;
+        }
+        Entity player = parser.create_player(netId);
+        clients[_remote_point]._id = (size_t) netId;
+        clients[_remote_point].player = (size_t) player;
+        netId++;
         clients[_remote_point].isClientConnected = false;
         clients[_remote_point]._timer =
             boost::posix_time::microsec_clock::universal_time();
-        send_playerId(clients[_remote_point]._id, _remote_point);
+        Utils::PlayerId p;
+        p.id = clients[_remote_point].player;
+        p.pos = parser.get_player_pos(p.id);
+        send_playerId(p, _remote_point);
     } else if (bytes_transferred == 1 && clients.count(_remote_point) != 0) {
         clients[_remote_point]._timer =
             boost::posix_time::microsec_clock::universal_time();
-        send_playerId(clients[_remote_point]._id, _remote_point);
+        Utils::PlayerId p;
+        p.id = clients[_remote_point].player;
+        p.pos = parser.get_player_pos(p.id);
+        send_playerId(p, _remote_point);
     } else {
         clients[_remote_point].isClientConnected = true;
         clients[_remote_point]._timer =
             boost::posix_time::microsec_clock::universal_time();
+        if (areClientsReady(clients, _nb_player) == true &&
+            reg.gameState == 0) {
+            reg.gameState = 1;
+            tick = std::thread(&udp_server::handle_tick, this); // Timer thread
+            broadcasting = std::thread(
+                &udp_server::start_snapshot, this); // Snapshot thread
+            tick.detach();
+            broadcasting.detach();
+            start_check();
+        }
         deserialize(bytes_transferred);
     }
 }
@@ -187,8 +220,9 @@ void udp_server::handle_receive(
     std::size_t bytes_transferred) // Callback to the receive function
 {
     if (!error || error == boost::asio::error::message_size) {
-        std::cout << "Received " << bytes_transferred << "bytes" << std::endl;
-        if (clients.count(_remote_point) == 0) {
+        std::osyncstream(std::cout)
+            << "Received " << bytes_transferred << "bytes" << std::endl;
+        if (clients.count(_remote_point) == 0 && clients.size() < 4) {
             wait_for_connexion(bytes_transferred);
             start_receive();
             return;
@@ -217,60 +251,39 @@ void udp_server::start_receive() // Receive function
             boost::asio::placeholders::bytes_transferred));
 }
 
-void synchronize(Registry &reg, sparse_array<Position> &positions)
-{
-    for (auto &player : reg.user_cmds) {
-        auto &pos = positions[player.first];
-        for (auto &cmds : player.second) {
-            pos->pos_X += cmds.moved.x;
-            pos->pos_Y += cmds.moved.y;
-        }
-    }
-}
-
-void extract(Registry &reg, sparse_array<Position> &positions)
-{
-    for (size_t ind = 0; ind < positions.size(); ind++) {
-        auto &pos = positions[ind];
-        if (!pos)
-            continue;
-        NetEnt tmp;
-        tmp.id = ind;
-        tmp.pos.x = pos->pos_X;
-        tmp.pos.y = pos->pos_Y;
-        reg._netent.push_back(tmp);
-    }
-}
-
 void udp_server::start_threads()
 {
-    tick = std::thread(&udp_server::handle_tick, this); // Timer thread
-    broadcasting =
-        std::thread(&udp_server::start_snapshot, this); // Snapshot thread
-    tick.detach();
-    broadcasting.detach();
-    start_check();
+    parser.open_file("./server/ressources/Maps/map_01.json");
+    Entity enemy_count = reg.spawn_entity();
+    reg.emplace_component<EnemyCount>(
+        enemy_count, parser.get_enemy_count(), std::chrono::seconds(2));
+    reg.emplace_component<BossCount>(enemy_count, parser.get_boss_count());
+    Entity player = parser.create_player(netId);
+    clients[_remote_point]._id = (size_t) netId;
+    clients[_remote_point].player = (size_t) player;
+    netId++;
+    clients[_remote_point].isClientConnected = false;
+    clients[_remote_point]._timer =
+        boost::posix_time::microsec_clock::universal_time();
+    Utils::PlayerId p;
+    p.id = clients[_remote_point].player;
+    p.pos = parser.get_player_pos(p.id);
+    send_playerId(p, _remote_point);
 }
 
-udp_server::udp_server(std::size_t port)
+udp_server::udp_server(std::size_t port, int nb_player)
     : _svc(), _socket(_svc, udp::endpoint(udp::v4(), port)), tick_timer(_svc),
-      check_timer(_svc)
+      check_timer(_svc), parser(reg)
 {
-    reg.register_component<Size>();
-    reg.register_component<Position>();
-    reg.register_component<Speed>();
-    reg.register_component<Direction>();
-    reg.register_component<SpawnGrace>();
-    reg.register_component<Player>();
-    reg.register_component<Damages>();
-    reg.register_component<Health>();
-    reg.add_system<Position>(synchronize);
-    reg.add_system<Position, Size, SpawnGrace, Damages, Health>(colision);
-    reg.add_system<Position, Speed, Direction>(move);
-    reg.add_system<Position>(extract);
+    Factory factory(reg);
+
+    _nb_player = nb_player;
+    factory.register_components();
+    factory.add_systems();
 
     _port = port;
 
+    reg.gameState = 0;
     start_receive();
     _svc.run();
 }
@@ -284,9 +297,11 @@ udp_server::~udp_server()
 
 int helper()
 {
-    std::cout << "USAGE\n";
-    std::cout << "\t./server <port>\n";
-    std::cout << " port\tport number of the server\n";
+    std::osyncstream(std::cout) << "USAGE\n";
+    std::osyncstream(std::cout) << "\t./r-type_server <port> <nb_player>\n";
+    std::osyncstream(std::cout) << " port\t\tport number of the server\n";
+    std::osyncstream(std::cout)
+        << " nb_clients\tnumber of clients needed to start the game\n";
     return 0;
 }
 
@@ -294,12 +309,19 @@ int main(int ac, char **av)
 {
     try {
         std::size_t port = 5000;
+        int nb_player = 2;
         if (ac == 2 &&
             (std::string(av[1]) == "-h" || std::string(av[1]) == "--help"))
             return helper();
-        if (ac == 2 && std::stoi(av[1]))
+        if (ac == 3 && std::stoi(av[1]) && std::stoi(av[2])) {
             port = std::stoi(av[1]);
-        udp_server server(port);
+            if (nb_player >= 1 && nb_player <= 4)
+                nb_player = std::stoi(av[2]);
+        } else {
+            if (ac == 2)
+                return helper();
+        }
+        udp_server server(port, nb_player);
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
     }

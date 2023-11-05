@@ -1,15 +1,15 @@
 #pragma once
 
 #include <any>
-#include <unordered_map>
-#include <typeindex>
 #include <functional>
-#include "Sparse_array.hpp"
+#include <typeindex>
+#include <unordered_map>
 #include "Entity.hpp"
 #include "NetEnt.hpp"
+#include "Sparse_array.hpp"
 #include "UserCmd.hpp"
 #ifdef SERVER
-    #include <map>
+#include <map>
 #endif // !SERVER
 
 class Registry {
@@ -21,12 +21,14 @@ class Registry {
   public:
     template<class Component>
     sparse_array<Component> &register_component();
+    template<class... Component>
+    std::tuple<sparse_array<Component> &...> register_components();
     template<class Component>
     sparse_array<Component> &get_components();
     template<class Component>
     sparse_array<Component> const &get_components() const;
-    Entity spawn_entity();
     Entity entity_from_index(std::size_t idx);
+    Entity spawn_entity();
     void kill_entity(Entity const &e);
     template<typename Component>
     typename sparse_array<Component>::reference_type
@@ -41,14 +43,16 @@ class Registry {
     add_system(Function &&f); // perfect forwarding in lambda capture , anyone ?
     template<class... Components, typename Function>
     void add_system(Function const &f); // taking it by reference .
+    void kill_all_entities();
     void run_systems();
-    #ifndef SERVER
-		ThreadNetEnt netEnts;
-        ThreadUserCmd currentCmd;
-	#else
-        std::map<std::size_t, std::vector<UserCmd>> user_cmds;
-        std::vector<NetEnt> _netent;
-    #endif // !SERVER
+#ifndef SERVER
+    ThreadNetEnt netEnts;
+    ThreadUserCmd currentCmd;
+#else
+    std::map<std::size_t, std::vector<UserCmd>> user_cmds;
+    std::vector<NetEnt> _netent;
+    std::size_t gameState;
+#endif // !SERVER
 
   private:
     std::unordered_map<std::type_index, std::any> _components_arrays;
@@ -70,7 +74,8 @@ class Registry {
 template<typename Component>
 inline void Registry::erase(const Entity &entity)
 {
-	std::any_cast<sparse_array<Component> &>(_components_arrays[typeid(Component)])[(size_t)entity] = std::nullopt;
+    std::any_cast<sparse_array<Component> &>(
+        _components_arrays[typeid(Component)])[(size_t) entity] = std::nullopt;
 }
 
 /**
@@ -107,6 +112,18 @@ inline sparse_array<Component> &Registry::register_component()
 }
 
 /**
+ * @brief Add many new component with its erase and insert function.
+ *
+ * @tparam  Component   The Components to insert.
+ * @return  The tuple of sparse_array of Component newly created.
+ */
+template<typename... Component>
+inline std::tuple<sparse_array<Component> &...> Registry::register_components()
+{
+    return std::tie(register_component<Component>()...);
+}
+
+/**
  * @brief Get component in component array
  *
  * @tparam  Component   The Component to get
@@ -115,6 +132,16 @@ inline sparse_array<Component> &Registry::register_component()
 template<class Component>
 inline sparse_array<Component> &Registry::get_components()
 {
+    try {
+        std::any_cast<sparse_array<Component> &>(
+            _components_arrays[typeid(Component)]);
+    } catch (const std::bad_any_cast &) {
+        std::cerr
+            << "Component " << typeid(Component).name()
+            << " not register (parce que vous savez pas l'utiliser enfin bref)"
+            << std::endl;
+        exit(EXIT_FAILURE);
+    }
     return std::any_cast<sparse_array<Component> &>(
         _components_arrays[std::type_index(typeid(Component))]);
 }
@@ -144,6 +171,16 @@ template<typename Component>
 inline typename sparse_array<Component>::reference_type
 Registry::add_component(Entity const &to, Component &&c)
 {
+    try {
+        std::any_cast<sparse_array<Component> &>(
+            _components_arrays[typeid(Component)]);
+    } catch (const std::bad_any_cast &) {
+        std::cerr
+            << "Component " << typeid(Component).name()
+            << " not register (parce que vous savez pas l'utiliser enfin bref)"
+            << std::endl;
+        exit(EXIT_FAILURE);
+    }
     auto &comp_array = std::any_cast<sparse_array<Component> &>(
         _components_arrays[typeid(Component)]);
     comp_array[(size_t) to] = std::move(c);
@@ -163,6 +200,16 @@ template<typename Component, typename... Params>
 inline typename sparse_array<Component>::reference_type
 Registry::emplace_component(Entity const &to, Params &&...p)
 {
+    try {
+        std::any_cast<sparse_array<Component> &>(
+            _components_arrays[typeid(Component)]);
+    } catch (const std::bad_any_cast &) {
+        std::cerr
+            << "Component " << typeid(Component).name()
+            << " not register (parce que vous savez pas l'utiliser enfin bref)"
+            << std::endl;
+        exit(EXIT_FAILURE);
+    }
     auto &sparse_arr = std::any_cast<sparse_array<Component> &>(
         _components_arrays[typeid(Component)]);
     sparse_arr[(size_t) to] = std::make_optional<Component>(p...);
