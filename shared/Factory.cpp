@@ -611,6 +611,6 @@ void Factory::create_game(
     std::cout << "player pos y: " << net_player_info.pos.y << std::endl;
     Entity weapon = create_weapon(player);
     create_hud(ScreenWidth, ScreenHeight, player, weapon);
-    // create_sounds(_reg);
+    create_sounds(_reg);
 }
 #endif
