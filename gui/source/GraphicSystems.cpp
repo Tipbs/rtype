@@ -1,6 +1,8 @@
 #include "GraphicSystems.hpp"
 #include <cstddef>
 #include <cstdlib>
+#include <cmath>
+#include <numbers>
 #include <syncstream>
 #include <raylib.h>
 #include "../../shared/Factory.hpp"
@@ -60,6 +62,7 @@ void display(
 void do_animation(
     Registry &r, sparse_array<Sprite> &sprites, sparse_array<Couleur> &couleurs)
 {
+    auto now = std::chrono::steady_clock::now();
     for (auto &&[sprite, colors] : zipper(sprites, couleurs)) {
         if (sprite->width_max == 8 &&
             sprite->height_max == 5) { // Ammunition case
@@ -69,14 +72,11 @@ void do_animation(
                          sprite->width_max - 1
                      ? -6 * sprite->width_padding
                      : sprite->width_padding);
-        } else { // Looping sprites frames
-            if (sprite->width_max == 2 && sprite->height_max == 5)
-                continue;
-            sprite->sprite.x =
-                (sprite->sprite.x / sprite->width_padding ==
-                         sprite->width_max - 1
-                     ? 0
-                     : sprite->sprite.x + sprite->width_padding);
+        } else if (
+            now > (sprite->time_since_last_anim +
+                   sprite->animation_delay)) {
+            sprite->sprite.x += sprite->width_padding;
+            sprite->time_since_last_anim = now;
         }
     }
 }
@@ -248,11 +248,45 @@ void killDeadEntities(Registry &r, sparse_array<NetworkedEntity> &entities)
     }
 }
 
+static void insertProjectileShooter(
+    Registry &r, sparse_array<Boss> &bosses,
+    sparse_array<ProjectileShooter> &shooters, NetEnt &ent)
+{
+    auto size = bosses.size();
+    size_t boss_index = -1;
+    for (size_t index = 0; index != size; ++index) {
+        if (bosses[index]) {
+            boss_index = index;
+            break;
+        }
+    }
+    if (boss_index == -1)
+        throw std::runtime_error("Failed to insert a projectileShooter to boss, "
+                             "the boss is not found");
+    if (shooters[boss_index]) {
+        shooters[boss_index]->shotCount = ent.dir.x;
+    } else {
+        auto &shooter = r.emplace_component<ProjectileShooter>(
+            boss_index, std::chrono::milliseconds(500));
+        shooter->shotCount = ent.dir.x; // hardcoded
+        auto radius = 80;
+        for (int i = 0; i <= 12; i++) {
+            double angle =
+                2 * std::numbers::pi * i / 12 + shooter->shotCount * 45;
+            double x = std::cos(angle) * radius;
+            double y = std::sin(angle) * radius;
+            shooter->infos.push_back(ProjectileInfo(
+                Position(x, y), Direction(std::cos(angle) / 3, std::sin(angle) / 3)));
+        }
+    }
+}
+
 void updateWithSnapshots(
     Registry &r, sparse_array<Position> &positions,
     sparse_array<NetworkedEntity> &entities, sparse_array<Speed> &speeds,
     sparse_array<Current_Player> &currents, sparse_array<Size> &sizes,
-    sparse_array<Player> &players)
+    sparse_array<Player> &players, sparse_array<Boss> &bosses,
+    sparse_array<ProjectileShooter> &shooters)
 {
     auto &net_ents = r.netEnts.ents;
     Factory factory(r);
@@ -271,7 +305,6 @@ void updateWithSnapshots(
             });
         if (finded != entities.end())
             continue;
-        auto pos = Position(net.pos.x, net.pos.y);
         factory.create_netent(net.type, net);
         it = net_ents.erase(it);
         if (it == net_ents.end())
@@ -290,6 +323,10 @@ void updateWithSnapshots(
                 });
             if (finded == net_ents.end())
                 continue;
+            if (bosses[i] && finded->type == EntityType::ProjectileShooter) {
+                insertProjectileShooter(r, bosses, shooters, *finded);
+                continue;
+            }
             if (current && std::abs(finded->pos.x - pos.value().pos_X) < 30.0 &&
                 std::abs(finded->pos.y - pos.value().pos_Y) <
                     30.0) // doesn't rollback if the server pos is close enough

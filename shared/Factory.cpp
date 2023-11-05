@@ -28,7 +28,7 @@ void Factory::register_components()
         Player, Weapon, Current_Player, Position, Damages, Size, Health, Speed,
         Direction, SpawnGrace, NetworkedEntity, Animation, Couleur,
         ProjectileShooter, Score, Backgrounds, AlwaysShoot, EnemyCount,
-        BossCount, Colision, Point>();
+        BossCount, Colision, Point, Boss>();
 }
 
 void Factory::add_systems()
@@ -40,6 +40,7 @@ void Factory::add_systems()
     _reg.add_system<Direction, Speed, Position, Size, Weapon, Player>(
         synchronize);
 #endif
+    _reg.add_system<Boss, Position, Direction>(stopAtCenter);
     _reg.add_system<SpawnGrace>(update_grace);
     _reg.add_system<
         Position, Size, SpawnGrace, Damages, Health, Colision, Point, Score>(
@@ -53,10 +54,10 @@ void Factory::add_systems()
         >(move);
     _reg.add_system<Player, Position, Direction, Size>(block_player_in_map);
     _reg.add_system<Position, Colision>(kill_outside_entities);
-#ifdef SERVER
-    _reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
     _reg.add_system<ProjectileShooter, Position, Size, Player>(
         shootProjectiles);
+#ifdef SERVER
+    _reg.add_system<AlwaysShoot, Position, Size>(enemyAlwaysShoot);
 #endif
 #ifndef SERVER
     _reg.add_system<Position, Sprite, Rectangle, InputField, Rect, Color, Text>(
@@ -69,7 +70,7 @@ void Factory::add_systems()
     _reg.add_system<Sprite, Couleur, Weapon, Current_Player>(do_ship_animation);
     _reg.add_system<Position, Size, Backgrounds>(make_infinite_background);
     _reg.add_system<
-        Position, NetworkedEntity, Speed, Current_Player, Size, Player>(
+        Position, NetworkedEntity, Speed, Current_Player, Size, Player, Boss, ProjectileShooter>(
         updateWithSnapshots);
     // _reg.add_system<Weapon, Couleur, HUD>(
     //     updateHUD);
@@ -78,7 +79,7 @@ void Factory::add_systems()
     // _reg.add_system<MusicComponent>(handle_music);
     _reg.add_system<SoundManager>(play_sound);
 #else
-    _reg.add_system<Position, Speed, Weapon, NetworkedEntity, Direction>(
+    _reg.add_system<Position, Speed, Weapon, NetworkedEntity, Direction, ProjectileShooter>(
         extract);
     _reg.add_system<Player, Direction>(resetPlayersDir);
 #endif
@@ -435,19 +436,17 @@ Factory::create_boss_projectile(Position pos, Direction diro, size_t net_id)
     // _reg.emplace_component<Tags>(entity, false, true, false, false, false,
     // true, false, true);
     _reg.emplace_component<Colision>(entity, Tag::Enemy);
-    _reg.emplace_component<NetworkedEntity>(entity, 1, EntityType::Projectile);
     return entity;
 }
 
 const Entity Factory::create_boss(Position pos, size_t net_id)
 {
-    std::cout << "create boss: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n";
     Entity const new_entity = _reg.spawn_entity();
     Size Size(98, 100);
     Speed speedo(300);
-    Direction diro(0, 0);
+    Direction diro(-0.2, 0);
     SpawnGrace gra(std::chrono::seconds(1));
-    ProjectileShooter proj_shooter(std::chrono::milliseconds(350));
+    ProjectileShooter proj_shooter(std::chrono::milliseconds(500));
 #ifndef SERVER
     std::string path = "./gui/ressources/Sprites/boss.png";
     Sprite sprite(path.c_str(), 97, 102, 10, 1);
@@ -465,6 +464,9 @@ const Entity Factory::create_boss(Position pos, size_t net_id)
     _reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
     _reg.emplace_component<Health>(new_entity, 1000);
     _reg.emplace_component<Damages>(new_entity, 1);
+    _reg.emplace_component<Boss>(new_entity);
+    _reg.emplace_component<Couleur>(new_entity, 0);
+#ifdef SERVER
     auto &shooter = _reg.add_component<ProjectileShooter>(
         new_entity, std::move(proj_shooter));
     auto radius = 80;
@@ -475,6 +477,7 @@ const Entity Factory::create_boss(Position pos, size_t net_id)
         shooter->infos.push_back(ProjectileInfo(
             Position(x, y), Direction(cos(angle) / 3, sin(angle) / 3)));
     }
+#endif
     _reg.emplace_component<NetworkedEntity>(
         new_entity, net_id, EntityType::Boss);
 
@@ -499,8 +502,6 @@ const Entity Factory::create_netent(EntityType type, NetEnt &net_ent)
         if (type == pair.first)
             return pair.second(this, pos, net_id);
     switch (type) {
-        case EntityType::Projectile:
-            return create_boss_projectile(pos, dir, net_id);
         case EntityType::Ammo:
             return create_ammo(pos, 1.0, 1, net_id, Tag::Enemy, dir);
         /*case EntityType::Win:
