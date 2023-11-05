@@ -126,7 +126,7 @@ void damages(
 
     std::cout << "damages" << std::endl;
     if (dama[i1])
-		healt[i2]->health -= dama[i1]->damages;
+        healt[i2]->health -= dama[i1]->damages;
     // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
     // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
     // HP." << std::endl;

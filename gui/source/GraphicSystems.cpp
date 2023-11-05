@@ -5,6 +5,7 @@
 #include <numbers>
 #include <syncstream>
 #include <raylib.h>
+#include <sys/types.h>
 #include "../../shared/Factory.hpp"
 #include "../../shared/indexed_zipper.hpp"
 #include "../../shared/Registry.hpp"
@@ -38,11 +39,74 @@ void draw_text(
             color.value());
 }
 
+static void draw_menu(
+    sparse_array<InputField> &inputFields, sparse_array<Position> &positions,
+    sparse_array<Rectangle> &rectangles, sparse_array<MenuFields> &menuFields,
+    sparse_array<CustomText> &customTexts,
+    sparse_array<CanBeSelected> &selectables)
+{
+    for (auto &&[inputField, rectangle] : zipper(inputFields, rectangles)) {
+        DrawRectangleRec(rectangle.value(), BLANK);
+        DrawRectangleLinesEx(rectangle.value(), 3, RED);
+        DrawText(
+            "IP du Serveur", (int) rectangle->x + 50, (int) rectangle->y - 48,
+            40, MAROON);
+        DrawText(
+            inputField->field.c_str(), (int) rectangle->x + 5,
+            (int) rectangle->y + 8, 40, MAROON);
+    }
+    for (auto &&[text, position, selectable] :
+         zipper(customTexts, positions, selectables)) {
+        DrawTextureRec(
+            text->texture,
+            {0.f, 0.f, 550,
+             (float) MeasureTextEx(text->font, text->str.c_str(), 100, 1.f).y},
+            {
+                (float) (position->pos_X -
+                         (float) MeasureTextEx(
+                             text->font, text->str.c_str(), 50, 1.f)
+                                 .x *
+                             1.5),
+                (float) (position->pos_Y -
+                         (float) MeasureTextEx(
+                             text->font, text->str.c_str(), 50, 1.f)
+                             .y +
+                         35),
+            },
+            WHITE);
+        DrawRectangleLinesEx(
+            {
+                (float) (position->pos_X -
+                         (float) MeasureTextEx(
+                             text->font, text->str.c_str(), 50, 1.f)
+                                 .x *
+                             1.5),
+                (float) (position->pos_Y -
+                         (float) MeasureTextEx(
+                             text->font, text->str.c_str(), 50, 1.f)
+                             .y +
+                         35),
+                550,
+                MeasureTextEx(text->font, text->str.c_str(), 50, 1.f).y * 2,
+            },
+            5, selectable->isSelected ? WHITE : DARKBLUE);
+        DrawTextEx(
+            text->font, text->str.c_str(),
+            {(float) position->pos_X -
+                 (float) MeasureTextEx(text->font, text->str.c_str(), 50, 1.f)
+                     .x,
+             (float) position->pos_Y + 10},
+            70, 1.0f, WHITE);
+    }
+}
+
 void display(
     Registry &r, sparse_array<Position> &positions,
     sparse_array<Sprite> &sprite, sparse_array<Rectangle> &rectangles,
     sparse_array<InputField> &inputFields, sparse_array<Rect> &rect,
-    sparse_array<Color> &col, sparse_array<Text> &text)
+    sparse_array<Color> &col, sparse_array<Text> &text,
+    sparse_array<MenuFields> &menuFields, sparse_array<CustomText> &customTexts,
+    sparse_array<CanBeSelected> &selectables)
 {
     BeginDrawing();
     for (auto &&[ind, pos, spri] : indexed_zipper(positions, sprite)) {
@@ -55,8 +119,62 @@ void display(
 
     draw_rectangle(rect, col);
     draw_text(text, positions, col);
+    draw_menu(
+        inputFields, positions, rectangles, menuFields, customTexts,
+        selectables);
 
     EndDrawing();
+}
+
+void handle_menu_inputs(
+    Registry &r, sparse_array<MenuFields> &menuFields,
+    sparse_array<Rectangle> &rectangles, sparse_array<CustomText> &texts)
+{
+    /*    for (auto &&[menuField, rectangle]: zipper(menuFields, rectangles)) {
+            //menuField->mouseOnText =
+       CheckCollisionPointRec(GetMousePosition(), rectangle.value()); int key =
+       GetCharPressed(); while (key > 0) { std::cout << key << std::endl; if
+       (key == KeyboardKey::KEY_DOWN) {
+                    ++menuField.value().actual_field;
+                } else if (key == KeyboardKey::KEY_UP) {
+                    --menuField.value().actual_field;
+                }
+                key = GetCharPressed();
+            }
+        }*/
+}
+
+void selectable_text(
+    Registry &r, sparse_array<CustomText> &texts,
+    sparse_array<Position> &positions, sparse_array<CanBeSelected> &selectables)
+{
+    ssize_t tmp = -1;
+
+    for (auto &&[text, position, selectable] :
+         zipper(texts, positions, selectables)) {
+        if (IsKeyPressed(KEY_UP) && selectable->isSelected) {
+            selectable->isSelected = false;
+            tmp = text->index;
+            if (text->index > 0)
+                tmp -= 1;
+            else
+                tmp = 2;
+        } else if (IsKeyPressed(KEY_DOWN) && selectable->isSelected) {
+            selectable->isSelected = false;
+            tmp = text->index;
+            if (text->index < 2)
+                tmp += 1;
+            else
+                tmp = 0;
+        }
+    }
+    for (auto &&[text, position, selectable] :
+         zipper(texts, positions, selectables)) {
+        if (tmp == text->index)
+            selectable->isSelected = true;
+        if (IsKeyPressed(KEY_SPACE) && selectable->isSelected)
+            selectable->function();
+    }
 }
 
 void do_animation(
@@ -375,8 +493,8 @@ void update_score_text(
 {
     for (auto &&[scoreText, text] : zipper(scoreTexts, texts)) {
         if (scores[static_cast<size_t>(scoreText->from)]) {
-			text->text =
-				std::to_string(scores[static_cast<size_t>(scoreText->from)]->score);
+            text->text = std::to_string(
+                scores[static_cast<size_t>(scoreText->from)]->score);
         }
     }
 }

@@ -7,7 +7,9 @@ void display(
     Registry &r, sparse_array<Position> &positions,
     sparse_array<Sprite> &sprite, sparse_array<Rectangle> &rectangles,
     sparse_array<InputField> &inputFields, sparse_array<Rect> &rect,
-    sparse_array<Color> &col, sparse_array<Text> &text);
+    sparse_array<Color> &col, sparse_array<Text> &text,
+    sparse_array<MenuFields> &menuFields, sparse_array<CustomText> &customTexts,
+    sparse_array<CanBeSelected> &selectables);
 void handle_dir_inputs(
     Registry &r, sparse_array<Direction> &dir,
     sparse_array<Current_Player> &players, sparse_array<Sprite> &sprite,
@@ -40,3 +42,10 @@ void update_score_text(
 void update_charge_rect(
     Registry &r, sparse_array<Weapon> &weapons,
     sparse_array<ChargeRect> &chargeRects, sparse_array<Rect> &rects);
+void handle_menu_inputs(
+    Registry &r, sparse_array<MenuFields> &menuFields,
+    sparse_array<Rectangle> &rectangles, sparse_array<CustomText> &texts);
+void selectable_text(
+    Registry &r, sparse_array<CustomText> &texts,
+    sparse_array<Position> &positions,
+    sparse_array<CanBeSelected> &selectables);
