@@ -27,13 +27,16 @@ void Factory::register_components()
         Sprite, InputField, Rectangle,
         // HUD,
         Rect, Color, Text, ScoreText, ChargeRect, MusicComponent, SoundManager,
+        // Game Over
+        GameOverBool, Button,
+        
         // Menu
         MenuFields, CustomText, CanBeSelected,
 #endif
         Player, Weapon, Current_Player, Position, Damages, Size, Health, Speed,
         Direction, SpawnGrace, NetworkedEntity, Animation, Couleur,
         ProjectileShooter, Score, Backgrounds, AlwaysShoot, EnemyCount,
-        BossCount, Colision, Point, Boss>();
+        BossCount, Colision, Point, GameOverState, Boss>();
 }
 
 void Factory::add_systems()
@@ -78,6 +81,7 @@ void Factory::add_systems()
     _reg.add_system<Direction, Current_Player, Sprite, Speed, Couleur>(
         handle_dir_inputs);
     _reg.add_system<Couleur, Size, Weapon, Position>(handle_shoot_inputs);
+    _reg.add_system<GameOverState, Button, Rect>(handle_click_inputs);
     //    _reg.add_system<InputField, Rectangle>(hadle_text_inputs);
     _reg.add_system<Sprite, Couleur>(do_animation);
     _reg.add_system<Sprite, Couleur, Weapon, Current_Player>(do_ship_animation);
@@ -89,8 +93,10 @@ void Factory::add_systems()
     //     updateHUD);
     _reg.add_system<Score, ScoreText, Text>(update_score_text);
     _reg.add_system<Weapon, ChargeRect, Rect>(update_charge_rect);
+    _reg.add_system<Color, GameOverBool, GameOverState>(update_game_over_state);
     _reg.add_system<MusicComponent>(handle_music);
     _reg.add_system<SoundManager>(play_sound);
+    _reg.add_system<Colision, Health, GameOverState>(gameOverTester);
     _reg.add_system<MenuFields, Rectangle, CustomText>(handle_menu_inputs);
     _reg.add_system<CustomText, Position, CanBeSelected>(selectable_text);
 #endif
@@ -431,6 +437,85 @@ void Factory::create_hud(
         PosHeight + (SizHeight / 2));
     _reg.emplace_component<Color>(scoreValueText, WHITE);
 }
+
+const Entity Factory::create_game_state()
+{
+    Entity const gameState = _reg.spawn_entity();
+    _reg.emplace_component<GameOverState>(gameState, false);
+    return gameState;
+}
+
+void button_quit()
+{
+    CloseWindow();
+}
+
+void Factory::create_game_over_hud(
+    const int ScreenWidth, const int ScreenHeight, Entity gamestate)
+{
+
+    int button_width = ScreenWidth / 5;
+    int button_height = ScreenHeight / 7;
+    int global_font_size = ScreenWidth / 20;
+
+
+    Entity const gameOverLayer = _reg.spawn_entity();
+    _reg.add_component<GameOverBool>(gameOverLayer, std::move(gamestate));
+    _reg.emplace_component<GameOverState>(gameOverLayer, false);
+    _reg.emplace_component<Rect>(
+        gameOverLayer, false, Rectangle{0, 0, (float)ScreenWidth, (float)ScreenHeight});
+    _reg.emplace_component<Color>(gameOverLayer, Color{ 230, 41, 55, 0 });
+
+
+
+    Entity const gameOverTextBorder = _reg.spawn_entity();
+    _reg.emplace_component<Text>(gameOverTextBorder, "You Died", global_font_size);
+    _reg.emplace_component<Position>(gameOverTextBorder, (ScreenWidth - MeasureText("You Died", global_font_size)) / 2, ScreenHeight / 3);
+    _reg.emplace_component<Color>(gameOverTextBorder, Color{ 230, 230, 230, 0 });
+
+    Entity const gameOverText = _reg.spawn_entity();
+    _reg.emplace_component<Text>(gameOverText, "You Died", global_font_size);
+    _reg.emplace_component<Position>(gameOverText, ((ScreenWidth - MeasureText("You Died", global_font_size)) / 2) - 2, ScreenHeight / 3 - 1);
+    _reg.emplace_component<Color>(gameOverText, Color{ 20, 20, 20, 0 });
+
+
+    // Entity const buttonMenu = _reg.spawn_entity();
+    // _reg.emplace_component<Rect>(
+    //     buttonMenu, false, Rectangle{(float)1 * button_width, (float)4 * button_height, (float)button_width, (float)button_height});
+    // _reg.emplace_component<Color>(buttonMenu, Color{ 20, 20, 20, 0 });
+    // _reg.emplace_component<Button>(buttonMenu, [&]() {create_menu(net_client, ip, port, ScreenWidth, ScreenHeight);});
+
+    Entity const buttonQuit = _reg.spawn_entity();
+    _reg.emplace_component<Rect>(
+        buttonQuit, false, Rectangle{(float)2 * button_width, (float)4 * button_height, (float)button_width, (float)button_height});
+    _reg.emplace_component<Color>(buttonQuit, Color{ 20, 20, 20, 0 });
+    _reg.emplace_component<Button>(buttonQuit, button_quit);
+
+
+
+    // Entity const buttonMenuBorder = _reg.spawn_entity();
+    // _reg.emplace_component<Rect>(
+    //     buttonMenuBorder, true, Rectangle{(float)1 * button_width, (float)4 * button_height, (float)button_width, (float)button_height});
+    // _reg.emplace_component<Color>(buttonMenuBorder, Color{ 230, 230, 230, 0 });
+
+    Entity const buttonQuitBorder = _reg.spawn_entity();
+    _reg.emplace_component<Rect>(
+        buttonQuitBorder, true, Rectangle{(float)2 * button_width, (float)4 * button_height, (float)button_width, (float)button_height});
+    _reg.emplace_component<Color>(buttonQuitBorder, Color{ 230, 230, 230, 0 });
+
+
+
+    // Entity const RetryText = _reg.spawn_entity();
+    // _reg.emplace_component<Text>(RetryText, "Retry", global_font_size);
+    // _reg.emplace_component<Position>(RetryText, (button_width + (button_width - MeasureText("Retry", global_font_size)) / 2), 4 * button_height + ((button_height - global_font_size) / 2));
+    // _reg.emplace_component<Color>(RetryText, Color{ 230, 230, 230, 0 });
+
+    Entity const QuitText = _reg.spawn_entity();
+    _reg.emplace_component<Text>(QuitText, "Quit", global_font_size);
+    _reg.emplace_component<Position>(QuitText, (2 * button_width + (button_width - MeasureText("Quit", global_font_size)) / 2), 4 * button_height + ((button_height - global_font_size) / 2));
+    _reg.emplace_component<Color>(QuitText, Color{ 230, 230, 230, 0 });
+}
+
 #endif
 
 const Entity
@@ -606,6 +691,8 @@ void Factory::create_game(
     std::cout << "player pos y: " << net_player_info.pos.y << std::endl;
     Entity weapon = create_weapon(player);
     create_hud(ScreenWidth, ScreenHeight, player, weapon);
-    // create_sounds(_reg);
+    Entity gamestate = create_game_state();
+    create_game_over_hud(ScreenWidth, ScreenHeight, gamestate);
+    create_sounds(_reg);
 }
 #endif

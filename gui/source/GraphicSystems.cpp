@@ -315,6 +315,39 @@ void handle_shoot_inputs(
     }
 }
 
+void handle_click_inputs(
+    Registry &r, sparse_array<GameOverState> &gameover, sparse_array<Button> &buttons,
+    sparse_array<Rect> &rectangles)
+{
+    for (size_t i = 0; i < gameover.size(); i++) {
+        if (!gameover[i])
+            continue;
+        if (!gameover[i]->isItOver)
+            return;
+    }
+    for (auto &&[button, rectangle] : zipper(buttons, rectangles)) {
+        int mouseX = 0;
+        int mouseY = 0;
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            mouseX = GetMouseX();
+            mouseY = GetMouseY();
+        }
+        if (mouseX < rectangle->rect.x) {
+            continue;
+        }
+        if (mouseX > rectangle->rect.x + rectangle->rect.width) {
+            continue;
+        }
+        if (mouseY < rectangle->rect.y) {
+            continue;
+        }
+        if (mouseY > rectangle->rect.y + rectangle->rect.height) {
+            continue;
+        }
+        button->func();
+    }
+}
+
 void hadle_text_inputs(
     Registry &r, sparse_array<InputField> &inputFields,
     sparse_array<Rectangle> &rectangles)
@@ -508,6 +541,23 @@ void update_charge_rect(
             (weapons[static_cast<size_t>(chargeRect->from)]->current_charge -
              1) *
             chargeRect->maxWidth;
+    }
+}
+
+void update_game_over_state(
+    Registry &r, sparse_array<Color> &col,
+    sparse_array<GameOverBool> &GraphicBool, sparse_array<GameOverState> &SentBool)
+{
+    for (auto &&[ind, color, sent, received] : indexed_zipper(col, SentBool, GraphicBool)) {
+        color->a = (85 * SentBool[static_cast<size_t>(received->from)]->isItOver); //85 is the opacity of the red square (85/255)
+        col[ind + 1]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 2]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 3]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 4]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 5]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 6]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 7]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
+        col[ind + 8]->a = (255 * SentBool[static_cast<size_t>(received->from)]->isItOver);
     }
 }
 

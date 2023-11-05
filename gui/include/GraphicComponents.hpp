@@ -135,3 +135,16 @@ struct CanBeSelected {
     CanBeSelected(bool isSelectedByDefault, std::function<void()> func)
         : isSelected(isSelectedByDefault), function(func) {};
 };
+
+struct GameOverBool {
+    Entity from;
+    bool state;
+
+    GameOverBool(Entity from) : from(from), state(false) {};
+};
+
+struct Button {
+    std::function<void()> func;
+    
+    Button(std::function<void()> funct) : func(funct) {};
+};

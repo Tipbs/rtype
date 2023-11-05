@@ -46,3 +46,5 @@ void stopAtCenter(
     Registry &r, sparse_array<Boss> &boss, sparse_array<Position> &positions,
     sparse_array<Direction> &directions);
 void clear_entities(Registry &r, sparse_array<Position> &positions);
+void gameOverTester(Registry &r, sparse_array<Colision> &col,
+    sparse_array<Health> &healths, sparse_array<GameOverState> &state);
