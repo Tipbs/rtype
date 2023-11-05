@@ -306,8 +306,10 @@ void updateWithSnapshots(
             });
         if (finded != entities.end())
             continue;
-        if (net.type == EntityType::Win || net.type == EntityType::Lose)
+        if (net.type == EntityType::Win || net.type == EntityType::Lose) {
+            std::cout << "Game finished\n";
             continue;
+        }
         factory.create_netent(net.type, net);
         it = net_ents.erase(it);
         if (it == net_ents.end())

@@ -51,10 +51,17 @@ void extract(
     sparse_array<NetworkedEntity> &ents, sparse_array<Direction> &directions,
     sparse_array<ProjectileShooter> &shooters)
 {
-    size_t i = 0;
+    if (reg.gameState != 1) {
+        NetEnt tmp;
+        if (reg.gameState == 2)
+            tmp.type = EntityType::Win;
+        if (reg.gameState == 3)
+            tmp.type = EntityType::Lose;
+        reg._netent.push_back(tmp);
+        return;
+    }
     for (auto &&[ind, pos, ent_id, dir] :
          indexed_zipper(positions, ents, directions)) {
-        i++;
         NetEnt tmp;
         tmp.type = ents[ind]->_type;
         tmp.id = ind;
@@ -76,15 +83,6 @@ void extract(
         }
         reg._netent.push_back(tmp);
     }
-    /*if (reg.gameState != 1) {
-        NetEnt tmp;
-        tmp.id = i + 1;
-        if (reg.gameState == 2)
-            tmp.type = EntityType::Win;
-        if (reg.gameState == 3)
-            tmp.type = EntityType::Lose;
-        reg._netent.push_back(tmp);
-    }*/
 }
 
 void resetPlayersDir(
