@@ -256,7 +256,7 @@ const Entity Factory::create_zorg(Position pos, size_t net_id)
     _reg.emplace_component<AlwaysShoot>(
         new_entity, std::chrono::milliseconds(750));
     _reg.emplace_component<SpawnGrace>(new_entity, std::chrono::seconds(1));
-    _reg.emplace_component<Health>(new_entity, 5);
+    _reg.emplace_component<Health>(new_entity, 1);
     _reg.emplace_component<NetworkedEntity>(
         new_entity, net_id, EntityType::Enemy);
     _reg.emplace_component<Colision>(new_entity, Tag::Enemy);

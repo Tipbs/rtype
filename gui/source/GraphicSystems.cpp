@@ -260,7 +260,7 @@ static void insertProjectileShooter(
         }
     }
     if (boss_index == -1)
-        throw std::exception("Failed to insert a projectileShooter to boss, "
+        throw std::runtime_error("Failed to insert a projectileShooter to boss, "
                              "the boss is not found");
     if (shooters[boss_index]) {
         shooters[boss_index]->shotCount = ent.dir.x;

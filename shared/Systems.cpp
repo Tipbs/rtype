@@ -97,7 +97,8 @@ void damages(
     size_t i1, size_t i2)
 {
     std::cout << "damages" << std::endl;
-    healt[i1]->health -= dama[i2]->damages;
+    if (dama[i2])
+		healt[i1]->health -= dama[i2]->damages;
     // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
     // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
     // HP." << std::endl;
@@ -105,12 +106,15 @@ void damages(
         r.kill_entity(r.entity_from_index(i1));
 
     std::cout << "damages" << std::endl;
-    healt[i2]->health -= dama[i1]->damages;
+    if (dama[i1])
+		healt[i2]->health -= dama[i1]->damages;
     // std::osyncstream(std::cout) << "User " << i1 << " has taken " <<
     // dama[i2]->damages << " damages. He now have " << healt[i1]->health << "
     // HP." << std::endl;
+#ifdef SERVER
     if (healt[i2]->health <= 0)
         r.kill_entity(r.entity_from_index(i2));
+#endif
 }
 
 static void
@@ -158,8 +162,6 @@ void colision(
                     positions[ind1].value(), positions[ind2].value(),
                     sizes[ind1].value(), sizes[ind2].value()))
                 continue;
-            std::cout << colisions[ind1]->to_string() << std::endl;
-            std::cout << colisions[ind2]->to_string() << std::endl;
 
             if (colisions[ind1]->check_only(Tag::Player) &&
                 colisions[ind2]->check(Tag::Damages, Tag::Enemy))
