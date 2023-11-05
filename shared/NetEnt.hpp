@@ -8,7 +8,7 @@ enum class EntityType {
     Player,
     Zorg,
     Boss,
-    Projectile,
+    ProjectileShooter,
     Ammo,
     Enemy,
     None
@@ -38,6 +38,7 @@ class NetEnt {
         ar &id;
         ar &type;
         ar &pos;
+        ar &dir;
         ar &attacking;
         ar &attackState;
     };

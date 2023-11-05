@@ -48,7 +48,8 @@ void synchronize(
 void extract(
     Registry &reg, sparse_array<Position> &positions,
     sparse_array<Speed> &speeds, sparse_array<Weapon> &weapons,
-    sparse_array<NetworkedEntity> &ents, sparse_array<Direction> &directions)
+    sparse_array<NetworkedEntity> &ents, sparse_array<Direction> &directions,
+    sparse_array<ProjectileShooter> &shooters)
 {
     for (auto &&[ind, pos, ent_id, dir] :
          indexed_zipper(positions, ents, directions)) {
@@ -63,6 +64,13 @@ void extract(
             auto &weapon = weapons[weapon_ind];
             tmp.attacking = weapon->IsShooting;
             tmp.attackState = weapon->current_charge;
+        }
+        if (shooters[ind]) {
+            NetEnt shooter_net;
+            shooter_net.id = ind;
+            shooter_net.type = EntityType::ProjectileShooter;
+            shooter_net.dir.x = shooters[ind]->shotCount;
+            reg._netent.push_back(shooter_net);
         }
         reg._netent.push_back(tmp);
     }
